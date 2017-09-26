@@ -1,0 +1,10 @@
+[api]
+key = 7afdasdfafdasdfas
+secret = 9a8e4103137248asdfasd
+
+[trade]
+# trade 10% of the available BTC
+size = 10
+
+# take 40% profit on each buy
+takeprofit = 20
