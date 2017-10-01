@@ -57,16 +57,22 @@ def _takeprofit(b, percent, row):
     pprint.pprint(r)
 
     if r['success']:
-        row.update_record(selling_price=tp)
+        row.update_record(selling_price=tp, sell_id=r['result']['uuid'])
         db.commit()
 
 
 #@retry()
-def takeprofit(b, p):
+def takeprofit(config_file, b, p):
 
-    print "Finding takeprofit rows..."
-    for row in db(db.buy.selling_price == None).select():
+
+    rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select()
+    for row in rows:
         print "\t", row
+
+        # if row['config_file'] != config_file:
+        #     print "my config file is {} but this one is {}. skipping".format(
+        #         config_file, row['config_file'])
+        #     continue
 
         o = b.get_order(row['order_id'])
         print "unsold row {}".format(pprint.pformat(o))
@@ -84,7 +90,10 @@ def main(ini, dry_run=False):
 
     b = mybittrex.make_bittrex(config)
     percent = float(config.get('trade', 'takeprofit'))
-    takeprofit(b, percent)
+
+    print "Setting profit targets for {}".format(ini)
+
+    takeprofit(config_file, b, percent)
 
 if __name__ == '__main__':
     argh.dispatch_command(main)

@@ -20,6 +20,7 @@ buy = db.define_table(
     Field('market'),
     Field('purchase_price', type='double'),
     Field('selling_price', type='double'),
+    Field('sell_id'),
     Field('amount', type='double'),
     Field('timestamp', type='datetime', default=datetime.now)
     )

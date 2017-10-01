@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 ignore_by_in = 'BURST START'.split()
 ignore_by_find = 'ETH- USDT-'.split()
 max_orders_per_market = 1
-MIN_PRICE = 0.00000100
-
+MIN_PRICE = 0.00000125
+MIN_VOLUME = 10 # TODO 10 BTC of daily volume or we dont consider it
 MIN_GAIN = 0.05 # need a 5 percent gain or it's not a surge!
 
 
@@ -268,9 +268,9 @@ def topcoins(exchange, min_volume, n):
     top = analyze_gain(exchange, min_volume)
 
 
-    # print 'TOP: {}.. now filtering'.format(top)
+    # print 'TOP: {}.. now filtering'.format(top[:10])
     top = [t for t in top if t[1] > MIN_GAIN]
-    print 'TOP filtered on MIN_GAIN : {}'.format(top)
+    # print 'TOP filtered on MIN_GAIN : {}'.format(top)
 
     return top[:n]
 

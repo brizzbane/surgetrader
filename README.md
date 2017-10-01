@@ -56,12 +56,21 @@ therefore you are making 20 cents per trade
 
 Therefore taking 50 2% trades and setting a 1% profit margin (ignoring fees)
 
+# User Training
+
+
 # TODO
 
 - Move percentage of BTC to trade on each run to config file.
 
 - Take profit right after successful buy. There is no reason for takeprofit.py
 to exist separately: just edit scan.py and have it take the profit!
+
+## Growth mode
+
+trade profits as well as principle instead of using fixed trade size
+
+
 
 # MONTHLY PROFIT SHARE
 
