@@ -13,7 +13,9 @@ If so, then SurgeTrader is for you!!!
 
 ## How it works
 
-SurgeTrader allows you to find what market(s) has had the greatest % growth over a period of time. It presumes that the coin with the greatest % gain will go up even more in the near or distant future.
+SurgeTrader allows you to find what coin has had the greatest %
+growth over a period of time. It presumes that the coin with the
+greatest % gain will go up even more in the near or distant future.
 
 # Installation
 
@@ -22,54 +24,84 @@ Install python-bittrex from this github instead of PyPi.
 
 # Configuration
 
-in the `src` directory, `mybittrex.ini` should have key and secret in it like so
+in the `src` directory, create an ini file for each account that will
+be trading. Follow the documentation in `ini-0-sample` for directions.
 
-    [api]
-    key = asdfa8asdf8asdfasdf
-    secret = 99asdfn8sdfjasd
+## Optimal Settings
+
+Over a period of experimentation, I have (as of 10/1/17) found that
+these settings work well:
+
+    Each trade should use 5% of the account. Aim for a 5% profit margin.
+
 
 # Usage
 ## Cron
 
 Create 1 cron entry that downloads the market data every hour (or whatever
-sample period you like) and then scans for the coin with the strongest surge and buys it.
+sample period you like) and then scans for the coin with the strongest
+surge and buys it:
 
-    00 * * * * cd $ST/src/ ; $PY download.py; $PY scan.py --buy 1
 
-Create another cron entry that sets a profit target on the successful buys
+    00   * * * * cd ~/prg/surgetrader/src/ ; $PY ./batch-download.py ; $PY ./batch-buy.py
+    */5  * * * * cd ~/prg/surgetrader/src/ ; $PY ./batch-takeprofit.py
 
-    */5 * * * * cd $ST/src/ ; $PY takeprofit.py --percent 10
+# User-Level Docs (show me the money)
 
-# Earning Potential
+The first thing you need to understand is that SurgeTrader detects
+surges in coins. The thing about a surging coin is that you may be
+late to the party: you might be buying just as the sell-off is about
+to start, which means you might not collect your profit immediately.
 
-Account balance = $1000
+Sure, there are those times, where the same coin gives you 3 or 4
+profits in 3 or 4 hours:
+![](https://api.monosnap.com/rpc/file/download?id=8RKinNxVaGOlJCRMCgIbQY2oZlxKQT)
 
-2% = 20
+But sometimes you get caught out at the top of a teacup and handle
+formation and it might be 3-4 weeks before a trade closes.
 
-1% gain on 2% of the account = 20.20
 
-therefore you are making 20 cents per trade
+## The most important rules of SurgeTrader is...
 
-50 trades in a month = 10 dollars profit
+YOUR ACCCOUNT WILL ALWAYS DECREASE IN VALUE.
 
-10 dollars is 1% of 1000 -> 1% gain on the account
+That's right. Unlike normal trading (Binary Options, Forex, Stocks,
+etc), your account will be in permanent drawdown. If you deposit 1
+BTC, expect your account value to plummet to 0.5 BTC and even
+lower. Expect all BTC to be gone and the estimated value of the
+account to hover about 0.25 BTC. And then get ready to collect small
+profits every day, only to open another losing trade which will
+eventually yield another small profit.
 
-Therefore taking 50 2% trades and setting a 1% profit margin (ignoring fees)
+So let me give you a concrete example. Let's say that you did in fact
+deposit 1 BTC to start. And let's say that you allocate 5% to each
+surge detected every hour. It will only take 19 or 20 hours to drain
+your account of BTC. Now you have 19 trades open. Every trade is
+immediately losing because we buy the coin at a market price and the
+bids will always be lower than that. So now you have 0 BTC and an
+estimated account value of probably 0.9 BTC or so. And then over 24
+hours [most trades lose even more value](http://take.ms/MgmwO) and now
+you are really getting riled up because you do not know about [the
+Emotional Market Cycle](https://www.youtube.com/watch?v=NMpVgvA5k3I)
+so then you sell all your coins for a loss and try to stalk me
+down... hahah.
 
-# User Training
+But no, on average you will find that you will get 1-5 trades closing
+per day. In an ideal world, you would be trading 10% of the account
+for a 10% profit, thereby realizing 1% profit on each trade... in
+other words for 1BTC account if you buy 0.1BTC of a coin and profit
+10% then you profited 0.01 BTC or 1% of your account balance. But
+unfortunately a 10% profit target takes longer to reach. 5% closes
+fast. You could even trade 10% of the account with a 5% profit target,
+but I suggest 5% of the account for a 5% profit target to be safe.
+
+To summarize: as long as you have daily profits to withdraw, you are
+in good shape, because SurgeTrader will take your principle and open
+another surge trade for you, so you have more profits to collect down
+the road.
 
 
 # TODO
-
-- Move percentage of BTC to trade on each run to config file.
-
-- Take profit right after successful buy. There is no reason for takeprofit.py
-to exist separately: just edit scan.py and have it take the profit!
-
-## Growth mode
-
-trade profits as well as principle instead of using fixed trade size
-
 
 
 # MONTHLY PROFIT SHARE

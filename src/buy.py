@@ -67,7 +67,6 @@ def record_gain(gain):
     db.commit()
 
 
-
 @supycache(cache_key='result')
 def analyze_gain(b, min_volume):
 
