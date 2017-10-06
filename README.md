@@ -13,8 +13,8 @@ If so, then SurgeTrader is for you!!!
 
 ## How it works
 
-SurgeTrader allows you to find what coin has had the greatest %
-growth over a period of time. It presumes that the coin with the
+SurgeTrader finds what coin has had the greatest %growth over a period
+of time. It presumes that the coin with the
 greatest % gain will go up even more in the near or distant future.
 
 # Installation
@@ -32,10 +32,9 @@ be trading. Follow the documentation in `ini-0-sample` for directions.
 Over a period of experimentation, I have (as of 10/1/17) found that
 these settings work well:
 
-    Each trade should use 5% of the account. Aim for a 5% profit margin.
+    Each trade should use 2-5% of the account. Aim for a 5% profit margin.
 
 
-# Usage
 ## Cron
 
 Create 1 cron entry that downloads the market data every hour (or whatever
@@ -63,7 +62,7 @@ formation and it might be 3-4 weeks before a trade closes.
 
 ## The most important rules of SurgeTrader is...
 
-YOUR ACCCOUNT WILL ALWAYS DECREASE IN VALUE.
+YOUR ACCCOUNT WILL ALWAYS DECREASE IN ESTIMATED VALUE.
 
 That's right. Unlike normal trading (Binary Options, Forex, Stocks,
 etc), your account will be in permanent drawdown. If you deposit 1
@@ -103,6 +102,22 @@ the road.
 
 # TODO
 
+## Realized Profit Tally
+
+    For all closed sell orders:
+        Report diff between cost/proceeds of buy and sell
+
+## Potential Profit Tally
+
+    For all open sell orders:
+       Note diff between buy price and price it can currently be liquidated at
+
+## Explain the declining estimated value
+
+- simple pictures of emotional market cycle
+- example of a trade that took 2-3 week to close
+- bitcoin lost from 2013 to 2016
+- emotional market cycle video
 
 # MONTHLY PROFIT SHARE
 
