@@ -6,15 +6,15 @@ Profit on price surges detected at BitTrex.
 Have you ever woken up, logged into BitTrex,  and saw something like this:
 ![](https://monosnap.com/file/qocoiI5ScQQjx2Fq5B5Teung3zejTu.png)
 
-and then you asked yourself: "what could I do to wake up to profits like this".
+and then you asked yourself: "what could I do to wake up to profits like this"?
 
 If so, then SurgeTrader is for you!!!
 
 ## How it works
 
 SurgeTrader finds what coin has had the greatest %growth over a period
-of time. It presumes that the coin with the
-greatest % gain will go up even more in the near or distant future.
+of time (typically an hour). It presumes that the coin with the
+greatest %gain will go up even more in the near or distant future.
 
 # Installation
 
