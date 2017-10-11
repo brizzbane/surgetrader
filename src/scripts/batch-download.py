@@ -1,7 +1,7 @@
 import random
 
-import inis
+from . import inis
 INI = inis.INI.split()
 
-import download
+from . import download
 download.main(random.choice(INI))

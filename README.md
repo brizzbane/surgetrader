@@ -1,11 +1,10 @@
 # surgetrader
-Trade on surges detected at BitTrex. this is the Python2 version that operates
-with SQLite.
+Profit on price surges detected at BitTrex.
 
 # Script description
 
 Have you ever woken up, logged into BitTrex,  and saw something like this:
-![](https://i.imgur.com/OHvlAAM.png)
+![](https://monosnap.com/file/qocoiI5ScQQjx2Fq5B5Teung3zejTu.png)
 
 and then you asked yourself: "what could I do to wake up to profits like this".
 
@@ -13,18 +12,21 @@ If so, then SurgeTrader is for you!!!
 
 ## How it works
 
-SurgeTrader allows you to find what coin has had the greatest %
-growth over a period of time. It presumes that the coin with the
-greatest % gain will go up even more in the near or distant future.
+SurgeTrader is a bot that detects what coin has had the greatest %
+growth over a period of time (typically one hour). It presumes that
+the coin with the greatest % gain will go up even more in the future.
 
 # Installation
 
-Install python-bittrex from this github instead of PyPi.
+Install python-bittrex from [this
+github](https://github.com/metaperl/python-bittrex) instead of PyPi.
+
+Then using Python3 type:
 `pip install -r requirements.txt`
 
 # Configuration
 
-in the `src` directory, create an ini file for each account that will
+in the `src/users` directory, create an ini file for each account that will
 be trading. Follow the documentation in `ini-0-sample` for directions.
 
 ## Optimal Settings
@@ -32,8 +34,11 @@ be trading. Follow the documentation in `ini-0-sample` for directions.
 Over a period of experimentation, I have (as of 10/1/17) found that
 these settings work well:
 
-    Each trade should use 5% of the account. Aim for a 5% profit margin.
+    Each trade should use 5% of the account. Aim for a 2% profit margin.
 
+You can aim for higher profit margins if you dont mind waiting longer
+for trades to close and for your overall estimated account balance to
+be lower than what you started with.
 
 # Usage
 ## Cron
@@ -42,9 +47,10 @@ Create 1 cron entry that downloads the market data every hour (or whatever
 sample period you like) and then scans for the coin with the strongest
 surge and buys it:
 
+    INVOKE=/home/schemelab/install/miniconda3/bin/invoke
 
-    00   * * * * cd ~/prg/surgetrader/src/ ; $PY ./batch-download.py ; $PY ./batch-buy.py
-    */5  * * * * cd ~/prg/surgetrader/src/ ; $PY ./batch-takeprofit.py
+    00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download ; $INVOKE buy
+    */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
 
 # User-Level Docs (show me the money)
 
@@ -99,6 +105,10 @@ To summarize: as long as you have daily profits to withdraw, you are
 in good shape, because SurgeTrader will take your principle and open
 another surge trade for you, so you have more profits to collect down
 the road.
+
+# Useful Links
+
+* [Calculating and withdrawing daily profit](https://www.youtube.com/watch?v=ah0P-zf-S-8&feature=youtu.be&hd=1)
 
 
 # TODO
