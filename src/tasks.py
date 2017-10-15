@@ -27,3 +27,24 @@ def takeprofit(ctx, ini=None):
     for ini in inis:
         print("Processing {}".format(ini))
         takeprofit.main(ini)
+
+@task
+def profitreport(ctx, ini=None):
+    import lib.report.profit
+
+    if ini:
+        inis = [ini]
+    else:
+        from users import users
+        inis = users.inis()
+
+    for ini in inis:
+        print("Processing {}".format(ini))
+        lib.report.profit.main(ini)
+
+
+@task
+def sellall(ctx, ini):
+    from lib import sellall
+
+    sellall.main(ini)

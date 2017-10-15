@@ -3,13 +3,12 @@
 # ini-terrence.brannon@gmail.ini
 # ini-steadyvest.radar.ini
 # ini-steadyvest.strategic.ini
-# ini-steadyvest@protonmail.ini
+# ini-msamitech@yahoo.ini
 
 
 INIS = """
 ini-mikegardner936@gmail.ini
-ini-msamitech@yahoo.ini
-ini-steadyvest.radar.ini
+ini-steadyvest@protonmail.ini
 """
 
 def inis():

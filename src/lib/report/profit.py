@@ -6,8 +6,8 @@ import argh
 import collections
 import logging
 from retry import retry
-from db import db
-import mybittrex
+from ..db import db
+from .. import mybittrex
 from bittrex.bittrex import SELL_ORDERBOOK
 from pprint import pprint
 
@@ -26,7 +26,7 @@ def open_order(result):
 
 def report_profit(config_file, b):
     import csv
-    csv_file = config_file + ".csv"
+    csv_file = "tmp/" + config_file + ".csv"
     csvfile = open(csv_file, 'w', newline='')
     fieldnames = 'sell_closed sell_opened market units_sold sell_price sell_commission units_bought buy_price buy_commission profit'.split()
     csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -42,7 +42,7 @@ def report_profit(config_file, b):
             #print("config file != {}... skipping".format(config_file))
             continue
 
-        if len(buy.sell_id) < 12:
+        if (not buy.sell_id) or (len(buy.sell_id) < 12):
             #print("No sell id ... skipping")
             continue
 
@@ -85,8 +85,8 @@ def report_profit(config_file, b):
 def main(ini):
 
     config_file = ini
-    config = configparser.RawConfigParser()
-    config.read(config_file)
+    from users import users
+    config = users.read(config_file)
 
     b = mybittrex.make_bittrex(config)
     report_profit(config_file, b)
