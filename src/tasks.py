@@ -42,9 +42,10 @@ def profitreport(ctx, ini=None, d=None):
 
     inis = listify_ini(ini)
 
+    # TODO parse d for yesterday, today, or general date
     if d:
         from datetime import date
-        _date = date.today()
+        _date = date.fromordinal(date.today().toordinal()-1)
     else:
         _date = None
 
