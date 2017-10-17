@@ -1,5 +1,6 @@
 from invoke import task
 
+
 @task
 def download(ctx, ini=None):
     import random
@@ -8,39 +9,48 @@ def download(ctx, ini=None):
 
     download.main(random.choice(users.inis()))
 
-@task
-def buy(ctx, ini=None):
-    from users import users
-    from lib import buy
-    buy.main(users.inis())
-
-@task
-def takeprofit(ctx, ini=None):
-    from lib import takeprofit
-
+def listify_ini(ini):
     if ini:
         inis = [ini]
     else:
         from users import users
         inis = users.inis()
+
+    return inis
+
+@task
+def buy(ctx, ini=None):
+    from users import users
+    from lib import buy
+
+    inis = listify_ini(ini)
+    buy.main(inis)
+
+@task
+def takeprofit(ctx, ini=None):
+    from lib import takeprofit
+
+    inis = listify_ini(ini)
 
     for ini in inis:
         print("Processing {}".format(ini))
         takeprofit.main(ini)
 
 @task
-def profitreport(ctx, ini=None):
+def profitreport(ctx, ini=None, d=None):
     import lib.report.profit
 
-    if ini:
-        inis = [ini]
+    inis = listify_ini(ini)
+
+    if d:
+        from datetime import date
+        _date = date.today()
     else:
-        from users import users
-        inis = users.inis()
+        _date = None
 
     for ini in inis:
         print("Processing {}".format(ini))
-        lib.report.profit.main(ini)
+        lib.report.profit.main(ini, _date)
 
 
 @task

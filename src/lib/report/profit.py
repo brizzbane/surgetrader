@@ -23,8 +23,15 @@ def open_order(result):
     pprint(result['IsOpen'])
     return result['IsOpen']
 
+def close_date(time_string):
+    from datetime import datetime
+    datetime_format = '%Y-%m-%dT%H:%M:%S'
 
-def report_profit(config_file, b):
+    (time_string, _) = time_string.split('.')
+    dt = datetime.strptime(time_string, datetime_format)
+    return dt.date()
+
+def report_profit(config_file, b, on_date=None):
     import csv
     csv_file = "tmp/" + config_file + ".csv"
     csvfile = open(csv_file, 'w', newline='')
@@ -36,7 +43,6 @@ def report_profit(config_file, b):
         db.buy.ALL,
         orderby=~db.buy.timestamp
     ):
-
 
         if buy.config_file != config_file:
             #print("config file != {}... skipping".format(config_file))
@@ -51,6 +57,11 @@ def report_profit(config_file, b):
         if open_order(so):
             print("Open order ... skipping")
             continue
+
+        if on_date:
+            _close_date = close_date(so['Closed'])
+            if _close_date != on_date:
+                continue
 
         pprint(buy)
         pprint(so)
@@ -82,14 +93,16 @@ def report_profit(config_file, b):
         csv_writer.writerow(calculations)
 
 
-def main(ini):
+def main(ini, _date=None):
 
     config_file = ini
     from users import users
     config = users.read(config_file)
 
     b = mybittrex.make_bittrex(config)
-    report_profit(config_file, b)
+    report_profit(config_file, b, _date)
 
 if __name__ == '__main__':
-    argh.dispatch_command(main)
+    ts = '2017-10-15T21:28:21.05'
+    dt = close_date(ts)
+    print(dt)
