@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 ignore_by_in = 'BURST START BTA BTS DRACO DAR'.split()
 ignore_by_find = 'ETH- USDT-'.split()
-max_orders_per_market = 1
+max_orders_per_market = 3
 MIN_PRICE = 0.00000125
 MIN_VOLUME = 5 # TODO 10 BTC of daily volume or we dont consider it
 MIN_GAIN = 0.05 # need a 5 percent gain or it's not a surge!
@@ -194,18 +194,22 @@ def config_min_volume(c):
     p = c.get('trade', 'volume_min')
     return float(p)
 
+def percent2ratio(f):
+    return f / 100.0
+
 def config_trade_size(c):
-    p = c.get('trade', 'size')
-    return float(p)
+    holdings = float(c.get('trade', 'deposit'))
+    trade_ratio = percent2ratio(float(c.get('trade', 'trade')))
+
+    return holdings * trade_ratio
 
 def config_trade_fallback(c):
     p = c.get('trade', 'fallback')
     return float(p) / 100.0
 
 def get_trade_size(c, btc):
-    s = config_trade_size(c)
 
-    print("Getting trade size...")
+
 
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
@@ -214,8 +218,9 @@ def get_trade_size(c, btc):
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
-    if btc >= config_trade_size(c):
-        return config_trade_size(c)
+    s = config_trade_size(c)
+    if btc >= s:
+        return s
 
     # Otherwise do not trade
     return 0
@@ -256,11 +261,9 @@ def _buycoin(config_file, c, b, mkt, btc):
 def buycoin(config_file, config, exchange, top_coins, min_volume=0):
     "Buy top N cryptocurrencies."
 
-
     avail = available_btc(exchange)
 
     for market in top_coins:
-
         _buycoin(config_file, config, exchange, market[0], avail)
 
 def topcoins(exchange, min_volume, n):

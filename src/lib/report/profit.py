@@ -11,10 +11,6 @@ from .. import mybittrex
 from bittrex.bittrex import SELL_ORDERBOOK
 from pprint import pprint
 
-def loop_forever():
-    while True:
-        pass
-
 
 logger = logging.getLogger(__name__)
 
