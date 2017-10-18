@@ -7,13 +7,13 @@
     <title meld:id="title">231360: Daily Confirmation</title>
     <style type="text/css" media="screen">
       <!--
-          td { font: 8pt Tahoma,Arial; }
-          //-->
+      td { font: 8pt Tahoma,Arial; }
+      //-->
     </style>
     <style type="text/css" media="print">
       <!--
-          td { font: 7pt Tahoma,Arial; }
-          //-->
+      td { font: 7pt Tahoma,Arial; }
+      //-->
     </style>
   </head>
 
@@ -36,70 +36,86 @@
 
           <tr><td colspan=13><b>Closed Transactions:</b></td></tr>
           <tr align=center bgcolor="#C0C0C0">
-   <td>Ticket</td><td nowrap>Open Time</td><td>Type</td><td>Lots</td><td>Item</td>
-   <td nowrap>Price</td><td>S / L</td><td>T / P</td><td nowrap>Close Time</td>
-   <td nowrap>Price</td><td>Commission</td><td>R/O Swap</td><td>Trade P/L</td></tr>
+            <td>Order ID</td>
+            <td nowrap>Sell Close</td>
+            <td>Sell Opened</td>
+            <td>Market</td>
+            <td>Units Sold</td>
+            <td>Sell Price</td>
+            <td nowrap>Sell Commission</td>
+            <td>Buy Price</td>
+            <td>Buy Commission</td>
+            <td>Trade P/L</td>
+          </tr>
 
-<tr align=right><td colspan=13 nowrap align=center>No transactions</td></tr>
+          <tr align=right>
+            <td colspan=7>&nbsp;</td>
+            <td>0.00</td>
+            <td>0.00</td>
+            <td>0.00</td>
+          </tr>
+
+          <tr>
+            <td colspan=7><b>&nbsp;</b></td>
+            <td colspan=2><b>Closed Trade P/L: </b></td>
+            <td colspan=1 align=right><b>0.00</b></td>
+          </tr>
+
+          <tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
+          <tr><td colspan=13><b>Open Trades:</b></td></tr>
+          <tr align=center bgcolor="#C0C0C0">
+            <td>Order ID</td>
+            <td nowrap>&nbsp</td>
+            <td>Sell Opened</td>
+            <td>Market</td>
+            <td>Units for Sale</td>
+            <td>Sell Price</td>
+            <td nowrap>Best Bid</td>
+            <td>Units Bid For</td>
+            <td>&nbsp;</td>
+            <td>Current P/L</td>
+          </tr>
 
 
-<tr align=right><td colspan=10>&nbsp;</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>
-<tr><td colspan=4><b>Deposit/Withdrawal: 0.00</b></td>
-    <td colspan=5><b>Credit Facility: 0.00</b></td>
-    <td colspan=2><b>Closed Trade P/L: </b></td>
-    <td colspan=2 align=right><b>0.00</b></td>
-</tr>
-<tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
-<tr><td colspan=13><b>Open Trades:</b></td></tr>
-<tr align=center bgcolor="#C0C0C0">
-    <td>Ticket</td><td nowrap>Open Time</td><td>Type</td><td>Lots</td><td>Item</td>
-    <td nowrap>Price</td><td>S / L</td><td>T / P</td><td nowrap>&nbsp;</td>
-    <td nowrap>Price</td><td>Commission</td><td>R/O Swap</td><td>Trade P/L</td></tr>
+          <tr align=right>
+            <td colspan=7>&nbsp;</td>
+            <td>0.00</td>
+            <td>0.37</td>
+            <td>-95.90</td>
+          </tr>
 
-<tr align=right><td>37668919</td><td nowrap>&nbsp;2017.10.16 00:51:18</td><td>buy</td><td>0.10</td><td>audchf.</td><td>0.76935</td><td>0.75560</td><td>0.77960</td><td nowrap>&nbsp;&nbsp;</td><td>0.76545</td><td>0.00</td><td>0.26</td><td>-39.98</td>
-<tr bgcolor=#E0E0E0 align=right><td>37668943</td><td nowrap>&nbsp;2017.10.16 00:52:13</td><td>buy</td><td>0.10</td><td>audusd.</td><td>0.78865</td><td>0.77250</td><td>0.81730</td><td nowrap>&nbsp;&nbsp;</td><td>0.78494</td><td>0.00</td><td>0.16</td><td>-37.10</td>
-<tr align=right><td>37673007</td><td nowrap>&nbsp;2017.10.16 01:58:18</td><td>sell</td><td>0.10</td><td>eurgbp.</td><td>0.88888</td><td>0.90370</td><td>0.87620</td><td nowrap>&nbsp;&nbsp;</td><td>0.89030</td><td>0.00</td><td>-0.05</td><td>-18.82</td>
+          <tr>
+            <td colspan=5>&nbsp;</td>
 
+          <tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
 
-<tr align=right><td colspan=10>&nbsp;</td><td>0.00</td><td>0.37</td><td>-95.90</td></tr>
-<tr><td colspan=9>&nbsp;</td><td colspan=2><b>Floating P/L:</b></td>
-    <td colspan=2 align=right><b>-95.53</b></td></tr>
-<tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
-<tr><td colspan=13><b>Working Orders:</b></td></tr>
-<tr align=center bgcolor="#C0C0C0">
-    <td>Ticket</td><td nowrap>Open Time</td><td>Type</td><td>Lots</td><td>Item</td>
-    <td nowrap>Price</td><td>S / L</td><td>T / P</td><td colspan=2>Market Price</td><td colspan=3>&nbsp;</td></tr>
+          <tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
 
-<tr align=right><td colspan=13 nowrap align=center>No transactions</td></tr>
+          <tr><td colspan=13><b>A/C Summary:</b></td></tr>
+          <tr><td colspan=3 nowrap>Previous Ledger Balance:</td>
+            <td colspan=2 align=right nowrap>1 192.12</td><td colspan=2>&nbsp;</td>
+            <td align=right colspan=3 align=right>Floating P/L:</td>
+            <td colspan=3 align=right>-95.53</td></tr>
+          <tr><td colspan=3 nowrap>Closed Trade P/L:</td>
+            <td align=right colspan=2>0.00</td><td colspan=2>&nbsp;</td>
+            <td align=right colspan=3 nowrap>Total Credit Facility:</td>
+            <td colspan=3 align=right>0.00</td></tr>
+          <tr><td colspan=3 nowrap>Deposit/Withdrawal:</td>
+            <td align=right colspan=2>0.00</td><td colspan=2>&nbsp;</td>
+            <td align=right colspan=3 nowrap>Equity:</td>
+            <td colspan=3 align=right>1 096.59</td></tr>
+          <tr><td colspan=3 nowrap>Balance:</td>
+            <td align=right colspan=2>1 192.12</td><td colspan=2>&nbsp;</td>
+            <td align=right colspan=3 nowrap>Margin Requirement:</td>
+            <td colspan=3 align=right>55.16</td></tr>
+          <tr><td colspan=10 align=right>Available Margin:</td>
+            <td colspan=3 align=right>1 041.43</td></tr>
+          <tr><td colspan=13 style="font: 8pt arial">Best Regards<br>Accounts Department</td></tr>
+          </table>
 
+          <font face="tahoma,arial" size=1><div style="font: 7pt tahoma,arial">
+              Please report to us within 24 hours if this statement is incorrect.
+              Otherwise this statements will be considered to be confirmed by you.</div></font>
 
-<tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
-
-<tr><td colspan=13><b>A/C Summary:</b></td></tr>
-<tr><td colspan=3 nowrap>Previous Ledger Balance:</td>
-    <td colspan=2 align=right nowrap>1 192.12</td><td colspan=2>&nbsp;</td>
-    <td align=right colspan=3 align=right>Floating P/L:</td>
-    <td colspan=3 align=right>-95.53</td></tr>
-<tr><td colspan=3 nowrap>Closed Trade P/L:</td>
-    <td align=right colspan=2>0.00</td><td colspan=2>&nbsp;</td>
-    <td align=right colspan=3 nowrap>Total Credit Facility:</td>
-    <td colspan=3 align=right>0.00</td></tr>
-<tr><td colspan=3 nowrap>Deposit/Withdrawal:</td>
-    <td align=right colspan=2>0.00</td><td colspan=2>&nbsp;</td>
-    <td align=right colspan=3 nowrap>Equity:</td>
-    <td colspan=3 align=right>1 096.59</td></tr>
-<tr><td colspan=3 nowrap>Balance:</td>
-    <td align=right colspan=2>1 192.12</td><td colspan=2>&nbsp;</td>
-    <td align=right colspan=3 nowrap>Margin Requirement:</td>
-    <td colspan=3 align=right>55.16</td></tr>
-<tr><td colspan=10 align=right>Available Margin:</td>
-    <td colspan=3 align=right>1 041.43</td></tr>
-<tr><td colspan=13 style="font: 8pt arial">Best Regards<br>Accounts Department</td></tr>
-</table>
-
-<font face="tahoma,arial" size=1><div style="font: 7pt tahoma,arial">
-Please report to us within 24 hours if this statement is incorrect.
-Otherwise this statements will be considered to be confirmed by you.</div></font>
-
-</div></font>
-</body></html>
+        </div></font>
+    </body></html>
