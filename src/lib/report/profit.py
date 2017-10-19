@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 
 
+# core
 import configparser
 import argh
 import collections
 import logging
+from pprint import pprint
+
+# 3rd party
+import meld3
 from retry import retry
+
+# local
 from ..db import db
 from .. import mybittrex
 from bittrex.bittrex import SELL_ORDERBOOK
-from pprint import pprint
+from users import users
 
 
 logger = logging.getLogger(__name__)
@@ -28,6 +35,12 @@ def close_date(time_string):
     return dt.date()
 
 def report_profit(config_file, b, on_date=None):
+    config = users.read(config_file)
+
+    html_template = open('lib/report/profit.html', 'r').read()
+    html_template = meld3.parse_htmlstring(html_template)
+    html_outfile = open("tmp/" + config_file + ".html", 'wb')
+
     import csv
     csv_file = "tmp/" + config_file + ".csv"
     csvfile = open(csv_file, 'w', newline='')
@@ -35,11 +48,12 @@ def report_profit(config_file, b, on_date=None):
     csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     csv_writer.writeheader()
 
+    closed_orders = list()
+
     for buy in db().select(
         db.buy.ALL,
         orderby=~db.buy.timestamp
     ):
-
         if buy.config_file != config_file:
             #print("config file != {}... skipping".format(config_file))
             continue
@@ -52,6 +66,7 @@ def report_profit(config_file, b, on_date=None):
 
         if open_order(so):
             print("Open order ... skipping")
+            # TODO: fill in open orders part of template
             continue
 
         if on_date:
@@ -87,14 +102,50 @@ def report_profit(config_file, b, on_date=None):
         }
 
         csv_writer.writerow(calculations)
+        closed_orders.append(calculations)
 
+
+    html_template.findmeld('acctno').content(config_file)
+    html_template.findmeld('name').content(config.get('client', 'name'))
+    html_template.findmeld('date').content("Transaction Log for Previous Day")
+
+    def satoshify(f):
+        return '{:.8f}'.format(f)
+
+    def render_row(element, data, append=None):
+        for field_name, field_value in data.items():
+            if field_name == 'units_bought':
+                continue
+            if field_name in 'units_sold sell_price sell_commission buy_price buy_commission':
+                field_value = str(field_value)
+            if field_name == 'profit':
+                profit = field_value
+                field_value = satoshify(field_value)
+
+            if append:
+                field_name += append
+            element.findmeld(field_name).content(field_value)
+
+        return profit
+
+    total_profit = 0
+    iterator = html_template.findmeld('closed_orders').repeat(closed_orders)
+
+    for element, data in iterator:
+        total_profit += render_row(element, data)
+
+
+    html_template.findmeld('pnl').content(satoshify(total_profit))
+    s = html_template.findmeld('closed_orders_sample')
+    render_row(s, data, append="2")
+    print("HTML OUTFILE: {}".format(html_outfile))
+    html_template.write_html(html_outfile)
 
 def main(ini, _date=None):
 
     config_file = ini
-    from users import users
-    config = users.read(config_file)
 
+    config = users.read(config_file)
     b = mybittrex.make_bittrex(config)
     report_profit(config_file, b, _date)
 

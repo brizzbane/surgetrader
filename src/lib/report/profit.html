@@ -28,17 +28,17 @@
 
         <table cellspacing=1 cellpadding=3 border=0>
           <tr>
-            <td meld:id="acctno" colspan=2>A/C No: <b>231360</b></td>
-            <td meld:id="name" colspan=6>Name: <b>Terrence  Brannon</b></td>
+            <td colspan=2>Account: <b meld:id="acctno">231360</b></td>
+            <td meld:id="name" colspan=6>Name: <b>Billy Ray</b></td>
             <td colspan=3>&nbsp;</td>
             <td meld:id="date" colspan=2 align=right>2017 October 16, 23:59</td>
           </tr>
 
           <tr><td colspan=13><b>Closed Transactions:</b></td></tr>
           <tr align=center bgcolor="#C0C0C0">
-            <td>Order ID</td>
+            <td>&nbsp;</td>
             <td nowrap>Sell Close</td>
-            <td>Sell Opened</td>
+            <td nowrap>Sell Opened</td>
             <td>Market</td>
             <td>Units Sold</td>
             <td>Sell Price</td>
@@ -48,74 +48,60 @@
             <td>Trade P/L</td>
           </tr>
 
-          <tr align=right>
-            <td colspan=7>&nbsp;</td>
-            <td>0.00</td>
-            <td>0.00</td>
-            <td>0.00</td>
-          </tr>
-
-          <tr>
-            <td colspan=7><b>&nbsp;</b></td>
-            <td colspan=2><b>Closed Trade P/L: </b></td>
-            <td colspan=1 align=right><b>0.00</b></td>
-          </tr>
-
-          <tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
-          <tr><td colspan=13><b>Open Trades:</b></td></tr>
-          <tr align=center bgcolor="#C0C0C0">
-            <td>Order ID</td>
-            <td nowrap>&nbsp</td>
-            <td>Sell Opened</td>
-            <td>Market</td>
-            <td>Units for Sale</td>
-            <td>Sell Price</td>
-            <td nowrap>Best Bid</td>
-            <td>Units Bid For</td>
+          <tr meld:id="closed_orders" align=right>
             <td>&nbsp;</td>
-            <td>Current P/L</td>
+            <td meld:id="sell_closed" nowrap>Sell Close</td>
+            <td meld:id='sell_opened'>Sell Opened</td>
+            <td meld:id='market'>Market</td>
+            <td meld:id='units_sold'>Units Sold</td>
+            <td meld:id='sell_price'>Sell Price</td>
+            <td meld:id='sell_commission' nowrap>Sell Commission</td>
+            <td meld:id="buy_price">Buy Price</td>
+            <td meld:id="buy_commission">Buy Commission</td>
+            <td meld:id="profit">Trade P/L</td>
+          </tr>
+
+
+        </table>
+
+        <table cellspacing=1 cellpadding=3 border=0>
+
+          <tr style="color:white" meld:id="closed_orders_sample" align=right>
+            <td>&nbsp;</td>
+            <td meld:id="sell_closed2" nowrap>Sell Close</td>
+            <td meld:id='sell_opened2'>Sell Opened</td>
+            <td meld:id='market2'>Market</td>
+            <td meld:id='units_sold2'>Units Sold</td>
+            <td meld:id='sell_price2'>Sell Price</td>
+            <td meld:id='sell_commission2' nowrap>Sell Commission</td>
+            <td meld:id="buy_price2">Buy Price</td>
+            <td meld:id="buy_commission2">Buy Commission</td>
+            <td meld:id="profit2">Trade P/L</td>
           </tr>
 
 
           <tr align=right>
-            <td colspan=7>&nbsp;</td>
-            <td>0.00</td>
-            <td>0.37</td>
-            <td>-95.90</td>
+            <td colspan=6>
+            </td>
+            <td>
+              <b>Closed Trade P&amp;L:</b>
+            </td>
+            <td>&nbsp;</td>
+            <td>
+              <b meld:id="pnl">
+                4 million
+              </b>
+            </td>
           </tr>
-
-          <tr>
-            <td colspan=5>&nbsp;</td>
-
-          <tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
-
-          <tr><td colspan=13 style="font: 1pt arial">&nbsp;</td></tr>
-
-          <tr><td colspan=13><b>A/C Summary:</b></td></tr>
-          <tr><td colspan=3 nowrap>Previous Ledger Balance:</td>
-            <td colspan=2 align=right nowrap>1 192.12</td><td colspan=2>&nbsp;</td>
-            <td align=right colspan=3 align=right>Floating P/L:</td>
-            <td colspan=3 align=right>-95.53</td></tr>
-          <tr><td colspan=3 nowrap>Closed Trade P/L:</td>
-            <td align=right colspan=2>0.00</td><td colspan=2>&nbsp;</td>
-            <td align=right colspan=3 nowrap>Total Credit Facility:</td>
-            <td colspan=3 align=right>0.00</td></tr>
-          <tr><td colspan=3 nowrap>Deposit/Withdrawal:</td>
-            <td align=right colspan=2>0.00</td><td colspan=2>&nbsp;</td>
-            <td align=right colspan=3 nowrap>Equity:</td>
-            <td colspan=3 align=right>1 096.59</td></tr>
-          <tr><td colspan=3 nowrap>Balance:</td>
-            <td align=right colspan=2>1 192.12</td><td colspan=2>&nbsp;</td>
-            <td align=right colspan=3 nowrap>Margin Requirement:</td>
-            <td colspan=3 align=right>55.16</td></tr>
-          <tr><td colspan=10 align=right>Available Margin:</td>
-            <td colspan=3 align=right>1 041.43</td></tr>
-          <tr><td colspan=13 style="font: 8pt arial">Best Regards<br>Accounts Department</td></tr>
-          </table>
+        </table>
 
           <font face="tahoma,arial" size=1><div style="font: 7pt tahoma,arial">
               Please report to us within 24 hours if this statement is incorrect.
-              Otherwise this statements will be considered to be confirmed by you.</div></font>
+              Otherwise this statements will be considered to be
+              confirmed by you.
+
+              Withdraw your profit daily.
+</div></font>
 
         </div></font>
     </body></html>
