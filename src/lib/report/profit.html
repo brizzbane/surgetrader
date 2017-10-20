@@ -21,20 +21,21 @@
     <font face="tahoma,arial" size=1>
       <div align=center>
 
-        <div style="font: 20pt Times New Roman">
-          <b>SurgeTrader</b>
-        </div>
+        <h1>SurgeTrader</h1>
 
-
-        <table cellspacing=1 cellpadding=3 border=0>
+        <table>
           <tr>
             <td colspan=2>Account: <b meld:id="acctno">231360</b></td>
             <td meld:id="name" colspan=6>Name: <b>Billy Ray</b></td>
             <td colspan=3>&nbsp;</td>
             <td meld:id="date" colspan=2 align=right>2017 October 16, 23:59</td>
           </tr>
+        </table>
 
-          <tr><td colspan=13><b>Closed Transactions:</b></td></tr>
+        <h2>Closed Transactions</h2>
+
+        <table cellspacing=1 cellpadding=3 border=0>
+
           <tr align=center bgcolor="#C0C0C0">
             <td>&nbsp;</td>
             <td nowrap>Sell Close</td>
@@ -81,10 +82,10 @@
 
 
           <tr align=right>
-            <td colspan=6>
+            <td colspan=5>
             </td>
             <td>
-              <b>Closed Trade P&amp;L:</b>
+              Closed Trade P&amp;L:
             </td>
             <td>&nbsp;</td>
             <td>
@@ -94,6 +95,38 @@
             </td>
           </tr>
         </table>
+
+        <h2>Open Transactions</h2>
+        <table cellspacing=1 cellpadding=3 border=0>
+
+          <tr align=center bgcolor="#C0C0C0">
+            <td>&nbsp;</td>
+            <td nowrap>Sell Close</td>
+            <td nowrap>Sell Opened</td>
+            <td>Market</td>
+            <td>Units Sold</td>
+            <td>Sell Price</td>
+            <td nowrap>Sell Commission</td>
+            <td>Buy Price</td>
+            <td>Buy Commission</td>
+            <td>Trade P/L</td>
+          </tr>
+
+          <tr meld:id="open_orders" align=right>
+            <td>&nbsp;</td>
+            <td meld:id="sell_closed3" nowrap>Sell Close</td>
+            <td meld:id='sell_opened3'>Sell Opened</td>
+            <td meld:id='market3'>Market</td>
+            <td meld:id='units_sold3'>Units Sold</td>
+            <td meld:id='sell_price3'>Sell Price</td>
+            <td meld:id='sell_commission3' nowrap>Sell Commission</td>
+            <td meld:id="buy_price3">Buy Price</td>
+            <td meld:id="buy_commission3">Buy Commission</td>
+            <td meld:id="profit3">Trade P/L</td>
+          </tr>
+
+        </table>
+
 
           <font face="tahoma,arial" size=1><div style="font: 7pt tahoma,arial">
               Please report to us within 24 hours if this statement is incorrect.

@@ -30,9 +30,12 @@ def close_date(time_string):
     from datetime import datetime
     datetime_format = '%Y-%m-%dT%H:%M:%S'
 
-    (time_string, _) = time_string.split('.')
-    dt = datetime.strptime(time_string, datetime_format)
+    time_strings = time_string.split('.')
+    dt = datetime.strptime(time_strings[0], datetime_format)
     return dt.date()
+
+def percent(a, b):
+    return (a/b)*100
 
 def report_profit(config_file, b, on_date=None):
     config = users.read(config_file)
@@ -48,6 +51,7 @@ def report_profit(config_file, b, on_date=None):
     csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     csv_writer.writeheader()
 
+    open_orders = list()
     closed_orders = list()
 
     for buy in db().select(
@@ -64,15 +68,13 @@ def report_profit(config_file, b, on_date=None):
 
         so = b.get_order(buy.sell_id)['result']
 
-        if open_order(so):
-            print("Open order ... skipping")
-            # TODO: fill in open orders part of template
-            continue
-
         if on_date:
-            _close_date = close_date(so['Closed'])
-            if _close_date != on_date:
-                continue
+            if open_order(so):
+                so['Closed'] = 'n/a'
+            else:
+                _close_date = close_date(so['Closed'])
+                if _close_date != on_date:
+                    continue
 
         pprint(buy)
         pprint(so)
@@ -88,6 +90,10 @@ def report_profit(config_file, b, on_date=None):
 
         profit = sell_proceeds - buy_proceeds
 
+        if open_order(so):
+            p = percent(so['Quantity'] - so['QuantityRemaining'], so['Quantity'])
+            so['Quantity'] = "{:d}%".format(int(p))
+
         calculations = {
             'sell_closed': so['Closed'],
             'sell_opened': so['Opened'],
@@ -101,9 +107,12 @@ def report_profit(config_file, b, on_date=None):
             'profit': profit
         }
 
-        csv_writer.writerow(calculations)
-        closed_orders.append(calculations)
-
+        if open_order(so):
+            print("Open order ... skipping")
+            open_orders.append(calculations)
+        else:
+            csv_writer.writerow(calculations)
+            closed_orders.append(calculations)
 
     html_template.findmeld('acctno').content(config_file)
     html_template.findmeld('name').content(config.get('client', 'name'))
@@ -124,20 +133,30 @@ def report_profit(config_file, b, on_date=None):
 
             if append:
                 field_name += append
-            element.findmeld(field_name).content(field_value)
+            element.findmeld(field_name).content(str(field_value))
 
         return profit
 
     total_profit = 0
     iterator = html_template.findmeld('closed_orders').repeat(closed_orders)
-
     for element, data in iterator:
         total_profit += render_row(element, data)
 
 
-    html_template.findmeld('pnl').content(satoshify(total_profit))
+
+    deposit = float(config.get('trade', 'deposit'))
+    percent_profit = percent(total_profit, deposit)
+    pnl = "{} ({:.2f} % of {})".format(
+        satoshify(total_profit), percent_profit, deposit)
+    html_template.findmeld('pnl').content(pnl)
+
     s = html_template.findmeld('closed_orders_sample')
     render_row(s, data, append="2")
+
+    iterator = html_template.findmeld('open_orders').repeat(open_orders)
+    for element, data in iterator:
+        render_row(element, data, append="3")
+
     print("HTML OUTFILE: {}".format(html_outfile))
     html_template.write_html(html_outfile)
 
