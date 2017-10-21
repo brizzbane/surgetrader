@@ -98,7 +98,7 @@ def analyze_gain(b, min_volume):
 
     for name, row in recent.items():
 
-        print(name)
+        # print(name)
 
         try:
             if min_volume and markets[name]['BaseVolume'] < min_volume:

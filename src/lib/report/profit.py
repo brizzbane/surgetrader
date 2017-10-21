@@ -3,19 +3,16 @@
 
 # core
 import configparser
-import argh
-import collections
 import logging
 from pprint import pprint
 
 # 3rd party
 import meld3
-from retry import retry
+
 
 # local
 from ..db import db
 from .. import mybittrex
-from bittrex.bittrex import SELL_ORDERBOOK
 from users import users
 
 
@@ -156,6 +153,13 @@ def report_profit(config_file, b, on_date=None):
     iterator = html_template.findmeld('open_orders').repeat(open_orders)
     for element, data in iterator:
         render_row(element, data, append="3")
+
+    for setting in 'deposit trade top takeprofit'.split():
+        elem = html_template.findmeld(setting)
+        val = config.get('trade', setting)
+        # print("In looking for {} we found {} with setting {}".format(
+        # setting, elem, val))
+        elem.content(val)
 
     print("HTML OUTFILE: {}".format(html_outfile))
     html_template.write_html(html_outfile)
