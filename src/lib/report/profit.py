@@ -154,7 +154,7 @@ def report_profit(config_file, b, on_date=None):
     for element, data in iterator:
         render_row(element, data, append="3")
 
-    for setting in 'deposit trade top takeprofit'.split():
+    for setting in 'deposit trade top takeprofit preserve'.split():
         elem = html_template.findmeld(setting)
         val = config.get('trade', setting)
         # print("In looking for {} we found {} with setting {}".format(

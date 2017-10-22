@@ -4,38 +4,35 @@
 import collections
 import logging
 import pprint
-import configparser
 
 # 3rd party
 import argh
+from bittrex.bittrex import SELL_ORDERBOOK
 from supycache import supycache
-
-from retry import retry
 
 # local
 from .db import db
 from . import mybittrex
-from bittrex.bittrex import SELL_ORDERBOOK
 
 
 logger = logging.getLogger(__name__)
 
-
-ignore_by_in = 'BURST START BTA BTS DRACO DAR'.split()
-ignore_by_find = 'ETH- USDT-'.split()
-max_orders_per_market = 3
+IGNORE_BY_IN = 'UNO BURST START BTA BTS DRACO DAR'.split()
+IGNORE_BY_FIND = 'ETH- USDT-'.split()
+MAX_ORDERS_PER_MARKET = 3
 MIN_PRICE = 0.00000125
-MIN_VOLUME = 5 # TODO 10 BTC of daily volume or we dont consider it
+MIN_VOLUME = 5
 MIN_GAIN = 0.05 # need a 5 percent gain or it's not a surge!
+PIPE = " | "
 
 
 def percent_gain(new, old):
     increase = (new - old)
     if increase:
-        percent_gain = increase / old
+        _ = increase / old
     else:
-        percent_gain = 0
-    return percent_gain
+        _ = 0
+    return _
 
 
 def number_of_open_orders_in(b, market):
@@ -47,8 +44,8 @@ def number_of_open_orders_in(b, market):
             if order['Exchange'] == market:
                 orders.append(order)
         return len(orders)
-    else:
-        return 0
+
+    return 0
 
 def record_gain(gain):
     # pprint.pprint(gain)
@@ -80,10 +77,7 @@ def analyze_gain(b, min_volume):
     # list 'recent'
 
     # having_query = db.market.
-    for row in db().select(
-        db.market.ALL,
-        groupby=db.market.name
-    ):
+    for row in db().select(db.market.ALL, groupby=db.market.name):
         for market_row in db(db.market.name == row.name).select(
                 db.market.ALL,
                 orderby=~db.market.timestamp,
@@ -96,6 +90,8 @@ def analyze_gain(b, min_volume):
 
     gain = list()
 
+
+
     for name, row in recent.items():
 
         # print(name)
@@ -105,32 +101,33 @@ def analyze_gain(b, min_volume):
                 print("Ignoring on low volume {0}".format(markets[name]))
                 continue
         except KeyError:
-            print("KeyError locating " + name)
+            print("KeyError locating " + name, end=PIPE)
             continue
 
         leave = False
 
-        for ignorable in ignore_by_in:
+        for ignorable in IGNORE_BY_IN:
             if ignorable in name:
                 print("\tIgnoring {} because {} is in({}).".format(
-                    name, ignorable, ignore_by_in))
+                    name, ignorable, ignore_by_in), end=PIPE)
                 leave = True
                 break
 
-        for f in ignore_by_find:
+        for f in IGNORE_BY_FIND:
             if name.find(f) > -1:
-                print('\tIgnore by find: ' + name)
+                print('\tIgnore by find: ' + name, end=PIPE)
                 leave = True
 
         if leave:
             continue
 
-        if number_of_open_orders_in(b, name) >= max_orders_per_market:
-            print('Max open orders: ' + name)
+        if number_of_open_orders_in(b, name) >= MAX_ORDERS_PER_MARKET:
+            print('Max open orders: ' + name, end=PIPE)
             continue
 
         if row[0].ask < MIN_PRICE:
-            print('Coin costs less than {}: {}'.format(MIN_PRICE, name))
+            print(
+                'Coin costs less than {}: {}'.format(MIN_PRICE, name), end=PIPE)
             continue
 
         gain.append(
@@ -177,17 +174,15 @@ def rate_for(b, mkt, btc):
     for order in orders['result']:
         btc_spent += order['Rate'] * order['Quantity']
         if btc_spent > 1.2* btc:
-            break
-
-    coin_amount = btc / order['Rate']
-    return order['Rate'], coin_amount
+            coin_amount = btc / order['Rate']
+            return order['Rate'], coin_amount
 
 def config_top(c):
     p = c.get('trade', 'top')
     return int(p)
 
-def config_accumulate(c):
-    p = c.get('trade', 'accumulate')
+def config_preserve(c):
+    p = c.get('trade', 'preserve')
     return float(p)
 
 def config_min_volume(c):
@@ -209,11 +204,9 @@ def config_trade_fallback(c):
 
 def get_trade_size(c, btc):
 
-
-
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
-    if btc <= config_accumulate(c):
+    if btc < config_preserve(c):
         return 0
 
     # If we have more BTC than the size of each trade, then
@@ -258,7 +251,7 @@ def _buycoin(config_file, c, b, mkt, btc):
         print("Buy was a success = {}".format(r))
         record_buy(config_file, r['result']['uuid'], mkt, rate, amount_of_coin)
 
-def buycoin(config_file, config, exchange, top_coins, min_volume=0):
+def buycoin(config_file, config, exchange, top_coins):
     "Buy top N cryptocurrencies."
 
     avail = available_btc(exchange)
