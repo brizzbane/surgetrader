@@ -3,11 +3,13 @@
 
 # core
 import configparser
+import io
 import logging
 from pprint import pprint
 
 # 3rd party
 import meld3
+
 
 
 # local
@@ -162,15 +164,26 @@ def report_profit(config_file, b, on_date=None):
         elem.content(val)
 
     print("HTML OUTFILE: {}".format(html_outfile))
+    strfs = io.BytesIO()
     html_template.write_html(html_outfile)
+    html_template.write_html(strfs)
+    #for output_stream in (html_outfile, strfs):
 
-def main(ini, _date=None):
+
+    return strfs
+
+def main(ini, _date=None, email=True):
 
     config_file = ini
 
     config = users.read(config_file)
     b = mybittrex.make_bittrex(config)
-    report_profit(config_file, b, _date)
+    html = report_profit(config_file, b, _date)
+    if email:
+        from .. import emailer
+        subject = "Profit Report for {}".format(ini)
+        recipient = config.get('client', 'email')
+        emailer.send(subject, None, html.getvalue(), recipient)
 
 if __name__ == '__main__':
     ts = '2017-10-15T21:28:21.05'

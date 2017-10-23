@@ -112,15 +112,11 @@ the road.
 
 # TODO
 
-## Realized Profit Tally
-
-    For all closed sell orders:
-        Report diff between cost/proceeds of buy and sell
-
-## Potential Profit Tally
-
-    For all open sell orders:
-       Note diff between buy price and price it can currently be liquidated at
+- tasks.py profitreport must accept an email flag
+- tasks.py profitreport must parse yesterday and lastmonth date arguments
+- monthly and daily emails must have approprate subjects
+- daily cronjob at 1am emails yesterdays profit report
+- monthly cronjob at 1am emails last months profit report
 
 ## Explain the declining estimated value
 
@@ -128,16 +124,3 @@ the road.
 - example of a trade that took 2-3 week to close
 - bitcoin lost from 2013 to 2016
 - emotional market cycle video
-
-# MONTHLY PROFIT SHARE
-
-* 50% client
-* 25% client buys ADSactly Community Units
-* 25% goes to developer (me)
-
-ex. 1000 profit
-- 500 to you
-- 250 you buy community units
-- 250 goes to me
-
-#

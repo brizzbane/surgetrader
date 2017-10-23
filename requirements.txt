@@ -1,5 +1,6 @@
 argh
 invoke
+marrow.mailer
 pyDAL
 retry
 supycache
