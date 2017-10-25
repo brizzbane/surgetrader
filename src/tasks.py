@@ -2,12 +2,38 @@ from invoke import task
 
 
 @task
-def download(ctx, ini=None):
+def profitreport(_ctx, ini=None, date_string=None):
+    import lib.report.profit
+
+    inis = listify_ini(ini)
+
+    if date_string:
+        from datetime import date
+        if date_string == 'yesterday':
+            date_string = "Yesterday"
+            _date = date.fromordinal(date.today().toordinal()-1)
+        elif date_string == 'lastmonth':
+            date_string = "Last month"
+            print("Not implemented")
+            quit()
+        else:
+            raise Exception("Unrecognized date option")
+    else:
+        _date = None
+
+    for _ini in inis:
+        print("Processing {}".format(_ini))
+        lib.report.profit.main(_ini, date_string, _date)
+
+
+@task
+def download(_ctx):
     import random
     from users import users
-    from lib import download
+    from lib import download as _download
 
-    download.main(random.choice(users.inis()))
+    _download.main(random.choice(users.inis()))
+
 
 def listify_ini(ini):
     if ini:
@@ -18,45 +44,28 @@ def listify_ini(ini):
 
     return inis
 
+
 @task
-def buy(ctx, ini=None):
-    from users import users
-    from lib import buy
+def buy(_ctx, ini=None):
+    from lib import buy as _buy
 
     inis = listify_ini(ini)
-    buy.main(inis)
+    _buy.main(inis)
+
 
 @task
-def takeprofit(ctx, ini=None):
-    from lib import takeprofit
-
-    inis = listify_ini(ini)
-
-    for ini in inis:
-        print("Processing {}".format(ini))
-        takeprofit.main(ini)
-
-@task
-def profitreport(ctx, ini=None, d=None):
-    import lib.report.profit
+def takeprofit(_ctx, ini=None):
+    from lib import takeprofit as _takeprofit
 
     inis = listify_ini(ini)
 
-    # TODO parse d for yesterday, today, or general date
-    # TODO parse d for yesterday, lastmonth
-    if d:
-        from datetime import date
-        _date = date.fromordinal(date.today().toordinal()-1)
-    else:
-        _date = None
-
-    for ini in inis:
-        print("Processing {}".format(ini))
-        lib.report.profit.main(ini, _date)
+    for _ in inis:
+        print("Processing {}".format(_))
+        _takeprofit.main(_)
 
 
 @task
-def sellall(ctx, ini):
-    from lib import sellall
+def sellall(_ctx, ini):
+    from lib import sellall as _sellall
 
-    sellall.main(ini)
+    _sellall.main(ini)

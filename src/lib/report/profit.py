@@ -10,8 +10,6 @@ from pprint import pprint
 # 3rd party
 import meld3
 
-
-
 # local
 from ..db import db
 from .. import mybittrex
@@ -36,7 +34,7 @@ def close_date(time_string):
 def percent(a, b):
     return (a/b)*100
 
-def report_profit(config_file, b, on_date=None):
+def report_profit(config_file, exchange, on_date=None):
     config = users.read(config_file)
 
     html_template = open('lib/report/profit.html', 'r').read()
@@ -65,7 +63,7 @@ def report_profit(config_file, b, on_date=None):
             #print("No sell id ... skipping")
             continue
 
-        so = b.get_order(buy.sell_id)['result']
+        so = exchange.get_order(buy.sell_id)['result']
 
         if on_date:
             if open_order(so):
@@ -80,7 +78,7 @@ def report_profit(config_file, b, on_date=None):
 
         sell_proceeds = so['Price'] - so['CommissionPaid']
 
-        bo = b.get_order(buy.order_id)['result']
+        bo = exchange.get_order(buy.order_id)['result']
 
         buy_proceeds = bo['Price'] + bo['CommissionPaid']
 
@@ -132,6 +130,8 @@ def report_profit(config_file, b, on_date=None):
 
             if append:
                 field_name += append
+
+            # print("Looking for {} in {}".format(field_name, element))
             element.findmeld(field_name).content(str(field_value))
 
         return profit
@@ -150,10 +150,14 @@ def report_profit(config_file, b, on_date=None):
     html_template.findmeld('pnl').content(pnl)
 
     s = html_template.findmeld('closed_orders_sample')
-    render_row(s, data, append="2")
+    if not total_profit:
+        s.replace("No closed trades!")
+    else:
+        render_row(s, data, append="2")
 
     iterator = html_template.findmeld('open_orders').repeat(open_orders)
-    for element, data in iterator:
+    for i, (element, data) in enumerate(iterator):
+        data["sell_number"] = i+1
         render_row(element, data, append="3")
 
     for setting in 'deposit trade top takeprofit preserve'.split():
@@ -169,19 +173,18 @@ def report_profit(config_file, b, on_date=None):
     html_template.write_html(strfs)
     #for output_stream in (html_outfile, strfs):
 
-
     return strfs
 
-def main(ini, _date=None, email=True):
+def main(ini, english_date, _date=None, email=True):
 
     config_file = ini
 
     config = users.read(config_file)
-    b = mybittrex.make_bittrex(config)
-    html = report_profit(config_file, b, _date)
+    exchange = mybittrex.make_bittrex(config)
+    html = report_profit(config_file, exchange, _date)
     if email:
         from .. import emailer
-        subject = "Profit Report for {}".format(ini)
+        subject = "{}'s Profit Report for {}".format(english_date, ini)
         recipient = config.get('client', 'email')
         emailer.send(subject, None, html.getvalue(), recipient)
 

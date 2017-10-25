@@ -101,7 +101,7 @@ def analyze_gain(b, min_volume):
                 print("Ignoring on low volume {0}".format(markets[name]))
                 continue
         except KeyError:
-            print("KeyError locating " + name, end=PIPE)
+            print("KeyError locating {}".format(name))
             continue
 
         leave = False
@@ -109,20 +109,20 @@ def analyze_gain(b, min_volume):
         for ignorable in IGNORE_BY_IN:
             if ignorable in name:
                 print("\tIgnoring {} because {} is in({}).".format(
-                    name, ignorable, ignore_by_in), end=PIPE)
+                    name, ignorable, IGNORE_BY_IN))
                 leave = True
                 break
 
         for f in IGNORE_BY_FIND:
             if name.find(f) > -1:
-                print('\tIgnore by find: ' + name, end=PIPE)
+                print('\tIgnore by find: ' + name)
                 leave = True
 
         if leave:
             continue
 
         if number_of_open_orders_in(b, name) >= MAX_ORDERS_PER_MARKET:
-            print('Max open orders: ' + name, end=PIPE)
+            print('Max open orders: ' + name)
             continue
 
         if row[0].ask < MIN_PRICE:
@@ -211,9 +211,9 @@ def get_trade_size(c, btc):
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
-    s = config_trade_size(c)
-    if btc >= s:
-        return s
+    trade_size = config_trade_size(c)
+    if btc >= trade_size:
+        return trade_size
 
     # Otherwise do not trade
     return 0
@@ -275,13 +275,13 @@ def process(config_file):
 
     exchange = mybittrex.make_bittrex(config)
 
-    min_volume = config_min_volume(config)
+    # min_volume = config_min_volume(config)
 
     amount_to_buy = config_top(config)
-    top_coins = topcoins(exchange, min_volume, amount_to_buy)
+    top_coins = topcoins(exchange, MIN_VOLUME, amount_to_buy)
 
     print("Buying coins for: {}".format(config_file))
-    buycoin(config_file, config, exchange, top_coins, min_volume)
+    buycoin(config_file, config, exchange, top_coins)
 
 def main(inis):
 

@@ -112,11 +112,13 @@ the road.
 
 # TODO
 
-- tasks.py profitreport must accept an email flag
-- tasks.py profitreport must parse yesterday and lastmonth date arguments
 - monthly and daily emails must have approprate subjects
 - daily cronjob at 1am emails yesterdays profit report
 - monthly cronjob at 1am emails last months profit report
+- throw exception if IsOpen == False but QuantityRemaining > 0
+- email admin if exception thrown in program
+- tasks.py profitreport must accept an email flag
+
 
 ## Explain the declining estimated value
 
