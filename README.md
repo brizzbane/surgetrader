@@ -1,44 +1,37 @@
 # surgetrader
-Profit on price surges detected at BitTrex.
+A python bot designed to profit on price surges detected at BitTrex.
 
-# Script description
+## How does it work?
 
-Have you ever woken up, logged into BitTrex,  and saw something like this:
-![](https://monosnap.com/file/qocoiI5ScQQjx2Fq5B5Teung3zejTu.png)
+SurgeTrader finds what coin has had the greatest percent growth over a period
+of time (typically an hour). It then buys that coin at market value and sets a profit target.
 
-and then you asked yourself: "what could I do to wake up to profits like this"?
+## How well has it worked?
 
-If so, then SurgeTrader is for you!!!
+I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/).
 
-## How it works
+# How do I install this bad boy?
 
-SurgeTrader finds what coin has had the greatest %growth over a period
-of time (typically an hour). It presumes that the coin with the
-greatest %gain will go up even more in the near or distant future.
-
-# Installation
-
-Install python-bittrex from [this
+1. You need Python 3
+1. Install python-bittrex from [this
 github](https://github.com/metaperl/python-bittrex) instead of PyPi.
+1. Then using Python3 type:`pip install -r requirements.txt`
 
-Then using Python3 type:
-`pip install -r requirements.txt`
+## Configuration
 
-# Configuration
-
-in the `src/users` directory, create an ini file for each account that will
+1. In the `src/users` directory, create an ini file for each account that will
 be trading. Follow the documentation in `ini-0-sample` for directions.
+1. Update the variable `INIS` in the file `src/users/users.py` with the name of this new ini file.
 
-## Optimal Settings
+### Optimal Settings
 
 Over a period of experimentation, I have (as of 10/1/17) found that
 these settings work well:
 
-    Each trade should use 2-5% of the account. Aim for a 5% profit margin.
+    Each trade should use 2-5% of the account. Aim for a 2% profit margin.
 
-You can aim for higher profit margins if you dont mind waiting longer
-for trades to close and for your overall estimated account balance to
-be lower than what you started with.
+You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
+profits, you should only aim for 2% profit.
 
 ## Cron
 
@@ -62,8 +55,8 @@ Sure, there are those times, where the same coin gives you 3 or 4
 profits in 3 or 4 hours:
 ![](https://api.monosnap.com/rpc/file/download?id=8RKinNxVaGOlJCRMCgIbQY2oZlxKQT)
 
-But sometimes you get caught out at the top of a teacup and handle
-formation and it might be 3-4 weeks before a trade closes.
+But sometimes you get caught out at the top of [a teacup and handle
+formation](http://www.investopedia.com/terms/c/cupandhandle.asp) and it might be 3-4 weeks before a trade closes.
 
 
 ## The most important rules of SurgeTrader is...
@@ -105,14 +98,10 @@ in good shape, because SurgeTrader will take your principle and open
 another surge trade for you, so you have more profits to collect down
 the road.
 
-# Useful Links
-
-* [Calculating and withdrawing daily profit](https://www.youtube.com/watch?v=ah0P-zf-S-8&feature=youtu.be&hd=1)
-
 
 # TODO
 
-- monthly and daily emails must have approprate subjects
+- use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
 - daily cronjob at 1am emails yesterdays profit report
 - monthly cronjob at 1am emails last months profit report
 - throw exception if IsOpen == False but QuantityRemaining > 0
