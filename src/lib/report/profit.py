@@ -2,10 +2,9 @@
 
 
 # core
-import configparser
 import io
 import logging
-from pprint import pprint
+from pprint import pprint, pformat
 
 # 3rd party
 import meld3
@@ -18,10 +17,12 @@ from users import users
 
 logger = logging.getLogger(__name__)
 
+
 def open_order(result):
 
     pprint(result['IsOpen'])
     return result['IsOpen']
+
 
 def close_date(time_string):
     from datetime import datetime
@@ -31,8 +32,10 @@ def close_date(time_string):
     dt = datetime.strptime(time_strings[0], datetime_format)
     return dt.date()
 
+
 def percent(a, b):
     return (a/b)*100
+
 
 def report_profit(config_file, exchange, on_date=None):
     config = users.read(config_file)
@@ -70,11 +73,18 @@ def report_profit(config_file, exchange, on_date=None):
                 so['Closed'] = 'n/a'
             else:
                 _close_date = close_date(so['Closed'])
-                if _close_date != on_date:
+                
+                if type(on_date) is list:
+                    if _close_date < on_date[0] or _close_date > on_date[1]:
+                        continue
+                elif _close_date != on_date:
                     continue
+                
+                print("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
+
 
         pprint(buy)
-        pprint(so)
+        # pprint(so)
 
         sell_proceeds = so['Price'] - so['CommissionPaid']
 
@@ -115,8 +125,10 @@ def report_profit(config_file, exchange, on_date=None):
     html_template.findmeld('name').content(config.get('client', 'name'))
     html_template.findmeld('date').content("Transaction Log for Previous Day")
 
+
     def satoshify(f):
         return '{:.8f}'.format(f)
+
 
     def render_row(element, data, append=None):
         for field_name, field_value in data.items():
@@ -175,6 +187,7 @@ def report_profit(config_file, exchange, on_date=None):
 
     return strfs
 
+
 def main(ini, english_date, _date=None, email=True):
 
     config_file = ini
@@ -187,6 +200,7 @@ def main(ini, english_date, _date=None, email=True):
         subject = "{}'s Profit Report for {}".format(english_date, ini)
         recipient = config.get('client', 'email')
         emailer.send(subject, None, html.getvalue(), recipient)
+
 
 if __name__ == '__main__':
     ts = '2017-10-15T21:28:21.05'

@@ -101,6 +101,7 @@ the road.
 
 # TODO
 
+- automatic withdrawal of profits at 1am
 - use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
 - daily cronjob at 1am emails yesterdays profit report
 - monthly cronjob at 1am emails last months profit report

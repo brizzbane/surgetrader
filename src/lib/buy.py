@@ -15,7 +15,7 @@ from .db import db
 from . import mybittrex
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 IGNORE_BY_IN = 'UNO BURST START BTA BTS DRACO DAR'.split()
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
@@ -35,17 +35,18 @@ def percent_gain(new, old):
     return _
 
 
-def number_of_open_orders_in(b, market):
+def number_of_open_orders_in(exchange, market):
     orders = list()
-    oo = b.get_open_orders(market)['result']
-    if oo:
+    open_orders_list = exchange.get_open_orders(market)['result']
+    if open_orders_list:
         # pprint.pprint(oo)
-        for order in oo:
+        for order in open_orders_list:
             if order['Exchange'] == market:
                 orders.append(order)
         return len(orders)
 
     return 0
+
 
 def record_gain(gain):
     # pprint.pprint(gain)
@@ -65,11 +66,11 @@ def record_gain(gain):
 
 
 @supycache(cache_key='result')
-def analyze_gain(b, min_volume):
+def analyze_gain(exchange, min_volume):
 
     recent = collections.defaultdict(list)
 
-    markets = b.get_market_summaries(by_market=True)
+    markets = exchange.get_market_summaries(by_market=True)
 
     # pprint.pprint(markets)
 
@@ -113,15 +114,15 @@ def analyze_gain(b, min_volume):
                 leave = True
                 break
 
-        for f in IGNORE_BY_FIND:
-            if name.find(f) > -1:
-                print('\tIgnore by find: ' + name)
+        for ignore_string in IGNORE_BY_FIND:
+            if name.find(ignore_string) > -1:
+                print('\tIgnore by find: ' + name, end=PIPE)
                 leave = True
 
         if leave:
             continue
 
-        if number_of_open_orders_in(b, name) >= MAX_ORDERS_PER_MARKET:
+        if number_of_open_orders_in(exchange, name) >= MAX_ORDERS_PER_MARKET:
             print('Max open orders: ' + name)
             continue
 
@@ -146,14 +147,14 @@ def analyze_gain(b, min_volume):
     return gain
 
 
-def report_btc_balance(b):
-    bal = b.get_balance('BTC')
+def report_btc_balance(exchange):
+    bal = exchange.get_balance('BTC')
     pprint.pprint(bal)
     return bal['result']
 
 
-def available_btc(b):
-    bal = report_btc_balance(b)
+def available_btc(exchange):
+    bal = report_btc_balance(exchange)
     avail = bal['Available']
     print("Available btc={0}".format(avail))
     return avail
@@ -165,75 +166,84 @@ def record_buy(config_file, order_id, mkt, rate, amount):
         order_id=order_id, market=mkt, purchase_price=rate, amount=amount)
     db.commit()
 
-def rate_for(b, mkt, btc):
+
+def rate_for(exchange, mkt, btc):
     "Return the rate that works for a particular amount of BTC."
 
     coin_amount = 0
     btc_spent = 0
-    orders = b.get_orderbook(mkt, SELL_ORDERBOOK)
+    orders = exchange.get_orderbook(mkt, SELL_ORDERBOOK)
     for order in orders['result']:
         btc_spent += order['Rate'] * order['Quantity']
         if btc_spent > 1.2* btc:
             coin_amount = btc / order['Rate']
             return order['Rate'], coin_amount
 
-def config_top(c):
-    p = c.get('trade', 'top')
-    return int(p)
+def config_top(config):
+    _ = config.get('trade', 'top')
+    return int(_)
 
-def config_preserve(c):
-    p = c.get('trade', 'preserve')
-    return float(p)
 
-def config_min_volume(c):
-    p = c.get('trade', 'volume_min')
-    return float(p)
+def config_preserve(config):
+    _ = config.get('trade', 'preserve')
+    return float(_)
 
-def percent2ratio(f):
-    return f / 100.0
 
-def config_trade_size(c):
-    holdings = float(c.get('trade', 'deposit'))
-    trade_ratio = percent2ratio(float(c.get('trade', 'trade')))
+def config_min_volume(config):
+    _ = config.get('trade', 'volume_min')
+    return float(_)
+
+
+def percent2ratio(percentage):
+    return percentage / 100.0
+
+
+def config_trade_size(config):
+    holdings = float(config.get('trade', 'deposit'))
+    trade_ratio = percent2ratio(float(config.get('trade', 'trade')))
 
     return holdings * trade_ratio
 
-def config_trade_fallback(c):
-    p = c.get('trade', 'fallback')
-    return float(p) / 100.0
 
-def get_trade_size(c, btc):
+def config_trade_fallback(config):
+    _ = config.get('trade', 'fallback')
+    return float(_) / 100.0
+
+
+def get_trade_size(config, btc):
 
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
-    if btc < config_preserve(c):
+    if btc < config_preserve(config):
         return 0
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
-    trade_size = config_trade_size(c)
+    trade_size = config_trade_size(config)
     if btc >= trade_size:
         return trade_size
 
     # Otherwise do not trade
     return 0
 
+
 def profitable_rate(entry, gain):
 
     x_percent = gain / 100.0
-    tp = entry * x_percent + entry
+    take_profit = entry * x_percent + entry
 
     print(("On an entry of {0:.8f}, TP={1:.8f} for a {2} percent gain".format(
-        entry, tp, gain)))
+        entry, take_profit, gain)))
 
-    return tp
+    return take_profit
 
-def _buycoin(config_file, c, b, mkt, btc):
+
+def _buycoin(config_file, config, exchange, mkt, btc):
     "Buy into market using BTC. Current allocately 2% of BTC to each trade."
 
     print("{} has {} BTC available.".format(config_file, btc))
 
-    size = get_trade_size(c, btc)
+    size = get_trade_size(config, btc)
 
     if not size:
         print("No trade size. Returning.")
@@ -241,15 +251,16 @@ def _buycoin(config_file, c, b, mkt, btc):
 
     print("I will trade {0} BTC.".format(size))
 
-    rate, amount_of_coin = rate_for(b, mkt, size)
+    rate, amount_of_coin = rate_for(exchange, mkt, size)
 
     print("I get {0} units of {1} at the rate of {2:.8f} BTC per coin.".format(
         amount_of_coin, mkt, rate))
 
-    r = b.buy_limit(mkt, amount_of_coin, rate)
-    if r['success']:
-        print("Buy was a success = {}".format(r))
-        record_buy(config_file, r['result']['uuid'], mkt, rate, amount_of_coin)
+    result = exchange.buy_limit(mkt, amount_of_coin, rate)
+    if result['success']:
+        print("Buy was a success = {}".format(result))
+        record_buy(config_file, result['result']['uuid'], mkt, rate, amount_of_coin)
+
 
 def buycoin(config_file, config, exchange, top_coins):
     "Buy top N cryptocurrencies."
@@ -259,15 +270,16 @@ def buycoin(config_file, config, exchange, top_coins):
     for market in top_coins:
         _buycoin(config_file, config, exchange, market[0], avail)
 
-def topcoins(exchange, min_volume, n):
-    top = analyze_gain(exchange, min_volume)
 
+def topcoins(exchange, min_volume, number_of_coins):
+    top = analyze_gain(exchange, min_volume)
 
     # print 'TOP: {}.. now filtering'.format(top[:10])
     top = [t for t in top if t[1] > MIN_GAIN]
     # print 'TOP filtered on MIN_GAIN : {}'.format(top)
 
-    return top[:n]
+    return top[:number_of_coins]
+
 
 def process(config_file):
     from users import users
@@ -282,6 +294,7 @@ def process(config_file):
 
     print("Buying coins for: {}".format(config_file))
     buycoin(config_file, config, exchange, top_coins)
+
 
 def main(inis):
 

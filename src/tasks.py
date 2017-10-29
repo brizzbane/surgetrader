@@ -14,8 +14,12 @@ def profitreport(_ctx, ini=None, date_string=None):
             _date = date.fromordinal(date.today().toordinal()-1)
         elif date_string == 'lastmonth':
             date_string = "Last month"
-            print("Not implemented")
-            quit()
+            from dateutil.relativedelta import relativedelta
+            today = date.today()
+            d = today - relativedelta(months=1)
+            startOfLastMonth = date(d.year, d.month, 1)
+            endOfLastMonth = date(today.year, today.month, 1) - relativedelta(days=1)
+            _date = [startOfLastMonth, endOfLastMonth]
         else:
             raise Exception("Unrecognized date option")
     else:
