@@ -1,10 +1,48 @@
+# Provide the API key and secret that you get from Bittrex
 [api]
 key = 7afdasdfafdasdfas
 secret = 9a8e4103137248asdfasd
 
-[trade]
-# trade 10% of the available BTC
-size = 10
+# Provide the client name and email for the period profit reports sent by email
+# https://gitlab.com/metaperl/surgetrader/blob/master/src/lib/report/profit.py
+[client]
+name = Agnes Lamont
+email = awlamont@gmail.com
 
-# take 40% profit on each buy
-takeprofit = 20
+# These parameters control how we buy and sell
+[trade]
+
+# How much BTC did we deposit to start trading with?
+deposit    = 1
+
+# What percentage of our deposit should we trade each time?
+trade      = 5
+
+# If the BTC in the account is below $preserve, then do not trade.
+# Presumably this is a base amount of BTC we want in the account at 
+# all times. In general, we set this to 0, but in certain cases we
+# might want to increase it.
+
+# For instance, if we dont want any trade activity, we can set it to
+# the same value as $deposit. If we want a certain amount of profit to always
+# be there and never traded, then we can raise this value up to that amount.
+# Let's say you were going away for 1 week and wanted the profits to accumulate
+# instead of leading to more open trades, then you would raise this value
+# in that case as well.
+preserve   = 0.0
+
+# When SurgeTrader is instructed to buy, it examines the most active coins and
+# after filtering out coins for various reasons (low volume, etc) it sorts them 
+# by percent gain. It then buys the top $top coins. In most cases, you only
+# want to buy 1 coin, so the default value of 1 is fine. 
+top        = 1
+
+# The minimum amount of 24-hr trade volume required for a coin to be considered
+# This parameter is not used. Instead the MIN_VOLUME constant in buy.py is used.
+# https://gitlab.com/metaperl/surgetrader/blob/master/src/lib/buy.py
+volume_min = 1
+
+# Once a surging coin has been detected and purchased by the buy task, the
+# takeprofit task comes along and sets a profit target for selling that coin.
+# 2% will yield several profitable trades per day. 
+takeprofit = 2

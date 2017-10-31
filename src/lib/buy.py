@@ -17,7 +17,7 @@ from . import mybittrex
 
 LOGGER = logging.getLogger(__name__)
 
-IGNORE_BY_IN = 'UNO BURST START BTA BTS DRACO DAR'.split()
+IGNORE_BY_IN = 'UNO BURST START BTA SPHR DRACO DAR'.split()
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
 MAX_ORDERS_PER_MARKET = 3
 MIN_PRICE = 0.00000125
@@ -116,7 +116,7 @@ def analyze_gain(exchange, min_volume):
 
         for ignore_string in IGNORE_BY_FIND:
             if name.find(ignore_string) > -1:
-                print('\tIgnore by find: ' + name, end=PIPE)
+                print('\tIgnore by find: ' + name)
                 leave = True
 
         if leave:
@@ -128,7 +128,7 @@ def analyze_gain(exchange, min_volume):
 
         if row[0].ask < MIN_PRICE:
             print(
-                'Coin costs less than {}: {}'.format(MIN_PRICE, name), end=PIPE)
+                'Coin costs less than {}: {}'.format(MIN_PRICE, name))
             continue
 
         gain.append(
