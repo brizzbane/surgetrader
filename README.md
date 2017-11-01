@@ -43,6 +43,9 @@ surge and buys it:
 
     00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download ; $INVOKE buy
     */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
+    11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
+    22   0 1 * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
+
 
 # User-Level Docs (show me the money)
 
