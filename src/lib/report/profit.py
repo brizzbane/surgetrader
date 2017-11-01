@@ -73,15 +73,19 @@ def report_profit(config_file, exchange, on_date=None):
                 so['Closed'] = 'n/a'
             else:
                 _close_date = close_date(so['Closed'])
-                
-                if type(on_date) is list:
-                    if _close_date < on_date[0] or _close_date > on_date[1]:
-                        continue
-                elif _close_date != on_date:
-                    continue
-                
                 print("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
 
+                if type(on_date) is list:
+                    if _close_date < on_date[0]:
+                        print("Trade is too old for report.")
+                        continue
+                    elif _close_date > on_date[1]:
+                        print("Trade is too new for report.")
+                        continue
+                    else:
+                        print("Trade is included in report.")
+                elif _close_date != on_date:
+                    continue
 
         pprint(buy)
         # pprint(so)
@@ -92,8 +96,8 @@ def report_profit(config_file, exchange, on_date=None):
 
         buy_proceeds = bo['Price'] + bo['CommissionPaid']
 
-        pprint("sell_proceeds = {}. buy Order = {}. buy proceeds = {}".format(
-            sell_proceeds, bo, buy_proceeds))
+        pprint("sell_order={}. sell_proceeds={}. buy Order={}. buy proceeds = {}".format(
+            so, sell_proceeds, bo, buy_proceeds))
 
         profit = sell_proceeds - buy_proceeds
 

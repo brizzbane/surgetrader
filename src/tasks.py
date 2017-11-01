@@ -19,6 +19,8 @@ def profitreport(_ctx, ini=None, date_string=None):
             d = today - relativedelta(months=1)
             startOfLastMonth = date(d.year, d.month, 1)
             endOfLastMonth = date(today.year, today.month, 1) - relativedelta(days=1)
+            print("Date range for profit report. Start={}. End={}".format(
+                    startOfLastMonth, endOfLastMonth))
             _date = [startOfLastMonth, endOfLastMonth]
         else:
             raise Exception("Unrecognized date option")
