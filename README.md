@@ -8,7 +8,9 @@ of time (typically an hour). It then buys that coin at market value and sets a p
 
 ## How well has it worked?
 
-I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/).
+I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/). Here are some other ways to learn about it:
+
+* [AMA Chat on reddit cryptomarkets](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/)
 
 # How do I install this bad boy?
 
