@@ -46,6 +46,16 @@ surge and buys it:
     11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
     22   0 1 * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
 
+## Manual Usage
+
+All usage of SurgeTrader, whether automated or manual, occurs with your current working directory set to `src`:
+
+    shell> cd $HOME/gitclones/surgetrader/src
+    
+All usage of SurgeTrader is controlled by calling `invoke`. A very simple thing that should work is:
+
+    shell> invoke download
+
 
 # User-Level Docs (show me the money)
 
