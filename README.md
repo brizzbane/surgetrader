@@ -3,7 +3,7 @@ A python bot designed to profit on price surges detected at BitTrex.
 
 ## How does it work?
 
-SurgeTrader finds what coin has had the greatest percent growth over a period
+SurgeTrader finds what coin has had the greatest percent growth in price over a period
 of time (typically an hour). It then buys that coin at market value and sets a profit target.
 
 ## How well has it worked?
