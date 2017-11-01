@@ -111,6 +111,7 @@ the road.
 - throw exception if IsOpen == False but QuantityRemaining > 0
 - email admin if exception thrown in program
 - tasks.py profitreport must accept an email flag
+- make the bot run on multiple exchanges.
 
 
 ## Explain the declining estimated value
