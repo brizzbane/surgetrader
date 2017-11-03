@@ -3,12 +3,14 @@ A python bot designed to profit on price surges detected at BitTrex.
 
 ## How does it work?
 
-SurgeTrader finds what coin has had the greatest percent growth over a period
+SurgeTrader finds what coin has had the greatest percent growth in price over a period
 of time (typically an hour). It then buys that coin at market value and sets a profit target.
 
 ## How well has it worked?
 
-I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/).
+I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/). Here are some other ways to learn about it:
+
+* [AMA Chat on reddit cryptomarkets](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/)
 
 # How do I install this bad boy?
 
@@ -44,6 +46,19 @@ surge and buys it:
 
     00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download ; $INVOKE buy
     */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
+    11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
+    22   0 1 * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
+
+## Manual Usage
+
+All usage of SurgeTrader, whether automated or manual, occurs with your current working directory set to `src`:
+
+    shell> cd $HOME/gitclones/surgetrader/src
+    
+All usage of SurgeTrader is controlled by calling `invoke`. A very simple thing that should work is:
+
+    shell> invoke download
+
 
 # User-Level Docs (show me the money)
 
@@ -109,6 +124,7 @@ the road.
 - throw exception if IsOpen == False but QuantityRemaining > 0
 - email admin if exception thrown in program
 - tasks.py profitreport must accept an email flag
+- make the bot run on multiple exchanges.
 
 
 ## Explain the declining estimated value
