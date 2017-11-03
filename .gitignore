@@ -6,7 +6,7 @@
 inis.py
 
 *.key
-*.ini
+src/users/*.ini
 secrets.json
 markets.json
 *.table

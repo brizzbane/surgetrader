@@ -1,24 +1,21 @@
 from marrow.mailer import Mailer, Message
 
-# The profit report email will come from this person
-MAIL_SENDER = "SurgeTrader@TerrenceBrannon.com"
-MAIL_BCC="revshareworks@gmail.com"
 
-def send(subject, txt, html, recipient, cc=None):
+def send(subject, _txt, html, sender, recipient, cc=None, bcc=None):
 
     mailer = Mailer(
         dict(
-            transport = dict(
-                use = 'smtp',
-                host = 'localhost')))
+            transport=dict(
+                use='smtp',
+                host='localhost')))
 
     mailer.start()
 
     message = Message(
-        author=MAIL_SENDER,
+        author=sender,
         to=recipient,
         cc=cc,
-        bcc=MAIL_BCC
+        bcc=bcc
     )
 
     message.subject = subject

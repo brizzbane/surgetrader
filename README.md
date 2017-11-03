@@ -24,7 +24,7 @@ github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 1. In the `src/users` directory, create an ini file for each account that will
 be trading. Follow the documentation in `ini-0-sample` for directions.
 1. Update the variable `INIS` in the file `src/users/users.py` with the name of this new ini file.
-1. In the `src/lib/emailer.py` file, configure the two constants at the top of the file appropriately.
+1. In the `src/system.ini` file, configure the file as documented
 
 ### Optimal Settings
 
@@ -54,7 +54,7 @@ surge and buys it:
 All usage of SurgeTrader, whether automated or manual, occurs with your current working directory set to `src`:
 
     shell> cd $HOME/gitclones/surgetrader/src
-    
+
 All usage of SurgeTrader is controlled by calling `invoke`. A very simple thing that should work is:
 
     shell> invoke download

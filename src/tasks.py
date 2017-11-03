@@ -1,6 +1,22 @@
 from invoke import task
 
 
+
+
+def listify_ini(ini):
+    if ini:
+        inis = [ini]
+    else:
+        from users import users
+        inis = users.inis()
+
+    return inis
+
+
+
+
+
+
 @task
 def profitreport(_ctx, ini=None, date_string=None):
     import lib.report.profit
@@ -27,9 +43,9 @@ def profitreport(_ctx, ini=None, date_string=None):
     else:
         _date = None
 
-    for _ini in inis:
-        print("Processing {}".format(_ini))
-        profit, config = lib.report.profit.main(_ini, date_string, _date)
+    for user_ini in inis:
+        print("Processing {}".format(user_ini))
+        profit, config = lib.report.profit.main(user_ini, date_string, _date)
 
 
 @task
@@ -41,14 +57,6 @@ def download(_ctx):
     _download.main(random.choice(users.inis()))
 
 
-def listify_ini(ini):
-    if ini:
-        inis = [ini]
-    else:
-        from users import users
-        inis = users.inis()
-
-    return inis
 
 
 @task

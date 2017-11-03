@@ -29,23 +29,25 @@ def close_date(time_string):
     datetime_format = '%Y-%m-%dT%H:%M:%S'
 
     time_strings = time_string.split('.')
-    dt = datetime.strptime(time_strings[0], datetime_format)
-    return dt.date()
+    _dt = datetime.strptime(time_strings[0], datetime_format)
+    return _dt.date()
 
 
 def percent(a, b):
     return (a/b)*100
 
 
-def report_profit(config_file, exchange, on_date=None):
-    config = users.read(config_file)
+def report_profit(user_config_file, exchange, on_date=None):
 
+    user_config = users.read(user_config_file)
+
+    
     html_template = open('lib/report/profit.html', 'r').read()
     html_template = meld3.parse_htmlstring(html_template)
-    html_outfile = open("tmp/" + config_file + ".html", 'wb')
+    html_outfile = open("tmp/" + user_config_file + ".html", 'wb')
 
     import csv
-    csv_file = "tmp/" + config_file + ".csv"
+    csv_file = "tmp/" + user_config_file + ".csv"
     csvfile = open(csv_file, 'w', newline='')
     fieldnames = 'sell_closed sell_opened market units_sold sell_price sell_commission units_bought buy_price buy_commission profit'.split()
     csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -58,8 +60,8 @@ def report_profit(config_file, exchange, on_date=None):
         db.buy.ALL,
         orderby=~db.buy.timestamp
     ):
-        if buy.config_file != config_file:
-            #print("config file != {}... skipping".format(config_file))
+        if buy.config_file != user_config_file:
+            #print("config file != {}... skipping".format(user_config_file))
             continue
 
         if (not buy.sell_id) or (len(buy.sell_id) < 12):
@@ -125,11 +127,9 @@ def report_profit(config_file, exchange, on_date=None):
             csv_writer.writerow(calculations)
             closed_orders.append(calculations)
 
-    html_template.findmeld('acctno').content(config_file)
-    html_template.findmeld('name').content(config.get('client', 'name'))
+    html_template.findmeld('acctno').content(user_config_file)
+    html_template.findmeld('name').content(user_config.get('client', 'name'))
     html_template.findmeld('date').content("Transaction Log for Previous Day")
-    
-    return 
 
 
     def satoshify(f):
@@ -161,7 +161,7 @@ def report_profit(config_file, exchange, on_date=None):
 
 
 
-    deposit = float(config.get('trade', 'deposit'))
+    deposit = float(user_config.get('trade', 'deposit'))
     percent_profit = percent(total_profit, deposit)
     pnl = "{} ({:.2f} % of {})".format(
         satoshify(total_profit), percent_profit, deposit)
@@ -180,7 +180,7 @@ def report_profit(config_file, exchange, on_date=None):
 
     for setting in 'deposit trade top takeprofit preserve'.split():
         elem = html_template.findmeld(setting)
-        val = config.get('trade', setting)
+        val = user_config.get('trade', setting)
         # print("In looking for {} we found {} with setting {}".format(
         # setting, elem, val))
         elem.content(val)
@@ -191,21 +191,35 @@ def report_profit(config_file, exchange, on_date=None):
     html_template.write_html(strfs)
     #for output_stream in (html_outfile, strfs):
 
-    return total_profit, config
+    return strfs, total_profit
 
+def system_config():
+    import configparser
+    config = configparser.RawConfigParser()
+    config.read("system.ini")
+    return config
 
 def main(ini, english_date, _date=None, email=True):
 
     config_file = ini
 
-    config = users.read(config_file)
-    exchange = mybittrex.make_bittrex(config)
-    html = report_profit(config_file, exchange, _date)
+    user_config = users.read(config_file)
+    exchange = mybittrex.make_bittrex(user_config)
+    html, total_profit = report_profit(config_file, exchange, _date)
     if email:
         from .. import emailer
+        sys_config = system_config()
         subject = "{}'s Profit Report for {}".format(english_date, ini)
-        recipient = config.get('client', 'email')
-        emailer.send(subject, None, html.getvalue(), recipient)
+        sender = sys_config.get('email', 'sender')
+        recipient = user_config.get('client', 'email')
+        emailer.send(subject, 
+                     _txt=None, html=html.getvalue(), 
+                     sender=sender,
+                     recipient=recipient,
+                     bcc=sys_config.get('email', 'bcc')
+                     )
+        
+    return total_profit, user_config
 
 
 if __name__ == '__main__':
