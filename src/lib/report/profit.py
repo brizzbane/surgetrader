@@ -128,6 +128,8 @@ def report_profit(config_file, exchange, on_date=None):
     html_template.findmeld('acctno').content(config_file)
     html_template.findmeld('name').content(config.get('client', 'name'))
     html_template.findmeld('date').content("Transaction Log for Previous Day")
+    
+    return 
 
 
     def satoshify(f):
@@ -189,7 +191,7 @@ def report_profit(config_file, exchange, on_date=None):
     html_template.write_html(strfs)
     #for output_stream in (html_outfile, strfs):
 
-    return strfs
+    return total_profit, config
 
 
 def main(ini, english_date, _date=None, email=True):

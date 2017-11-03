@@ -1,5 +1,9 @@
 from marrow.mailer import Mailer, Message
 
+# The profit report email will come from this person
+MAIL_SENDER = "SurgeTrader@TerrenceBrannon.com"
+MAIL_BCC="revshareworks@gmail.com"
+
 def send(subject, txt, html, recipient, cc=None):
 
     mailer = Mailer(
@@ -11,10 +15,10 @@ def send(subject, txt, html, recipient, cc=None):
     mailer.start()
 
     message = Message(
-        author="SurgeTrader@TerrenceBrannon.com",
+        author=MAIL_SENDER,
         to=recipient,
         cc=cc,
-        bcc='revshareworks@gmail.com'
+        bcc=MAIL_BCC
     )
 
     message.subject = subject

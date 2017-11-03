@@ -4,7 +4,7 @@
 # ini-steadyvest.radar.ini
 # ini-steadyvest.strategic.ini
 # ini-msamitech@yahoo.ini
-# ini-mikegardner936@gmail.ini
+# 
 
 INIS = """
 ini-steadyvest@protonmail.ini

@@ -22,6 +22,7 @@ github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 1. In the `src/users` directory, create an ini file for each account that will
 be trading. Follow the documentation in `ini-0-sample` for directions.
 1. Update the variable `INIS` in the file `src/users/users.py` with the name of this new ini file.
+1. In the `src/lib/emailer.py` file, configure the two constants at the top of the file appropriately.
 
 ### Optimal Settings
 

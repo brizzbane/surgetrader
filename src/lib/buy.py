@@ -22,7 +22,7 @@ IGNORE_BY_FIND = 'ETH- USDT-'.split()
 MAX_ORDERS_PER_MARKET = 3
 MIN_PRICE = 0.00000125
 MIN_VOLUME = 5
-MIN_GAIN = 0.05 # need a 5 percent gain or it's not a surge!
+MIN_GAIN = 2 # need a 2 percent gain or it's not a surge!
 PIPE = " | "
 
 
@@ -214,7 +214,7 @@ def get_trade_size(config, btc):
 
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
-    if btc < config_preserve(config):
+    if btc <= config_preserve(config):
         return 0
 
     # If we have more BTC than the size of each trade, then
@@ -275,7 +275,7 @@ def topcoins(exchange, min_volume, number_of_coins):
     top = analyze_gain(exchange, min_volume)
 
     # print 'TOP: {}.. now filtering'.format(top[:10])
-    top = [t for t in top if t[1] > MIN_GAIN]
+    top = [t for t in top if t[1] > percent2ratio(MIN_GAIN)]
     # print 'TOP filtered on MIN_GAIN : {}'.format(top)
 
     return top[:number_of_coins]

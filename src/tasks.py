@@ -29,7 +29,7 @@ def profitreport(_ctx, ini=None, date_string=None):
 
     for _ini in inis:
         print("Processing {}".format(_ini))
-        lib.report.profit.main(_ini, date_string, _date)
+        profit, config = lib.report.profit.main(_ini, date_string, _date)
 
 
 @task
