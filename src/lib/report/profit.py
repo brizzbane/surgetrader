@@ -20,8 +20,10 @@ logger = logging.getLogger(__name__)
 
 def open_order(result):
 
-    pprint(result['IsOpen'])
-    return result['IsOpen']
+    # pprint(result['IsOpen'])
+    is_open = result['IsOpen']
+    print("\tOrder is open={}".format(is_open))
+    return is_open
 
 
 def close_date(time_string):
@@ -68,7 +70,10 @@ def report_profit(user_config_file, exchange, on_date=None):
             #print("No sell id ... skipping")
             continue
 
+
         so = exchange.get_order(buy.sell_id)['result']
+        
+        print("Sell order={}".format(so))
 
         if on_date:
             if open_order(so):
@@ -89,7 +94,7 @@ def report_profit(user_config_file, exchange, on_date=None):
                 elif _close_date != on_date:
                     continue
 
-        pprint(buy)
+        # pprint(buy)
         # pprint(so)
 
         sell_proceeds = so['Price'] - so['CommissionPaid']
@@ -98,8 +103,8 @@ def report_profit(user_config_file, exchange, on_date=None):
 
         buy_proceeds = bo['Price'] + bo['CommissionPaid']
 
-        pprint("sell_order={}. sell_proceeds={}. buy Order={}. buy proceeds = {}".format(
-            so, sell_proceeds, bo, buy_proceeds))
+        print("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(
+            sell_proceeds, bo, buy_proceeds))
 
         profit = sell_proceeds - buy_proceeds
 

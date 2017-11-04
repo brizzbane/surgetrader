@@ -118,13 +118,11 @@ the road.
 # TODO
 
 - automatic withdrawal of profits at 1am
-- use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
-- daily cronjob at 1am emails yesterdays profit report
-- monthly cronjob at 1am emails last months profit report
+- call takeprofits immediately after buy https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/
 - throw exception if IsOpen == False but QuantityRemaining > 0
 - email admin if exception thrown in program
 - tasks.py profitreport must accept an email flag
-- make the bot run on multiple exchanges.
+- make the bot run on multiple exchanges: use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
 
 
 ## Explain the declining estimated value

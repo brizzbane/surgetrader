@@ -215,11 +215,13 @@ def get_trade_size(config, btc):
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
     if btc <= config_preserve(config):
+        print("BTC balance <= amount to preserve")
         return 0
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
     trade_size = config_trade_size(config)
+    print("Trade size={}".format(trade_size))
     if btc >= trade_size:
         return trade_size
 

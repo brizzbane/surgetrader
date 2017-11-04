@@ -2,6 +2,7 @@ argh
 python-dateutil
 invoke
 marrow.mailer
+meld3
 pyDAL
 retry
 supycache
