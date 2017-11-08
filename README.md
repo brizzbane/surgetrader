@@ -21,9 +21,9 @@ github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 
 ## Configuration
 
-1. At the shell, copy `src/system.ini.sample` to `src/system.ini` and configure the file as documented
+1. At the shell, copy `src/system.ini.sample` to `src/system.ini` and configure the file as documented.
 1. In the `src/users` directory, create an ini file for each account that will
-be trading. Follow the documentation in `sample.ini` for directions.
+be trading. Follow the documentation in `src/users/sample.ini` for directions.
 1. Update the variable `INIS` in the file `src/users/users.py` with the name of this new ini file.
 
 ### Optimal Settings
@@ -48,6 +48,12 @@ surge and buys it:
     */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
     11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
     22   0 1 * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
+
+### Note
+
+Some people want to set profit targets as soon as they buy instead of doing it every 5 minutes.
+You can see the modifications that one individual made [here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
+
 
 ## Manual Usage
 
