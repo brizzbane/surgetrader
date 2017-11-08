@@ -21,10 +21,10 @@ github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 
 ## Configuration
 
+1. At the shell, copy `src/system.ini.sample` to `src/system.ini` and configure the file as documented
 1. In the `src/users` directory, create an ini file for each account that will
-be trading. Follow the documentation in `ini-0-sample` for directions.
+be trading. Follow the documentation in `sample.ini` for directions.
 1. Update the variable `INIS` in the file `src/users/users.py` with the name of this new ini file.
-1. In the `src/system.ini` file, configure the file as documented
 
 ### Optimal Settings
 

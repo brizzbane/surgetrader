@@ -4,6 +4,7 @@
 
 *.sqlite3
 inis.py
+system.ini
 
 *.key
 src/users/*.ini
