@@ -260,8 +260,10 @@ def _buycoin(config_file, config, exchange, mkt, btc):
 
     result = exchange.buy_limit(mkt, amount_of_coin, rate)
     if result['success']:
-        print("Buy was a success = {}".format(result))
+        print("\tBuy was a success = {}".format(result))
         record_buy(config_file, result['result']['uuid'], mkt, rate, amount_of_coin)
+    else:
+        print("\tBuy FAILED: {}".format(result))
 
 
 def buycoin(config_file, config, exchange, top_coins):

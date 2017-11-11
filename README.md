@@ -52,7 +52,8 @@ surge and buys it:
 ### Note
 
 Some people want to set profit targets as soon as they buy instead of doing it every 5 minutes.
-You can see the modifications that one individual made [here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
+You can see the modifications that one individual made 
+[here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
 
 
 ## Manual Usage
@@ -137,3 +138,8 @@ the road.
 - example of a trade that took 2-3 week to close
 - bitcoin lost from 2013 to 2016
 - emotional market cycle video
+
+# DISCLAIMER
+
+The author of this software is in no way responsible for any type of loss incurred
+by those who chose to download and use it.

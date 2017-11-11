@@ -2,8 +2,8 @@
 # A daily profit report is emailed when one invokes
 # shell> invoke profitreport -d yesterday
 # The sender of the email is configured here
-sender = adminaddress@mydomain.com
+sender = clientservices@MYDOMAIN.com
 
 # All profit reports can be sent to the sysadmin so he is aware of the
 # profit of all people using the system
-bcc = profitreports@mydomain.com
+bcc = profitreports@MYDOMAIN.com
