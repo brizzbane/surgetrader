@@ -9,7 +9,6 @@
 INIS = """
 ini-steadyvest@protonmail.ini
 agnes.ini
-merry.ini
 """
 
 def inis():

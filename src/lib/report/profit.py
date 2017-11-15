@@ -89,8 +89,6 @@ def report_profit(user_config_file, exchange, on_date=None):
                     elif _close_date > on_date[1]:
                         print("Trade is too new for report.")
                         continue
-                    else:
-                        print("Trade is included in report.")
                 elif _close_date != on_date:
                     continue
 
@@ -126,11 +124,22 @@ def report_profit(user_config_file, exchange, on_date=None):
         }
 
         if open_order(so):
-            print("Open order ... skipping")
+            del(calculations['sell_commission'])
+            del(calculations['sell_price'])
+            print("Open order...")
+            best_bid = exchange.get_ticker(so['Exchange'])['result']['Bid']
+            difference = calculations['buy_price'] - best_bid
+            calculations['best_bid'] = best_bid
+            calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
+            
+            # print(f"Ticker {ticker}")
             open_orders.append(calculations)
         else:
             csv_writer.writerow(calculations)
             closed_orders.append(calculations)
+
+    
+    # open_orders.sort(key=lambda r: r['difference'])
 
     html_template.findmeld('acctno').content(user_config_file)
     html_template.findmeld('name').content(user_config.get('client', 'name'))
@@ -145,7 +154,7 @@ def report_profit(user_config_file, exchange, on_date=None):
         for field_name, field_value in data.items():
             if field_name == 'units_bought':
                 continue
-            if field_name in 'units_sold sell_price sell_commission buy_price buy_commission':
+            if field_name in 'units_sold best_bid sell_price sell_commission buy_price buy_commission':
                 field_value = str(field_value)
             if field_name == 'profit':
                 profit = field_value

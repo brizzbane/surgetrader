@@ -8,6 +8,7 @@ import pprint
 # 3rd party
 import argh
 from bittrex.bittrex import SELL_ORDERBOOK
+from retry import retry
 from supycache import supycache
 
 # local
@@ -95,14 +96,14 @@ def analyze_gain(exchange, min_volume):
 
     for name, row in recent.items():
 
-        # print(name)
+        print(f"Analysing {name}...")
 
         try:
             if min_volume and markets[name]['BaseVolume'] < min_volume:
-                print("Ignoring on low volume {0}".format(markets[name]))
+                print("\tIgnoring on low volume {0}".format(markets[name]))
                 continue
         except KeyError:
-            print("KeyError locating {}".format(name))
+            print("\tKeyError locating {}".format(name))
             continue
 
         leave = False
@@ -284,7 +285,8 @@ def topcoins(exchange, min_volume, number_of_coins):
 
     return top[:number_of_coins]
 
-
+import json
+@retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def process(config_file):
     from users import users
     config = users.read(config_file)
