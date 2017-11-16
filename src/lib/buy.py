@@ -22,7 +22,7 @@ IGNORE_BY_IN = 'UNO BURST START BTA SPHR DRACO DAR'.split()
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
 MAX_ORDERS_PER_MARKET = 3
 MIN_PRICE = 0.00000125
-MIN_VOLUME = 5
+MIN_VOLUME = 12 # Must have at least 12 BTC in transactions over last 24 hours
 MIN_GAIN = 2 # need a 2 percent gain or it's not a surge!
 PIPE = " | "
 
@@ -285,8 +285,7 @@ def topcoins(exchange, min_volume, number_of_coins):
 
     return top[:number_of_coins]
 
-import json
-@retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
+
 def process(config_file):
     from users import users
     config = users.read(config_file)

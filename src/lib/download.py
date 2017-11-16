@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 
-
-import argh
+# Core
+from datetime import datetime
 import logging
 import pprint
-from datetime import datetime
+
+
+# 3rd Party
+import argh
 from retry import retry
+
+# Local
 from .db import db
 from . import mybittrex
-import configparser
+
 
 logger = logging.getLogger(__name__)
 
-
-#@retry(tries=10, delay=3)
+import json
+@retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def main(ini):
 
     config_file = ini
