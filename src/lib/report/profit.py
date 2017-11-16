@@ -73,6 +73,7 @@ def report_profit(user_config_file, exchange, on_date=None):
 
         so = exchange.get_order(buy.sell_id)['result']
         
+        print("-----------------------------------------------------")
         print("Sell order={}".format(so))
 
         if on_date:

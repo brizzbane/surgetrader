@@ -18,24 +18,23 @@ from . import mybittrex
 
 LOGGER = logging.getLogger(__name__)
 
-IGNORE_BY_IN = 'UNO BURST START BTA SPHR DRACO DAR'.split()
+IGNORE_BY_IN = list()
+IGNORE_BY_IN.append('BURST') # https://steemit.com/cryptocurrency/@iceburst/the-death-of-burst-coin
+IGNORE_BY_IN.append('UNO')   # in the processs of being delisted?
+IGNORE_BY_IN.append('START') 
+
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
 MAX_ORDERS_PER_MARKET = 3
 MIN_PRICE = 0.00000125
-MIN_VOLUME = 12 # Must have at least 12 BTC in transactions over last 24 hours
-MIN_GAIN = 2 # need a 2 percent gain or it's not a surge!
+MIN_VOLUME = 24 # Must have at least 12 BTC in transactions over last 24 hours
+MIN_GAIN = 5 # need a 2 percent gain or it's not a surge!
 PIPE = " | "
 
 
-def percent_gain(new, old):
-    increase = (new - old)
-    if increase:
-        _ = increase / old
-    else:
-        _ = 0
-    return _
 
 
+import json
+@retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def number_of_open_orders_in(exchange, market):
     orders = list()
     open_orders_list = exchange.get_open_orders(market)['result']
@@ -66,6 +65,12 @@ def record_gain(gain):
     db.commit()
 
 
+def percent_gain(new, old):
+    gain = (new - old) / old
+    gain *= 100
+    return gain
+
+
 @supycache(cache_key='result')
 def analyze_gain(exchange, min_volume):
 
@@ -92,19 +97,9 @@ def analyze_gain(exchange, min_volume):
 
     gain = list()
 
-
-
     for name, row in recent.items():
 
         print(f"Analysing {name}...")
-
-        try:
-            if min_volume and markets[name]['BaseVolume'] < min_volume:
-                print("\tIgnoring on low volume {0}".format(markets[name]))
-                continue
-        except KeyError:
-            print("\tKeyError locating {}".format(name))
-            continue
 
         leave = False
 
@@ -122,14 +117,25 @@ def analyze_gain(exchange, min_volume):
 
         if leave:
             continue
+        
+        
+        try:
+            if min_volume and markets[name]['BaseVolume'] < min_volume:
+                print("\tIgnoring on low volume {0}".format(markets[name]))
+                continue
+        except KeyError:
+            print("\tKeyError locating {}".format(name))
+            continue
+
+
 
         if number_of_open_orders_in(exchange, name) >= MAX_ORDERS_PER_MARKET:
-            print('Max open orders: ' + name)
+            print('\tMax open orders: ' + name)
             continue
 
         if row[0].ask < MIN_PRICE:
             print(
-                'Coin costs less than {}: {}'.format(MIN_PRICE, name))
+                '\tCoin costs less than {}: {}'.format(MIN_PRICE, name))
             continue
 
         gain.append(
@@ -280,8 +286,14 @@ def topcoins(exchange, min_volume, number_of_coins):
     top = analyze_gain(exchange, min_volume)
 
     # print 'TOP: {}.. now filtering'.format(top[:10])
-    top = [t for t in top if t[1] > percent2ratio(MIN_GAIN)]
+    top = [t for t in top if t[1] >= MIN_GAIN]
     # print 'TOP filtered on MIN_GAIN : {}'.format(top)
+
+    
+    print("Top 5 coins filtered on gain: {}".format(
+            pprint.pformat(top[:5], indent=4)
+        )
+        )
 
     return top[:number_of_coins]
 
