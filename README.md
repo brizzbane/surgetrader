@@ -125,6 +125,7 @@ the road.
 
 # TODO
 
+- do not trade coins newly added to Bittrex (and of course this code should run on all exchanges)
 - automatic withdrawal of profits at 1am
 - call takeprofits immediately after buy https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/
 - throw exception if IsOpen == False but QuantityRemaining > 0
