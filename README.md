@@ -124,7 +124,7 @@ the road.
 
 
 # TODO
-\
+
 - re-issue limit orders that are older than 28 days (Bittrex changed max limit trade age to 28 days).
 - do not trade coins newly added to Bittrex. Newly added coins get you into [the soup I got into with Decentraland](https://www.reddit.com/r/surgetraderbot/comments/7cef5j/dailyprofit_056/).
 - automatic withdrawal of profits at 1am
