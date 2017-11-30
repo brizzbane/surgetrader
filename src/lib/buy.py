@@ -26,7 +26,7 @@ IGNORE_BY_IN.append('START')
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
 MAX_ORDERS_PER_MARKET = 3
 MIN_PRICE = 0.00000125
-MIN_VOLUME = 24 # Must have at least 12 BTC in transactions over last 24 hours
+MIN_VOLUME = 12 # Must have at least 12 BTC in transactions over last 24 hours
 MIN_GAIN = 5 # need a 2 percent gain or it's not a surge!
 PIPE = " | "
 
@@ -156,14 +156,14 @@ def analyze_gain(exchange, min_volume):
 
 def report_btc_balance(exchange):
     bal = exchange.get_balance('BTC')
-    pprint.pprint(bal)
+    # pprint.pprint(bal)
     return bal['result']
 
 
 def available_btc(exchange):
     bal = report_btc_balance(exchange)
     avail = bal['Available']
-    print("Available btc={0}".format(avail))
+    print("\tAvailable btc={0}".format(avail))
     return avail
 
 
@@ -228,7 +228,7 @@ def get_trade_size(config, btc):
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
     trade_size = config_trade_size(config)
-    print("Trade size={}".format(trade_size))
+    print("\tTrade size   ={}".format(trade_size))
     if btc >= trade_size:
         return trade_size
 
@@ -249,8 +249,6 @@ def profitable_rate(entry, gain):
 
 def _buycoin(config_file, config, exchange, mkt, btc):
     "Buy into market using BTC. Current allocately 2% of BTC to each trade."
-
-    print("{} has {} BTC available.".format(config_file, btc))
 
     size = get_trade_size(config, btc)
 
@@ -290,7 +288,9 @@ def topcoins(exchange, min_volume, number_of_coins):
     # print 'TOP filtered on MIN_GAIN : {}'.format(top)
 
     
-    print("Top 5 coins filtered on gain: {}".format(
+    print("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
+            MIN_GAIN,
+            min_volume,
             pprint.pformat(top[:5], indent=4)
         )
         )

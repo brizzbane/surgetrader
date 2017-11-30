@@ -75,9 +75,20 @@ def takeprofit(_ctx, ini=None):
 
     for _ in inis:
         print("Processing {}".format(_))
-        _takeprofit.main(_)
+        _takeprofit.take_profit(_)
 
 
+@task
+def clearprofit(_ctx, ini=None):
+    from lib import takeprofit as _takeprofit
+
+    inis = listify_ini(ini)
+
+    for _ in inis:
+        print("Processing {}".format(_))
+        _takeprofit.clear_profit(_)
+        
+        
 @task
 def sellall(_ctx, ini):
     from lib import sellall as _sellall

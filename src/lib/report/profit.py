@@ -8,6 +8,7 @@ from pprint import pprint, pformat
 
 # 3rd party
 import meld3
+from retry import retry
 
 # local
 from ..db import db
@@ -214,6 +215,8 @@ def system_config():
     config.read("system.ini")
     return config
 
+import json
+@retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def main(ini, english_date, _date=None, email=True):
 
     config_file = ini
