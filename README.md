@@ -11,6 +11,7 @@ of time (typically an hour). It then buys that coin at market value and sets a p
 I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/). Here are some other ways to learn about it:
 
 * [AMA Chat on reddit cryptomarkets](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/)
+* [A comment I made](https://www.reddit.com/r/CryptoMarkets/comments/7dxyb4/bitcoin_cash_traders_lose_millions_as_exchange/dq1jeuk/) in response to a panic buy where people list millions - SurgeTraderBot can rightly be seen as a bot that sometimes buys into panic.
 
 # How do I install this bad boy?
 
@@ -134,6 +135,8 @@ the road.
 
 # TODO
 
+- re-issue limit orders that are older than 28 days (Bittrex changed max limit trade age to 28 days).
+- do not trade coins newly added to Bittrex. Newly added coins get you into [the soup I got into with Decentraland](https://www.reddit.com/r/surgetraderbot/comments/7cef5j/dailyprofit_056/).
 - automatic withdrawal of profits at 1am
 - call takeprofits immediately after buy https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/
 - throw exception if IsOpen == False but QuantityRemaining > 0
