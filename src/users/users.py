@@ -17,5 +17,6 @@ def inis():
 def read(ini):
     import configparser
     config = configparser.RawConfigParser()
-    config.read("users/" + ini)
+    with open("users/" + ini) as f:
+        config.readfp(f)
     return config

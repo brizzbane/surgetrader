@@ -2,7 +2,6 @@ from invoke import task
 
 
 
-
 def listify_ini(ini):
     if ini:
         inis = [ini]
@@ -11,10 +10,6 @@ def listify_ini(ini):
         inis = users.inis()
 
     return inis
-
-
-
-
 
 
 @task
@@ -57,8 +52,6 @@ def download(_ctx):
     _download.main(random.choice(users.inis()))
 
 
-
-
 @task
 def buy(_ctx, ini=None):
     from lib import buy as _buy
@@ -79,7 +72,7 @@ def takeprofit(_ctx, ini=None):
 
 
 @task
-def clearprofit(_ctx, ini=None):
+def cancelsells(_ctx, ini=None):
     from lib import takeprofit as _takeprofit
 
     inis = listify_ini(ini)
@@ -87,8 +80,8 @@ def clearprofit(_ctx, ini=None):
     for _ in inis:
         print("Processing {}".format(_))
         _takeprofit.clear_profit(_)
-        
-        
+
+
 @task
 def sellall(_ctx, ini):
     from lib import sellall as _sellall
