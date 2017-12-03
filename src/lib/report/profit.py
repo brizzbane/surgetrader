@@ -23,7 +23,7 @@ def open_order(result):
 
     # pprint(result['IsOpen'])
     is_open = result['IsOpen']
-    print("\tOrder is open={}".format(is_open))
+    # print("\tOrder is open={}".format(is_open))
     return is_open
 
 
@@ -52,7 +52,7 @@ def report_profit(user_config_file, exchange, on_date=None):
     import csv
     csv_file = "tmp/" + user_config_file + ".csv"
     csvfile = open(csv_file, 'w', newline='')
-    fieldnames = 'sell_closed sell_opened market units_sold sell_price sell_commission units_bought buy_price buy_commission profit'.split()
+    fieldnames = 'sell_closed buy_opened market units_sold sell_price sell_commission units_bought buy_price buy_commission profit'.split()
     csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     csv_writer.writeheader()
 
@@ -70,11 +70,12 @@ def report_profit(user_config_file, exchange, on_date=None):
         if (not buy.sell_id) or (len(buy.sell_id) < 12):
             #print("No sell id ... skipping")
             continue
+        
+        print("-----------------------------------------------------")
 
 
         so = exchange.get_order(buy.sell_id)['result']
         
-        print("-----------------------------------------------------")
         print("Sell order={}".format(so))
 
         if on_date:
@@ -82,7 +83,7 @@ def report_profit(user_config_file, exchange, on_date=None):
                 so['Closed'] = 'n/a'
             else:
                 _close_date = close_date(so['Closed'])
-                print("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
+                # print("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
 
                 if type(on_date) is list:
                     if _close_date < on_date[0]:
@@ -103,8 +104,7 @@ def report_profit(user_config_file, exchange, on_date=None):
 
         buy_proceeds = bo['Price'] + bo['CommissionPaid']
 
-        print("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(
-            sell_proceeds, bo, buy_proceeds))
+        # print("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
 
         profit = sell_proceeds - buy_proceeds
 
@@ -114,7 +114,7 @@ def report_profit(user_config_file, exchange, on_date=None):
 
         calculations = {
             'sell_closed': so['Closed'],
-            'sell_opened': so['Opened'],
+            'buy_opened': bo['Opened'],
             'market': so['Exchange'],
             'units_sold': so['Quantity'],
             'sell_price': so['PricePerUnit'],
@@ -128,15 +128,16 @@ def report_profit(user_config_file, exchange, on_date=None):
         if open_order(so):
             del(calculations['sell_commission'])
             del(calculations['sell_price'])
-            print("Open order...")
+            calculations['sell_closed'] = 'n/a'
+            print("\tOpen order...")
             best_bid = exchange.get_ticker(so['Exchange'])['result']['Bid']
             difference = calculations['buy_price'] - best_bid
             calculations['best_bid'] = best_bid
             calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
-            
             # print(f"Ticker {ticker}")
             open_orders.append(calculations)
         else:
+            print("\tClosed order...")
             csv_writer.writerow(calculations)
             closed_orders.append(calculations)
 
@@ -165,7 +166,8 @@ def report_profit(user_config_file, exchange, on_date=None):
             if append:
                 field_name += append
 
-            # print("Looking for {} in {}".format(field_name, element))
+            print("Field_value={}. Looking for {} in {}".format(field_value, field_name, element))
+
             element.findmeld(field_name).content(str(field_value))
 
         return profit
@@ -174,8 +176,6 @@ def report_profit(user_config_file, exchange, on_date=None):
     iterator = html_template.findmeld('closed_orders').repeat(closed_orders)
     for element, data in iterator:
         total_profit += render_row(element, data)
-
-
 
     deposit = float(user_config.get('trade', 'deposit'))
     percent_profit = percent(total_profit, deposit)
@@ -189,7 +189,14 @@ def report_profit(user_config_file, exchange, on_date=None):
     else:
         render_row(s, data, append="2")
 
-    iterator = html_template.findmeld('open_orders').repeat(open_orders)
+    print("Open Orders={}".format(open_orders))
+    open_orders_element = html_template.findmeld('open_orders')
+    print("Open Orders Element={}".format(vars(open_orders_element)))
+    for child in open_orders_element.__dict__['_children']:
+        print("\t{}".format(vars(child)))
+
+
+    iterator = open_orders_element.repeat(open_orders)
     for i, (element, data) in enumerate(iterator):
         data["sell_number"] = i+1
         render_row(element, data, append="3")

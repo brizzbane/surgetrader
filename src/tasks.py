@@ -1,7 +1,6 @@
 from invoke import task
 
 
-
 def listify_ini(ini):
     if ini:
         inis = [ini]

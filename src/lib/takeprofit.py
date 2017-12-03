@@ -43,12 +43,14 @@ def __takeprofit(entry, gain):
 
     return profit_target
 
-def _takeprofit(exchange, percent, row):
+def _takeprofit(exchange, percent, order, row):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
 
-    print("b.sell_limit({}, {}, {})".format(row.market, row.amount, profit_target))
-    result = exchange.sell_limit(row.market, row.amount, profit_target)
+    amount_to_sell = order['Quantity'] - 1e-8
+
+    print("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
+    result = exchange.sell_limit(row.market, amount_to_sell, profit_target)
     pprint.pprint(result)
 
     if result['success']:
@@ -72,7 +74,7 @@ def takeprofit(config_file, exchange, percent):
         print("unsold row {}".format(pprint.pformat(order)))
         order = order['result']
         if not order['IsOpen']:
-            _takeprofit(exchange, percent, row)
+            _takeprofit(exchange, percent, order, row)
 
 
 def _clearprofit(exchange, row, order):
@@ -84,8 +86,10 @@ def _clearprofit(exchange, row, order):
 
     if result['success']:
         print("\tSuccess: {}".format(result))
+        row.update_record(selling_price=None, sell_id=None)
+        db.commit()
     else:
-        print("\tFailed: {}".format(result))
+        raise Exception("Order cancel failed: {}".format(result))
         
     # TODO: only update records on Success
     # Why am I updating in all cases. Because of feedback like this from the program:
@@ -93,8 +97,7 @@ def _clearprofit(exchange, row, order):
     #  Failed: {'success': False, 'message': 'ORDER_NOT_OPEN', 'result': None}
     # You read that right: the exchange returned True for IsOpen yet when I tell the exchange to cancel the order it says ORDER_NOT_OPEN
 
-    row.update_record(selling_price=None, sell_id=None)
-    db.commit()
+
         
 
 def clearprofit(config_file, exchange):
