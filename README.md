@@ -32,7 +32,7 @@ be trading. Follow the documentation in `src/users/sample.ini` for directions.
 Over a period of experimentation, I have (as of 10/1/17) found that
 these settings work well:
 
-    Each trade should use 2-5% of the account. Aim for a 2% profit margin.
+    Each trade should use 1-2% of the account. Aim for a 5% profit margin.
 
 You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
 profits, you should only aim for 2% profit.
