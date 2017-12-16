@@ -44,7 +44,7 @@ def report_profit(user_config_file, exchange, on_date=None):
 
     user_config = users.read(user_config_file)
 
-    
+
     html_template = open('lib/report/profit.html', 'r').read()
     html_template = meld3.parse_htmlstring(html_template)
     html_outfile = open("tmp/" + user_config_file + ".html", 'wb')
@@ -70,13 +70,12 @@ def report_profit(user_config_file, exchange, on_date=None):
         if (not buy.sell_id) or (len(buy.sell_id) < 12):
             #print("No sell id ... skipping")
             continue
-        
-        print("-----------------------------------------------------")
+
+        print("-------------------{}----------------------------------".format(buy.order_id))
 
 
         so = exchange.get_order(buy.sell_id)['result']
-        
-        print("Sell order={}".format(so))
+
 
         if on_date:
             if open_order(so):
@@ -108,6 +107,8 @@ def report_profit(user_config_file, exchange, on_date=None):
 
         profit = sell_proceeds - buy_proceeds
 
+        print("Sell order={}".format(so))
+
         if open_order(so):
             p = percent(so['Quantity'] - so['QuantityRemaining'], so['Quantity'])
             so['Quantity'] = "{:d}%".format(int(p))
@@ -130,6 +131,8 @@ def report_profit(user_config_file, exchange, on_date=None):
             del(calculations['sell_price'])
             calculations['sell_closed'] = 'n/a'
             print("\tOpen order...")
+            ticker = exchange.get_ticker(so['Exchange'])
+            print("Ticker {}".format(ticker))
             best_bid = exchange.get_ticker(so['Exchange'])['result']['Bid']
             difference = calculations['buy_price'] - best_bid
             calculations['best_bid'] = best_bid
@@ -137,11 +140,13 @@ def report_profit(user_config_file, exchange, on_date=None):
             # print(f"Ticker {ticker}")
             open_orders.append(calculations)
         else:
-            print("\tClosed order...")
+            print("\tClosed order: {}".format(calculations))
+            if so['PricePerUnit'] is None:
+                raise Exception("Order closed but did not sell")
             csv_writer.writerow(calculations)
             closed_orders.append(calculations)
 
-    
+
     # open_orders.sort(key=lambda r: r['difference'])
 
     html_template.findmeld('acctno').content(user_config_file)
@@ -166,7 +171,7 @@ def report_profit(user_config_file, exchange, on_date=None):
             if append:
                 field_name += append
 
-            print("Field_value={}. Looking for {} in {}".format(field_value, field_name, element))
+            # print("Field_value={}. Looking for {} in {}".format(field_value, field_name, element))
 
             element.findmeld(field_name).content(str(field_value))
 
@@ -237,13 +242,13 @@ def main(ini, english_date, _date=None, email=True):
         subject = "{}'s Profit Report for {}".format(english_date, ini)
         sender = sys_config.get('email', 'sender')
         recipient = user_config.get('client', 'email')
-        emailer.send(subject, 
-                     _txt=None, html=html.getvalue(), 
+        emailer.send(subject,
+                     _txt=None, html=html.getvalue(),
                      sender=sender,
                      recipient=recipient,
                      bcc=sys_config.get('email', 'bcc')
                      )
-        
+
     return total_profit, user_config
 
 
