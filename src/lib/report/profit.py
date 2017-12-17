@@ -5,6 +5,7 @@
 import io
 import logging
 from pprint import pprint, pformat
+import traceback
 
 # 3rd party
 import meld3
@@ -12,6 +13,7 @@ from retry import retry
 
 # local
 from ..db import db
+from .. import emailer
 from .. import mybittrex
 from users import users
 
@@ -71,7 +73,7 @@ def report_profit(user_config_file, exchange, on_date=None):
             #print("No sell id ... skipping")
             continue
 
-        print("-------------------{}----------------------------------".format(buy.order_id))
+        print("-------------------{}--------------".format(buy.order_id))
 
 
         so = exchange.get_order(buy.sell_id)['result']
@@ -227,6 +229,23 @@ def system_config():
     config.read("system.ini")
     return config
 
+
+def notify_admin(msg, user_config, sys_config):
+
+    logging.debug(f"Cancelling all open orders before notifying admin about {error_msg}")
+
+    subject = "SurgeTraderBOT aborted execution on exception"
+    sender = sys_config.get('email', 'sender')
+    recipient = user_config.get('email', 'bcc')
+    emailer.send(subject,
+                 _txt=msg, html=None,
+                 sender=sender,
+                 recipient=recipient,
+                 bcc=None
+                 )
+    
+    
+
 import json
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def main(ini, english_date, _date=None, email=True):
@@ -234,11 +253,18 @@ def main(ini, english_date, _date=None, email=True):
     config_file = ini
 
     user_config = users.read(config_file)
+    sys_config = system_config()
+
     exchange = mybittrex.make_bittrex(user_config)
-    html, total_profit = report_profit(config_file, exchange, _date)
+    try:
+        html, total_profit = report_profit(config_file, exchange, _date)
+    except Exception as e:
+        error_msg = traceback.format_exc()
+        print(f'Aborting: {error_msg}')
+        if email:
+            notify_admin(error_msg, user_config, sys_config)
+
     if email:
-        from .. import emailer
-        sys_config = system_config()
         subject = "{}'s Profit Report for {}".format(english_date, ini)
         sender = sys_config.get('email', 'sender')
         recipient = user_config.get('client', 'email')
