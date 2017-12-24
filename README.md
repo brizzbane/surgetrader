@@ -21,7 +21,9 @@ Here are some other ways to learn about it:
 1. You need Python **3**. I recommend the [Miniconda](https://conda.io/miniconda.html) or [Anaconda](https://www.anaconda.com) Python 3 distribution.
 1. Install python-bittrex from [this
 github](https://github.com/metaperl/python-bittrex) instead of PyPi.
-1. Then using Python3 type:`pip install -r requirements.txt`
+1. `git clone https://gitlab.com/metaperl/surgetrader/`
+1. `cd surgetrader`
+1. `pip install -r requirements.txt`
 
 ## Configuration
 
