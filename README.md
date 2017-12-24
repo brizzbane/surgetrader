@@ -8,7 +8,10 @@ of time (typically an hour). It then buys that coin at market value and sets a p
 
 ## How well has it worked?
 
-I record performance in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/). Here are some other ways to learn about it:
+I record performance in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
+You may ask questions in the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/). 
+
+Here are some other ways to learn about it:
 
 * [AMA Chat on reddit cryptomarkets](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/)
 * [A comment I made](https://www.reddit.com/r/CryptoMarkets/comments/7dxyb4/bitcoin_cash_traders_lose_millions_as_exchange/dq1jeuk/) in response to a panic buy where people list millions - SurgeTraderBot can rightly be seen as a bot that sometimes buys into panic.
@@ -66,6 +69,41 @@ Some people want to set profit targets as soon as they buy instead of doing it e
 You can see the modifications that one individual made
 [here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
 
+## System Hygiene
+
+### Error email: "Order closed but did not sell"
+
+Occasionally you will get an email from SurgeTraderBot with the subject "SurgeTraderBOT aborted execution on exception"
+and in the body of the email you will see something like this:
+
+    Traceback (most recent call last):
+      File "/home/schemelab/prg/surgetrader/src/lib/report/profit.py", line 263, in main
+        html, total_profit = report_profit(config_file, exchange, _date)
+      File "/home/schemelab/prg/surgetrader/src/lib/report/profit.py", line 150, in report_profit
+        raise Exception("Order closed but did not sell: {}".format(so))
+    Exception: Order closed but did not sell: {'AccountId': None, 'OrderUuid': '0a5ef35c-edde-49fe-b569-8a4c7e2f7259', 'Exchange': 'BTC-XAUR',
+
+The reason this happens is that BitTrex delists coins without notice. So what happened is that you bought a coin and before 
+you could sell it, Bittrex delisted it. So...what you must do is delete those records from the database so the error does not occur again. In this
+case the COIN `XAUR` must be removed from our local database:
+
+    schemelab@metta:~/prg/surgetrader/src$ sqlite3 storage.sqlite3
+    SQLite version 3.13.0 2016-05-18 10:57:30
+    Enter ".help" for usage hints.
+    sqlite> SELECT * FROM buy WHERE market='BTC-XAUR';
+    1639|542ceb17-cf28-436d-8291-87f0dd98900c|BTC-XAUR|3.456e-05|3.52512e-05|1446.75925925926|2017-10-19 13:00:30|agnes.ini|3cf637d7-352b-410c-adaf-32cf488964a2
+    1946|36108597-bbb5-49e3-84b3-df5e25b309dd|BTC-XAUR|2.922e-05|2.98044e-05|6844.62696783025|2017-11-09 08:01:04|ini-steadyvest@protonmail.ini|4cd7c755-27f9-4ac0-9752-f25d517c17f0
+    2275|77abdc33-8601-4317-8ef1-ca3f13077ada|BTC-XAUR|1.556e-05|1.6338e-05|1928.0205655527|2017-12-15 23:00:55|ini-steadyvest@protonmail.ini|0a5ef35c-edde-49fe-b569-8a4c7e2f7259
+    sqlite> DELETE FROM  buy WHERE market='BTC-XAUR';
+    sqlite> .exit
+
+It's very important to run the `SELECT` statement, and then type `DELETE ` and copy and paste the text `FROM buy WHERE market='BTC-XAUR';` ...
+the reason this is important is so that you do not issue the wrong `DELETE` statement and wipe your entire database.
+
+Alternatively backup the file `storage.sqlite3` before doing this because if you don't you may regret it and my DISCLAIMER frees me from any
+losses you may incur while using this code!
+
+At that point, you can do what you want with your coin: liquidate it on Bittrex or send it somewhere else.
 
 ## Manual Usage
 

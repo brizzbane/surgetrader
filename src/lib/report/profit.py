@@ -135,16 +135,19 @@ def report_profit(user_config_file, exchange, on_date=None):
             print("\tOpen order...")
             ticker = exchange.get_ticker(so['Exchange'])
             print("Ticker {}".format(ticker))
-            best_bid = exchange.get_ticker(so['Exchange'])['result']['Bid']
-            difference = calculations['buy_price'] - best_bid
-            calculations['best_bid'] = best_bid
-            calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
-            # print(f"Ticker {ticker}")
-            open_orders.append(calculations)
+            if ticker['result']:
+                best_bid = ticker['result']['Bid']
+                difference = calculations['buy_price'] - best_bid
+                calculations['best_bid'] = best_bid
+                calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
+                # print(f"Ticker {ticker}")
+                open_orders.append(calculations)
+            else:
+                raise Exception("Ticker not obtained for {}".format(so))
         else:
             print("\tClosed order: {}".format(calculations))
             if so['PricePerUnit'] is None:
-                raise Exception("Order closed but did not sell")
+                raise Exception("Order closed but did not sell: {}".format(so))
             csv_writer.writerow(calculations)
             closed_orders.append(calculations)
 
@@ -232,13 +235,13 @@ def system_config():
 
 def notify_admin(msg, user_config, sys_config):
 
-    logging.debug(f"Cancelling all open orders before notifying admin about {error_msg}")
+    print(f"Cancelling all open orders before notifying admin about {msg}")
 
     subject = "SurgeTraderBOT aborted execution on exception"
     sender = sys_config.get('email', 'sender')
-    recipient = user_config.get('email', 'bcc')
+    recipient = sys_config.get('email', 'bcc')
     emailer.send(subject,
-                 _txt=msg, html=None,
+                 text=msg, html=None,
                  sender=sender,
                  recipient=recipient,
                  bcc=None
@@ -258,24 +261,25 @@ def main(ini, english_date, _date=None, email=True):
     exchange = mybittrex.make_bittrex(user_config)
     try:
         html, total_profit = report_profit(config_file, exchange, _date)
+        
+        if email:
+            subject = "{}'s Profit Report for {}".format(english_date, ini)
+            sender = sys_config.get('email', 'sender')
+            recipient = user_config.get('client', 'email')
+            emailer.send(subject,
+                         text='hi my name is slim shady', html=html.getvalue(),
+                         sender=sender,
+                         recipient=recipient,
+                         bcc=sys_config.get('email', 'bcc')
+                         )
+    
     except Exception as e:
         error_msg = traceback.format_exc()
         print(f'Aborting: {error_msg}')
         if email:
+            print("Notifying admin via email")
             notify_admin(error_msg, user_config, sys_config)
 
-    if email:
-        subject = "{}'s Profit Report for {}".format(english_date, ini)
-        sender = sys_config.get('email', 'sender')
-        recipient = user_config.get('client', 'email')
-        emailer.send(subject,
-                     _txt=None, html=html.getvalue(),
-                     sender=sender,
-                     recipient=recipient,
-                     bcc=sys_config.get('email', 'bcc')
-                     )
-
-    return total_profit, user_config
 
 
 if __name__ == '__main__':

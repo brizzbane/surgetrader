@@ -1,7 +1,7 @@
 from marrow.mailer import Mailer, Message
 
 
-def send(subject, _txt, html, sender, recipient, cc=None, bcc=None):
+def send(subject, text, html, sender, recipient, cc=None, bcc=None):
 
     mailer = Mailer(
         dict(
@@ -20,7 +20,7 @@ def send(subject, _txt, html, sender, recipient, cc=None, bcc=None):
 
     message.subject = subject
     message.rich = html
-    message.plain = 'txt'
+    message.plain = text
 
     mailer.send(message)
     mailer.stop()
