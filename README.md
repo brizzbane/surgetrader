@@ -58,9 +58,9 @@ surge and buys it:
 
 ### Note
 
-What is `clearprofit`? It is a hack I put in place because Bittrex
+What is `cancelsells`? It is a hack I put in place because Bittrex
 recently decided to close all trades older than 28 days. So what
-`clearprofit` does is cancel sell orders once a week and delete the
+`cancelsells` does is cancel sell orders once a week and delete the
 `sell_id` from the database. Then the takeprofit task will notice
 that a buy trade does not have a sell limit order in place and will
 automatically place a new one.
