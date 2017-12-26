@@ -23,7 +23,8 @@ Here are some other ways to learn about it:
 github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 1. `git clone https://gitlab.com/metaperl/surgetrader/`
 1. `cd surgetrader`
-1. `pip install -r requirements.txt`
+1. `pip3 install -r requirements.txt`
+1 If `pip3` is not available, then you may try calling `pip` instead. But make sure that `pip` is indeed a Python **3** `pip and not a Python 2 one by typing `which pip` and looking at the path of the executable.
 
 ## Configuration
 
