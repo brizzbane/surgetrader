@@ -42,6 +42,33 @@ def percent(a, b):
     return (a/b)*100
 
 
+class ReportError(Exception):
+    """Base class for exceptions in this module."""
+    pass
+
+class GetTickerError(ReportError):
+    """Exception raised for when exchange does not return a result for a ticker (normally due to a network glitch).
+
+    Attributes:
+        expression -- input expression in which the error occurred
+        message -- explanation of the error
+    """
+
+    def __init__(self, market, message):
+        self.market = market
+        self.message = "Unable to obtain ticker for ".format(market)
+
+
+@retry(exceptions=GetTickerError, tries=10, delay=5)
+def obtain_ticker(exchange, order):
+    market = order['Exchange']
+    ticker = exchange.get_ticker(market)
+    if ticker['result']:
+        return ticker
+    else:
+        raise GetTickerError(market)
+
+
 def report_profit(user_config_file, exchange, on_date=None):
 
     user_config = users.read(user_config_file)
@@ -133,17 +160,14 @@ def report_profit(user_config_file, exchange, on_date=None):
             del(calculations['sell_price'])
             calculations['sell_closed'] = 'n/a'
             print("\tOpen order...")
-            ticker = exchange.get_ticker(so['Exchange'])
-            print("Ticker {}".format(ticker))
-            if ticker['result']:
-                best_bid = ticker['result']['Bid']
-                difference = calculations['buy_price'] - best_bid
-                calculations['best_bid'] = best_bid
-                calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
-                # print(f"Ticker {ticker}")
-                open_orders.append(calculations)
-            else:
-                raise Exception("Ticker not obtained for {}".format(so))
+            ticker = obtain_ticker(exchange, so)
+            best_bid = ticker['result']['Bid']
+            difference = calculations['buy_price'] - best_bid
+            calculations['best_bid'] = best_bid
+            calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
+            # print(f"Ticker {ticker}")
+            open_orders.append(calculations)
+
         else:
             print("\tClosed order: {}".format(calculations))
             if so['PricePerUnit'] is None:

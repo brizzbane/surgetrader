@@ -22,6 +22,8 @@ IGNORE_BY_IN = list()
 IGNORE_BY_IN.append('BURST') # https://steemit.com/cryptocurrency/@iceburst/the-death-of-burst-coin
 IGNORE_BY_IN.append('UNO')   # in the processs of being delisted?
 IGNORE_BY_IN.append('START') 
+IGNORE_BY_IN.append('UNB') 
+
 
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
 MAX_ORDERS_PER_MARKET = 3
