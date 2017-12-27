@@ -18,10 +18,14 @@ Here are some other ways to learn about it:
 
 # How do I install this bad boy?
 
-1. You need Python 3
+1. You need Python **3**. I recommend the [Miniconda](https://conda.io/miniconda.html) or [Anaconda](https://www.anaconda.com) Python 3 distribution.
 1. Install python-bittrex from [this
 github](https://github.com/metaperl/python-bittrex) instead of PyPi.
-1. Then using Python3 type:`pip install -r requirements.txt`
+1. `git clone https://gitlab.com/metaperl/surgetrader/`
+1. `cd surgetrader`
+1. `pip3 install -r requirements.txt`
+1. If `pip3` is not available, then you may try calling `pip` instead. But make sure that `pip` is indeed a Python **3** `pip`
+and not a Python 2 one by typing `which pip` and looking at the path of the executable.
 
 ## Configuration
 
@@ -32,10 +36,10 @@ be trading. Follow the documentation in `src/users/sample.ini` for directions.
 
 ### Optimal Settings
 
-Over a period of experimentation, I have (as of 10/1/17) found that
+Over a period of experimentation, I have found that
 these settings work well:
 
-    Each trade should use 1-2% of the account. Aim for a 5% profit margin.
+    Each trade should use 3% of the account. Aim for a 5% profit margin.
 
 You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
 profits, you should only aim for 2% profit.
@@ -56,9 +60,9 @@ surge and buys it:
 
 ### Note
 
-What is `clearprofit`? It is a hack I put in place because Bittrex
+What is `cancelsells`? It is a hack I put in place because Bittrex
 recently decided to close all trades older than 28 days. So what
-`clearprofit` does is cancel sell orders once a week and delete the
+`cancelsells` does is cancel sell orders once a week and delete the
 `sell_id` from the database. Then the takeprofit task will notice
 that a buy trade does not have a sell limit order in place and will
 automatically place a new one.
