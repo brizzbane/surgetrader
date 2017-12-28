@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
 
-import ConfigParser
+import configparser
 import argh
 import collections
 import logging
 import pprint
 from retry import retry
-from db import db
-import mybittrex
+
+from src.lib import mybittrex
+
 from bittrex.bittrex import SELL_ORDERBOOK
 from pprint import pprint
 
@@ -34,17 +35,17 @@ def sellall(b):
     cancelall(b)
     balances = b.get_balances()
     for balance in balances['result']:
-        print "-------------------- {}".format(balance['Currency'])
+        print("-------------------- {}".format(balance['Currency']))
         pprint(balance)
 
         if not balance['Available'] or balance['Currency'] == 'BTC':
-            print "\tno balance or this is BTC"
+            print("\tno balance or this is BTC")
             continue
 
 
         skipcoin = "CRYPT TIT GHC"
         if balance['Currency'] in skipcoin:
-            print "\tthis is a skipcoin"
+            print("\tthis is a skipcoin")
             continue
 
         market = "BTC-" + balance['Currency']
@@ -56,7 +57,7 @@ def sellall(b):
 
         my_ask = ticker['Bid'] - 5e-8
 
-        print "My Ask = {}".format(my_ask)
+        print("My Ask = {}".format(my_ask))
 
         r = b.sell_limit(market, balance['Balance'], my_ask)
         pprint(r)
@@ -65,7 +66,7 @@ def sellall(b):
 def main(ini):
 
     config_file = ini
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read(config_file)
 
     b = mybittrex.make_bittrex(config)

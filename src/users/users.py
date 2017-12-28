@@ -8,8 +8,8 @@
 
 INIS = """
 ini-steadyvest@protonmail.ini
-ini-steadyvest.strategic.ini
 agnes.ini
+ini-steadyvest.strategic.ini
 """
 
 def inis():

@@ -12,8 +12,12 @@ def listify_ini(ini):
 
 
 @task
-def profitreport(_ctx, ini=None, date_string=None):
+def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
     import lib.report.profit
+    
+    
+    print("tasks.SKIP MARKETS={}".format(skip_markets))
+
 
     inis = listify_ini(ini)
 
@@ -36,10 +40,15 @@ def profitreport(_ctx, ini=None, date_string=None):
             raise Exception("Unrecognized date option")
     else:
         _date = None
+        
+    if skip_markets:
+        skip_markets=skip_markets.split()
+
+    print("tasks2.SKIP MARKETS={}".format(skip_markets))
 
     for user_ini in inis:
         print("Processing {}".format(user_ini))
-        lib.report.profit.main(user_ini, date_string, _date)
+        lib.report.profit.main(user_ini, date_string, _date=_date, skip_markets=skip_markets)
 
 
 @task

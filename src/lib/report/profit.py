@@ -54,7 +54,7 @@ class GetTickerError(ReportError):
         message -- explanation of the error
     """
 
-    def __init__(self, market, message):
+    def __init__(self, market):
         self.market = market
         self.message = "Unable to obtain ticker for ".format(market)
 
@@ -69,7 +69,9 @@ def obtain_ticker(exchange, order):
         raise GetTickerError(market)
 
 
-def report_profit(user_config_file, exchange, on_date=None):
+def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
+    
+    print("SKIP MARKETS={}".format(skip_markets))
 
     user_config = users.read(user_config_file)
 
@@ -99,6 +101,18 @@ def report_profit(user_config_file, exchange, on_date=None):
         if (not buy.sell_id) or (len(buy.sell_id) < 12):
             #print("No sell id ... skipping")
             continue
+        
+        if skip_markets:
+            leave = False
+            for _skip_market in skip_markets:
+                # print("Testing {} against {}".format(_skip_market, buy.market))
+                if _skip_market in buy.market:
+                    print("{} is being skipped for this report".format(_skip_market))
+                    leave = True
+                    
+            if leave:
+                continue
+                    
 
         print("-------------------{}--------------".format(buy.order_id))
 
@@ -275,7 +289,10 @@ def notify_admin(msg, user_config, sys_config):
 
 import json
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
-def main(ini, english_date, _date=None, email=True):
+def main(ini, english_date, _date=None, email=True, skip_markets=None):
+    
+    print("profit.main.SKIP MARKETS={}".format(skip_markets))
+
 
     config_file = ini
 
@@ -284,7 +301,7 @@ def main(ini, english_date, _date=None, email=True):
 
     exchange = mybittrex.make_bittrex(user_config)
     try:
-        html, total_profit = report_profit(config_file, exchange, _date)
+        html, total_profit = report_profit(config_file, exchange, _date, skip_markets)
         
         if email:
             subject = "{}'s Profit Report for {}".format(english_date, ini)
