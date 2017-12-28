@@ -87,8 +87,14 @@ and in the body of the email you will see something like this:
         raise Exception("Order closed but did not sell: {}".format(so))
     Exception: Order closed but did not sell: {'AccountId': None, 'OrderUuid': '0a5ef35c-edde-49fe-b569-8a4c7e2f7259', 'Exchange': 'BTC-XAUR',
 
-The reason this happens is that BitTrex delists coins without notice. So what happened is that you bought a coin and before 
-you could sell it, Bittrex delisted it. So...what you must do is delete those records from the database so the error does not occur again. In this
+The reason this happens is that BitTrex delists coins or the coin is undergoing maintenance at the moment. 
+So what happened is that you bought a coin and before 
+you could sell it, Bittrex delisted it or is doing some routine wallet maintenace. 
+
+If the market is delisted, you must delete those records from the database so the error does not occur again. if the market is just under
+maintenance, then you can wait until it returns. 
+
+Let's continue our discussion about deleting trades from the database in the case of a market being delisted. In this
 case the COIN `XAUR` must be removed from our local database:
 
     schemelab@metta:~/prg/surgetrader/src$ sqlite3 storage.sqlite3
