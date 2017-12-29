@@ -75,7 +75,26 @@ You can see the modifications that one individual made
 
 ## System Hygiene
 
-### Error email: "Order closed but did not sell"
+Occasionally, the daily profit report will email you, informing you that the system crashed. The two common reasons for crashing are:
+1. Bittrex is performing temporary maintenance on a coin
+2. Bittrex is delisting a market
+
+You need to go to Bittrex and see why the bot crashed ... or connect with me in [Discord](https://discord.me/cashmoney). If the coin
+is under maintenance, you will see something like [this](http://take.ms/WtFsc) when you visit the market.
+
+### Market Under Maintenance
+
+You may get errors when the profit report runs if a market is under maintenance. If this is the case, then when you invoke the profit report, tell it
+to skip certain markets. Let's say the market "BTC-CRW" is currently under maintenance. Here is how to skip it in the profit report:
+
+    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s CRW
+    
+You can put as many markets there as you like:
+
+    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s "CRW NBT OK"
+
+
+### Market Delisted
 
 Occasionally you will get an email from SurgeTraderBot with the subject "SurgeTraderBOT aborted execution on exception"
 and in the body of the email you will see something like this:
