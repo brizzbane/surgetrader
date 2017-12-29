@@ -50,23 +50,43 @@ class GetTickerError(ReportError):
     """Exception raised for when exchange does not return a result for a ticker (normally due to a network glitch).
 
     Attributes:
-        expression -- input expression in which the error occurred
-        message -- explanation of the error
+        market -- market in which the error occurred
     """
 
     def __init__(self, market):
         self.market = market
         self.message = "Unable to obtain ticker for ".format(market)
+        
+class NullTickerError(ReportError):
+    """Exception raised for when exchange does not return a result for a ticker (normally due to a network glitch).
+
+    Attributes:
+        market -- market in which the error occurred
+    """
+
+    def __init__(self, market):
+        self.market = market
+        self.message = "None price values in ticker for ".format(market)
 
 
 @retry(exceptions=GetTickerError, tries=10, delay=5)
 def obtain_ticker(exchange, order):
     market = order['Exchange']
     ticker = exchange.get_ticker(market)
-    if ticker['result']:
-        return ticker
+    if ticker['success']:
+        if ticker['result']['Bid'] is None:
+            raise NullTickerError(market)
+        else:
+            return ticker
     else:
         raise GetTickerError(market)
+
+
+def numeric(p):
+    if p is None:
+        return 0
+    else:
+        return p
 
 
 def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
@@ -164,7 +184,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
             'sell_price': so['PricePerUnit'],
             'sell_commission': so['CommissionPaid'],
             'units_bought': bo['Quantity'],
-            'buy_price': bo['PricePerUnit'],
+            'buy_price': numeric(bo['PricePerUnit']),
             'buy_commission': bo['CommissionPaid'],
             'profit': profit
         }
@@ -176,6 +196,9 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
             print("\tOpen order...")
             ticker = obtain_ticker(exchange, so)
             best_bid = ticker['result']['Bid']
+            print("ticker = {}".format(ticker))
+            print("difference = {} - {}".format(calculations['buy_price'], best_bid))
+
             difference = calculations['buy_price'] - best_bid
             calculations['best_bid'] = best_bid
             calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
