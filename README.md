@@ -1,5 +1,5 @@
 # surgetrader
-A python bot designed to profit on price surges detected at BitTrex.
+A python **3** bot designed to profit on price surges detected at BitTrex.
 
 ## How does it work?
 
