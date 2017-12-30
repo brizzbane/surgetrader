@@ -160,7 +160,13 @@ But sometimes you get caught out at the top of [a teacup and handle
 formation](http://www.investopedia.com/terms/c/cupandhandle.asp) and it might be 3-4 weeks before a trade closes. [Patience](https://www.reddit.com/r/surgetraderbot/search?q=%23patience&restrict_sr=on)
 my dear friend, [Patience](https://www.reddit.com/r/surgetraderbot/search?q=%23patience&restrict_sr=on).
 
+## Media and Contact
 
+Direct chat with the bot developer is via [his Discord](https://discord.gg/5WPHMwu). 
+Forum chat is available on [the official Reddit forum](https://www.reddit.com/r/surgetraderbot/). Subscribe to get critical updates/news.
+Various orientation posts on SurgeTraderBot:
+* [I'm the author the FOSS crypto trading bot SurgeTrader #AMA](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/).
+* 
 
 
 # TODO
