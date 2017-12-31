@@ -1,5 +1,5 @@
 # surgetrader
-A python bot designed to profit on price surges detected at BitTrex.
+A python **3** bot designed to profit on price surges detected at BitTrex.
 
 ## How does it work?
 
@@ -75,7 +75,26 @@ You can see the modifications that one individual made
 
 ## System Hygiene
 
-### Error email: "Order closed but did not sell"
+Occasionally, the daily profit report will email you, informing you that the system crashed. The two common reasons for crashing are:
+1. Bittrex is performing temporary maintenance on a coin
+2. Bittrex is delisting a market
+
+You need to go to Bittrex and see why the bot crashed ... or connect with me in [Discord](https://discord.me/cashmoney). If the coin
+is under maintenance, you will see something like [this](http://take.ms/WtFsc) when you visit the market.
+
+### Market Under Maintenance
+
+You may get errors when the profit report runs if a market is under maintenance. If this is the case, then when you invoke the profit report, tell it
+to skip certain markets. Let's say the market "BTC-CRW" is currently under maintenance. Here is how to skip it in the profit report:
+
+    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s CRW
+    
+You can put as many markets there as you like:
+
+    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s "CRW NBT OK"
+
+
+### Market Delisted
 
 Occasionally you will get an email from SurgeTraderBot with the subject "SurgeTraderBOT aborted execution on exception"
 and in the body of the email you will see something like this:
@@ -138,47 +157,16 @@ profits in 3 or 4 hours:
 ![](https://api.monosnap.com/rpc/file/download?id=8RKinNxVaGOlJCRMCgIbQY2oZlxKQT)
 
 But sometimes you get caught out at the top of [a teacup and handle
-formation](http://www.investopedia.com/terms/c/cupandhandle.asp) and it might be 3-4 weeks before a trade closes.
+formation](http://www.investopedia.com/terms/c/cupandhandle.asp) and it might be 3-4 weeks before a trade closes. [Patience](https://www.reddit.com/r/surgetraderbot/search?q=%23patience&restrict_sr=on)
+my dear friend, [Patience](https://www.reddit.com/r/surgetraderbot/search?q=%23patience&restrict_sr=on).
 
+## Media and Contact
 
-## The most important rules of SurgeTrader is...
-
-YOUR ACCCOUNT WILL ALWAYS DECREASE IN ESTIMATED VALUE.
-
-That's right. Unlike normal trading (Binary Options, Forex, Stocks,
-etc), your account will be in permanent drawdown. If you deposit 1
-BTC, expect your account value to plummet to 0.5 BTC and even
-lower. Expect all BTC to be gone and the estimated value of the
-account to hover about 0.25 BTC. And then get ready to collect small
-profits every day, only to open another losing trade which will
-eventually yield another small profit.
-
-So let me give you a concrete example. Let's say that you did in fact
-deposit 1 BTC to start. And let's say that you allocate 5% to each
-surge detected every hour. It will only take 19 or 20 hours to drain
-your account of BTC. Now you have 19 trades open. Every trade is
-immediately losing because we buy the coin at a market price and the
-bids will always be lower than that. So now you have 0 BTC and an
-estimated account value of probably 0.9 BTC or so. And then over 24
-hours [most trades lose even more value](http://take.ms/MgmwO) and now
-you are really getting riled up because you do not know about [the
-Emotional Market Cycle](https://www.youtube.com/watch?v=NMpVgvA5k3I)
-so then you sell all your coins for a loss and try to stalk me
-down... hahah.
-
-But no, on average you will find that you will get 1-5 trades closing
-per day. In an ideal world, you would be trading 10% of the account
-for a 10% profit, thereby realizing 1% profit on each trade... in
-other words for 1BTC account if you buy 0.1BTC of a coin and profit
-10% then you profited 0.01 BTC or 1% of your account balance. But
-unfortunately a 10% profit target takes longer to reach. 5% closes
-fast. You could even trade 10% of the account with a 5% profit target,
-but I suggest 5% of the account for a 5% profit target to be safe.
-
-To summarize: as long as you have daily profits to withdraw, you are
-in good shape, because SurgeTrader will take your principle and open
-another surge trade for you, so you have more profits to collect down
-the road.
+Direct chat with the bot developer is via [his Discord](https://discord.gg/5WPHMwu). 
+Forum chat is available on [the official Reddit forum](https://www.reddit.com/r/surgetraderbot/). Subscribe to get critical updates/news.
+Various orientation posts on SurgeTraderBot:
+* [I'm the author the FOSS crypto trading bot SurgeTrader #AMA](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/).
+* 
 
 
 # TODO
@@ -192,13 +180,6 @@ the road.
 - tasks.py profitreport must accept an email flag
 - make the bot run on multiple exchanges: use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
 
-
-## Explain the declining estimated value
-
-- simple pictures of emotional market cycle
-- example of a trade that took 2-3 week to close
-- bitcoin lost from 2013 to 2016
-- emotional market cycle video
 
 # DISCLAIMER
 
