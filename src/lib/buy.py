@@ -21,8 +21,8 @@ LOGGER = logging.getLogger(__name__)
 IGNORE_BY_IN = list()
 IGNORE_BY_IN.append('BURST') # https://steemit.com/cryptocurrency/@iceburst/the-death-of-burst-coin
 IGNORE_BY_IN.append('UNO')   # in the processs of being delisted?
-IGNORE_BY_IN.append('START') 
-IGNORE_BY_IN.append('UNB') 
+IGNORE_BY_IN.append('START')
+IGNORE_BY_IN.append('UNB')
 
 
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
@@ -101,7 +101,7 @@ def analyze_gain(exchange, min_volume):
 
     for name, row in recent.items():
 
-        print(f"Analysing {name}...")
+        print("Analysing {}...".format(name))
 
         leave = False
 
@@ -119,8 +119,8 @@ def analyze_gain(exchange, min_volume):
 
         if leave:
             continue
-        
-        
+
+
         try:
             if min_volume and markets[name]['BaseVolume'] < min_volume:
                 print("\tIgnoring on low volume {0}".format(markets[name]))
@@ -289,7 +289,7 @@ def topcoins(exchange, min_volume, number_of_coins):
     top = [t for t in top if t[1] >= MIN_GAIN]
     # print 'TOP filtered on MIN_GAIN : {}'.format(top)
 
-    
+
     print("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
             MIN_GAIN,
             min_volume,
