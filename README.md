@@ -78,6 +78,7 @@ You can see the modifications that one individual made
 Occasionally, the daily profit report will email you, informing you that the system crashed. The two common reasons for crashing are:
 1. Bittrex is performing temporary maintenance on a coin
 2. Bittrex is delisting a market
+3. An order closed but did not sell. This can happen if you clicked the "X" button on a open sell order so the order closed but did not sell. 
 
 You need to go to Bittrex and see why the bot crashed ... or connect with me in [Discord](https://discord.me/cashmoney). If the coin
 is under maintenance, you will see something like [this](http://take.ms/WtFsc) when you visit the market.
@@ -133,6 +134,23 @@ Alternatively backup the file `storage.sqlite3` before doing this because if you
 losses you may incur while using this code!
 
 At that point, you can do what you want with your coin: liquidate it on Bittrex or send it somewhere else.
+
+### "Order Closed But Did Not Sell"
+
+For whatever reason, a (sell) order that you put up may be closed --- either manually by you or by Bittrex for some odd reason. In this case, you also need to remove the order
+from the database so that the profit report can complete successfully. Here is a transcript of this happening to me and me solving it:
+
+    Traceback (most recent call last):
+      File "/home/schemelab/prg/surgetrader/src/lib/report/profit.py", line 327, in main
+        html, total_profit = report_profit(config_file, exchange, _date, skip_markets)
+      File "/home/schemelab/prg/surgetrader/src/lib/report/profit.py", line 211, in report_profit
+        raise Exception("Order closed but did not sell: {}".format(so))
+    Exception: Order closed but did not sell: {'AccountId': None, 'OrderUuid': 'b44f845b-1485-4d6a-a807-bf4278772648', 'Exchange': 'BTC-1ST', 'Type': 'LIMIT_SELL', 'Quantity': 353.35689044, 'QuantityRemaining': 353.35689044, 'Limit': 2.971e-05, 'Reserved': 353.35689044, 'ReserveRemaining': 353.35689044, 'CommissionReserved': 0.0, 'CommissionReserveRemaining': 0.0, 'CommissionPaid': 0.0, 'Price': 0.0, 'PricePerUnit': None, 'Opened': '2017-12-10T03:05:12.393', 'Closed': '2017-12-13T16:22:53.243', 'IsOpen': False, 'Sentinel': '1b92cdee-7f35-40e0-aa0f-85b678b45858', 'CancelInitiated': False, 'ImmediateOrCancel': False, 'IsConditional': False, 'Condition': 'NONE', 'ConditionTarget': None}
+
+    sqlite> SELECT * FROM buy WHERE sell_id='b44f845b-1485-4d6a-a807-bf4278772648';
+    2132|26c5f0b9-a17f-4211-9933-3f52a0d8e586|BTC-1ST|2.83e-05|2.9715e-05|353.356890459364|2017-12-09 22:03:25|ini-steadyvest@protonmail.ini|b44f845b-1485-4d6a-a807-bf4278772648
+    sqlite> DELETE FROM buy WHERE sell_id='b44f845b-1485-4d6a-a807-bf4278772648';
+
 
 ## Manual Usage
 
