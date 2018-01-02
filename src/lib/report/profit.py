@@ -339,7 +339,7 @@ def main(ini, english_date, _date=None, email=True, skip_markets=None):
     
     except Exception as e:
         error_msg = traceback.format_exc()
-        print(f'Aborting: {error_msg}')
+        print('Aborting: {}'.format(error_msg))
         if email:
             print("Notifying admin via email")
             notify_admin(error_msg, user_config, sys_config)
