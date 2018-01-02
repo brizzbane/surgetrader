@@ -9,7 +9,7 @@ of time (typically an hour). It then buys that coin at market value and sets a p
 ## How well has it worked?
 
 I record performance in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
-You may ask questions in the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/). 
+You may ask questions in the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/).
 
 Here are some other ways to learn about it:
 
@@ -78,7 +78,7 @@ You can see the modifications that one individual made
 Occasionally, the daily profit report will email you, informing you that the system crashed. The two common reasons for crashing are:
 1. Bittrex is performing temporary maintenance on a coin
 2. Bittrex is delisting a market
-3. An order closed but did not sell. This can happen if you clicked the "X" button on a open sell order so the order closed but did not sell. 
+3. An order closed but did not sell. This can happen if you clicked the "X" button on a open sell order so the order closed but did not sell.
 
 You need to go to Bittrex and see why the bot crashed ... or connect with me in [Discord](https://discord.me/cashmoney). If the coin
 is under maintenance, you will see something like [this](http://take.ms/WtFsc) when you visit the market.
@@ -89,7 +89,7 @@ You may get errors when the profit report runs if a market is under maintenance.
 to skip certain markets. Let's say the market "BTC-CRW" is currently under maintenance. Here is how to skip it in the profit report:
 
     cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s CRW
-    
+
 You can put as many markets there as you like:
 
     cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s "CRW NBT OK"
@@ -107,12 +107,12 @@ and in the body of the email you will see something like this:
         raise Exception("Order closed but did not sell: {}".format(so))
     Exception: Order closed but did not sell: {'AccountId': None, 'OrderUuid': '0a5ef35c-edde-49fe-b569-8a4c7e2f7259', 'Exchange': 'BTC-XAUR',
 
-The reason this happens is that BitTrex delists coins or the coin is undergoing maintenance at the moment. 
-So what happened is that you bought a coin and before 
-you could sell it, Bittrex delisted it or is doing some routine wallet maintenace. 
+The reason this happens is that BitTrex delists coins or the coin is undergoing maintenance at the moment.
+So what happened is that you bought a coin and before
+you could sell it, Bittrex delisted it or is doing some routine wallet maintenace.
 
 If the market is delisted, you must delete those records from the database so the error does not occur again. if the market is just under
-maintenance, then you can wait until it returns. 
+maintenance, then you can wait until it returns.
 
 Let's continue our discussion about deleting trades from the database in the case of a market being delisted. In this
 case the COIN `XAUR` must be removed from our local database:
@@ -180,11 +180,11 @@ my dear friend, [Patience](https://www.reddit.com/r/surgetraderbot/search?q=%23p
 
 ## Media and Contact
 
-Direct chat with the bot developer is via [his Discord](https://discord.gg/5WPHMwu). 
+Direct chat with the bot developer is via [his Discord](https://discord.gg/5WPHMwu).
 Forum chat is available on [the official Reddit forum](https://www.reddit.com/r/surgetraderbot/). Subscribe to get critical updates/news.
 Various orientation posts on SurgeTraderBot:
 * [I'm the author the FOSS crypto trading bot SurgeTrader #AMA](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/).
-* 
+*
 
 
 # TODO
@@ -197,6 +197,7 @@ Various orientation posts on SurgeTraderBot:
 - email admin if exception thrown in program
 - tasks.py profitreport must accept an email flag
 - make the bot run on multiple exchanges: use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
+- log program information via logging instead of print statements and save them to disk as well as printing them.
 
 
 # DISCLAIMER

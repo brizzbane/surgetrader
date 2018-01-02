@@ -202,7 +202,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
             difference = calculations['buy_price'] - best_bid
             calculations['best_bid'] = best_bid
             calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
-            # print(f"Ticker {ticker}")
+            # print("Ticker {}".format(ticker))
             open_orders.append(calculations)
 
         else:
@@ -296,7 +296,7 @@ def system_config():
 
 def notify_admin(msg, user_config, sys_config):
 
-    print(f"Cancelling all open orders before notifying admin about {msg}")
+    print("Cancelling all open orders before notifying admin about {}".format(msg))
 
     subject = "SurgeTraderBOT aborted execution on exception"
     sender = sys_config.get('email', 'sender')
