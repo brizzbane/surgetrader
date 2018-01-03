@@ -2,6 +2,7 @@
 
 # core
 import collections
+import json
 import logging
 import pprint
 
@@ -35,7 +36,6 @@ PIPE = " | "
 
 
 
-import json
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def number_of_open_orders_in(exchange, market):
     orders = list()
@@ -102,6 +102,10 @@ def analyze_gain(exchange, min_volume):
     for name, row in recent.items():
 
         print("Analysing {}...".format(name))
+
+        if len(row) != 2:
+            print("\t2 entries for market required. Perhaps this is the first run?")
+            break
 
         leave = False
 
@@ -291,11 +295,9 @@ def topcoins(exchange, min_volume, number_of_coins):
 
 
     print("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
-            MIN_GAIN,
-            min_volume,
-            pprint.pformat(top[:5], indent=4)
-        )
-        )
+        MIN_GAIN,
+        min_volume,
+        pprint.pformat(top[:5], indent=4)))
 
     return top[:number_of_coins]
 

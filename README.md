@@ -73,6 +73,12 @@ Some people want to set profit targets as soon as they buy instead of doing it e
 You can see the modifications that one individual made
 [here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
 
+
+### Test it Out!
+
+Do **NOT** test this out by typing `invoke download`. If you do, you run the risk of prematurely buying a coin - not a big deal.
+But it's better to test it by typing `invoke takeprofit`
+
 ## System Hygiene
 
 Occasionally, the daily profit report will email you, informing you that the system crashed. The two common reasons for crashing are:
