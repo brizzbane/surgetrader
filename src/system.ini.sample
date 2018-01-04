@@ -2,8 +2,13 @@
 # A daily profit report is emailed when one invokes
 # shell> invoke profitreport -d yesterday
 # The sender of the email is configured here
+# In other words, if you are running SurgeTraderBot on a server called
+# bigprofits.com and you login to bigprofits.com as trader, then
+# sender should be trader@bigprofits.com
+
 sender = clientservices@MYDOMAIN.com
 
-# All profit reports can be sent to the sysadmin so he is aware of the
+# All profit reports are sent to the sysadmin so he is aware of the
 # profit of all people using the system
+# In many cases this could be the same email as above
 bcc = profitreports@MYDOMAIN.com
