@@ -204,6 +204,7 @@ Various orientation posts on SurgeTraderBot:
 - tasks.py profitreport must accept an email flag
 - make the bot run on multiple exchanges: use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
 - log program information via logging instead of print statements and save them to disk as well as printing them.
+- use unique names for profit reports written to HTML/CSV
 
 
 # DISCLAIMER
