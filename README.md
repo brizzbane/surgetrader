@@ -168,6 +168,13 @@ All usage of SurgeTrader is controlled by calling `invoke`. A very simple thing 
 
     shell> invoke download
 
+# DEVELOPER DOCS
+
+Developers please read the code documentation. The best place to start is
+[src/tasks.py](https://gitlab.com/metaperl/surgetrader/blob/master/src/tasks.py)
+because all functionality of this application can be accessed that way.
+
+You may also join [the developer Discord channel](https://discord.gg/uYHEsh5).
 
 # User-Level Docs (show me the money)
 
