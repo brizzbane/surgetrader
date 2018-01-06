@@ -3,6 +3,7 @@
 
 # core
 import io
+import json
 import logging
 from pprint import pprint, pformat
 import traceback
@@ -56,7 +57,7 @@ class GetTickerError(ReportError):
     def __init__(self, market):
         self.market = market
         self.message = "Unable to obtain ticker for ".format(market)
-        
+
 class NullTickerError(ReportError):
     """Exception raised for when exchange does not return a result for a ticker (normally due to a network glitch).
 
@@ -67,6 +68,12 @@ class NullTickerError(ReportError):
     def __init__(self, market):
         self.market = market
         self.message = "None price values in ticker for ".format(market)
+
+def numeric(p):
+    if p is None:
+        return 0
+    else:
+        return p
 
 
 @retry(exceptions=GetTickerError, tries=10, delay=5)
@@ -82,15 +89,15 @@ def obtain_ticker(exchange, order):
         raise GetTickerError(market)
 
 
-def numeric(p):
-    if p is None:
-        return 0
-    else:
-        return p
+@retry(exceptions=json.decoder.JSONDecodeError, tries=3, delay=5)
+def obtain_order(exchange, id):
+    order = exchange.get_order(id)
+    # print("Order = {}".format(order))
+    return order['result']
 
 
 def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
-    
+
     print("SKIP MARKETS={}".format(skip_markets))
 
     user_config = users.read(user_config_file)
@@ -121,7 +128,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
         if (not buy.sell_id) or (len(buy.sell_id) < 12):
             #print("No sell id ... skipping")
             continue
-        
+
         if skip_markets:
             leave = False
             for _skip_market in skip_markets:
@@ -129,16 +136,17 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
                 if _skip_market in buy.market:
                     print("{} is being skipped for this report".format(_skip_market))
                     leave = True
-                    
+
             if leave:
                 continue
-                    
+
 
         print("-------------------{}--------------".format(buy.order_id))
 
+        print("\tGet order")
+        so = obtain_order(exchange, buy.sell_id)
 
-        so = exchange.get_order(buy.sell_id)['result']
-
+        print("\tDate check")
 
         if on_date:
             if open_order(so):
@@ -189,6 +197,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
             'profit': profit
         }
 
+        print("\tCalculations")
         if open_order(so):
             del(calculations['sell_commission'])
             del(calculations['sell_price'])
@@ -307,13 +316,13 @@ def notify_admin(msg, user_config, sys_config):
                  recipient=recipient,
                  bcc=None
                  )
-    
-    
+
+
 
 import json
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def main(ini, english_date, _date=None, email=True, skip_markets=None):
-    
+
     print("profit.main.SKIP MARKETS={}".format(skip_markets))
 
 
@@ -325,7 +334,7 @@ def main(ini, english_date, _date=None, email=True, skip_markets=None):
     exchange = mybittrex.make_bittrex(user_config)
     try:
         html, total_profit = report_profit(config_file, exchange, _date, skip_markets)
-        
+
         if email:
             subject = "{}'s Profit Report for {}".format(english_date, ini)
             sender = sys_config.get('email', 'sender')
@@ -336,7 +345,7 @@ def main(ini, english_date, _date=None, email=True, skip_markets=None):
                          recipient=recipient,
                          bcc=sys_config.get('email', 'bcc')
                          )
-    
+
     except Exception as e:
         error_msg = traceback.format_exc()
         print('Aborting: {}'.format(error_msg))

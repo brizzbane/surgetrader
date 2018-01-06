@@ -97,6 +97,21 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
 
 @task
 def download(_ctx):
+    """Download the current price data for all markets on Bittrex.
+
+    Call getmarketsummaries via `the Bittrex API`_ and place the JSON
+    file in src/tmp.
+
+    Args:
+        None other than the PyInvoke context object.
+
+    Returns:
+        Nothing.
+
+    .. _the Bittrex API:
+        https://bittrex.com/Home/Api
+
+    """
     import random
     from users import users
     from lib import download as _download
@@ -106,6 +121,15 @@ def download(_ctx):
 
 @task
 def buy(_ctx, ini=None):
+    """Analyze market data (obtained via `invoke download`) and buy coins.
+
+    Buy compares last hour's market data with this hour and find the coin(s)
+    that have shown the most growth in an hour. It filters out certain coins
+    based on certain criteria. And then buy the top N coin(s).
+
+    Returns:
+        Nothing.
+    """
     from lib import buy as _buy
 
     inis = listify_ini(ini)
@@ -114,6 +138,11 @@ def buy(_ctx, ini=None):
 
 @task
 def takeprofit(_ctx, ini=None):
+    """Issue SELL LIMIT orders on the coin(s) that have been bought.
+
+    Every 5 minutes this task runs to see if any new coins have been bought.
+    If so, it then sets a profit target for them.
+    """
     from lib import takeprofit as _takeprofit
 
     inis = listify_ini(ini)
@@ -125,6 +154,13 @@ def takeprofit(_ctx, ini=None):
 
 @task
 def cancelsells(_ctx, ini=None):
+    """Cancel sell orders so that `invoke takeprofit` can re-issue them.
+
+    Bittrex implemented a policy where a SELL LIMIT order can only be active
+    for 28 days. After that, they close the order. The purpose of this code is
+    to cancel and re-issue the order so that it remains active as long as
+    necessary to close for a profit.
+    """
     from lib import takeprofit as _takeprofit
 
     inis = listify_ini(ini)
@@ -136,6 +172,14 @@ def cancelsells(_ctx, ini=None):
 
 @task
 def sellall(_ctx, ini):
+    """Sell all coins in wallet.
+
+    Occasionally you may need to liquidate all non-BTC coins in your wallet.
+    For instance, if you want to restart SurgeTrader. This task does that.
+
+    Args:
+        ini (str): the ini file that connects to the account to liquidate.
+    """
     from lib import sellall as _sellall
 
     _sellall.main(ini)
