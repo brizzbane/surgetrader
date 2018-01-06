@@ -1,9 +1,5 @@
 """Perform purchases of coins based on technical analysis.
 
-This module demonstrates documentation as specified by the `Google Python
-Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-with a section header and a colon followed by a block of indented text.
-
 Example:
 
         shell> invoke buy
@@ -33,8 +29,10 @@ from . import mybittrex
 
 
 LOGGER = logging.getLogger(__name__)
+"""TODO: move print statements to logging"""
 
 IGNORE_BY_IN = list()
+"""TODO: move this list of coins to the system.ini file so users can customize"""
 IGNORE_BY_IN.append('BURST') # https://steemit.com/cryptocurrency/@iceburst/the-death-of-burst-coin
 IGNORE_BY_IN.append('UNO')   # in the processs of being delisted?
 IGNORE_BY_IN.append('START')
@@ -42,151 +40,79 @@ IGNORE_BY_IN.append('UNB')
 
 
 IGNORE_BY_FIND = 'ETH- USDT-'.split()
+"""We do not trade the markets based on ETH or USDT."""
 MAX_ORDERS_PER_MARKET = 3
+"""The maximum number of purchases of a coin we will have open sell orders for
+is 3. Sometimes a coin will surge on the hour, but drop on the day or week.
+And then surge again on the hour, while dropping on the longer time charts.
+We do not want to suicide our account by continually chasing a coin with this
+chart pattern. MANA did this for a long time before recovering. But we dont
+need that much risk."""
 MIN_PRICE = 0.00000125
-MIN_VOLUME = 12 # Must have at least 12 BTC in transactions over last 24 hours
-MIN_GAIN = 5 # need a 2 percent gain or it's not a surge!
-PIPE = " | "
-
-
+"""The coin must cost 100 sats or more because any percentage markup for a
+cheaper coin will not lead to a change in price."""
+MIN_VOLUME = 12
+"Must have at least 12 BTC in transactions over last 24 hours"
+MIN_GAIN = 5
+"1-hour gain must be 5% or more"
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def number_of_open_orders_in(exchange, market):
+    """Maximum number of unclosed SELL LIMIT orders for a coin.
+
+    SurgeTrader detects hourly surges. On occasion the hourly surge is part
+    of a longer downtrend, leading SurgeTrader to buy on surges that do not
+    close. We do not want to keep buying false surges so we limit ourselves to
+    3 open orders on any one coin.
+
+    Args:
+        exchange (int): The exchange object.
+        market (str): The coin.
+
+    Returns:
+        int: The number of open orders for a particular coin.
+
+    """
     orders = list()
     open_orders_list = exchange.get_open_orders(market)['result']
     if open_orders_list:
-        # pprint.pprint(oo)
         for order in open_orders_list:
             if order['Exchange'] == market:
                 orders.append(order)
-        return len(orders)
 
-    return 0
-
-
-def record_gain(gain):
-    # pprint.pprint(gain)
-
-    for i, _gain in enumerate(gain, start=1):
-        print("{0}: {1}".format(i, pprint.pformat(_gain)))
-        db.picks.insert(
-            market=_gain[0],
-            old_price=_gain[2],
-            new_price=_gain[3],
-            gain=_gain[1]
-        )
-        if i > 10:
-            break
-
-    db.commit()
+    return len(orders)
 
 
 def percent_gain(new, old):
+    """The percentage increase from old to new.
+
+    Returns:
+        float: percentage increase [0.0,100.0]
+    """
     gain = (new - old) / old
     gain *= 100
     return gain
 
 
-@supycache(cache_key='result')
-def analyze_gain(exchange, min_volume):
 
-    recent = collections.defaultdict(list)
+def obtain_btc_balance(exchange):
+    """Get BTC balance.
 
-    markets = exchange.get_market_summaries(by_market=True)
-
-    def should_skip(name):
-        for ignorable in IGNORE_BY_IN:
-            if ignorable in name:
-                print("\tIgnoring {} because {} is in({}).".format(
-                    name, ignorable, IGNORE_BY_IN))
-                return True
-
-        for ignore_string in IGNORE_BY_FIND:
-            if name.find(ignore_string) > -1:
-                print('\tIgnore by find: ' + name)
-                return True
-
-        return False
-
-    # pprint.pprint(markets)
-
-    # list 'recent'
-
-    # having_query = db.market.
-    for row in db().select(db.market.ALL, groupby=db.market.name):
-        for market_row in db(db.market.name == row.name).select(
-                db.market.ALL,
-                orderby=~db.market.timestamp,
-                limitby=(0, 2)
-        ):
-            recent[market_row.name].append(market_row)
-
-    print("Number of markets = {0}".format(len(list(recent.keys()))))
-    # pprint.pprint(recent)
-
-    gain = list()
-
-    for name, row in recent.items():
-
-        print("Analysing {}...".format(name))
-
-        if len(row) != 2:
-            print("\t2 entries for market required. Perhaps this is the first run?")
-            break
-
-        leave = False
-
-        leave = should_skip(name)
-
-        if leave:
-            continue
-
-
-        try:
-            if min_volume and markets[name]['BaseVolume'] < min_volume:
-                print("\tIgnoring on low volume {0}".format(markets[name]))
-                continue
-        except KeyError:
-            print("\tKeyError locating {}".format(name))
-            continue
-
-
-
-        if number_of_open_orders_in(exchange, name) >= MAX_ORDERS_PER_MARKET:
-            print('\tMax open orders: ' + name)
-            continue
-
-        if row[0].ask < MIN_PRICE:
-    # take the 2 most recent pricings for each market and store in the
-            print(
-                '\tCoin costs less than {}: {}'.format(MIN_PRICE, name))
-            continue
-
-        gain.append(
-            (
-                name,
-                percent_gain(row[0].ask, row[1].ask),
-                row[1].ask,
-                row[0].ask,
-                'https://bittrex.com/Market/Index?MarketName={0}'.format(name),
-            )
-        )
-
-    # record_gain(gain)
-
-    gain = sorted(gain, key=lambda r: r[1], reverse=True)
-    return gain
-
-
-def report_btc_balance(exchange):
+    Returns:
+        dict: The account's balance of BTC.
+    """
     bal = exchange.get_balance('BTC')
-    # pprint.pprint(bal)
     return bal['result']
 
 
 def available_btc(exchange):
-    bal = report_btc_balance(exchange)
+    """Get BTC balance.
+
+    Returns:
+        float: The account's balance of BTC.
+    """
+    bal = obtain_btc_balance(exchange)
     avail = bal['Available']
     print("\tAvailable btc={0}".format(avail))
     return avail
@@ -305,8 +231,86 @@ def buycoin(config_file, config, exchange, top_coins):
         _buycoin(config_file, config, exchange, market[0], avail)
 
 
-def topcoins(exchange, min_volume, number_of_coins):
-    top = analyze_gain(exchange, min_volume)
+@supycache(cache_key='result')
+def analyze_gain(exchange):
+
+    def should_skip(name):
+        for ignorable in IGNORE_BY_IN:
+            if ignorable in name:
+                print("\tIgnoring {} because {} is in({}).".format(
+                    name, ignorable, IGNORE_BY_IN))
+                return True
+
+        for ignore_string in IGNORE_BY_FIND:
+            if name.find(ignore_string) > -1:
+                print('\tIgnore by find: ' + name)
+                return True
+
+        return False
+
+    def get_recent_market_data():
+        retval = collections.defaultdict(list)
+
+        for row in db().select(db.market.ALL, groupby=db.market.name):
+            for market_row in db(db.market.name == row.name).select(
+                    db.market.ALL,
+                    orderby=~db.market.timestamp,
+                    limitby=(0, 2)
+            ):
+                retval[market_row.name].append(market_row)
+
+        return retval
+
+    markets = exchange.get_market_summaries(by_market=True)
+    recent = get_recent_market_data()
+
+    print("Number of markets = {0}".format(len(list(recent.keys()))))
+
+    gain = list()
+
+    for name, row in recent.items():
+
+        print("Analysing {}...".format(name))
+
+        if len(row) != 2:
+            print("\t2 entries for market required. Perhaps this is the first run?")
+            continue
+
+        if should_skip(name):
+            continue
+
+        try:
+            if markets[name]['BaseVolume'] < MIN_VOLUME:
+                print("\t{} 24hr vol < {}".format(markets[name], MIN_VOLUME))
+                continue
+        except KeyError:
+            print("\tKeyError locating {}".format(name))
+            continue
+
+        if number_of_open_orders_in(exchange, name) >= MAX_ORDERS_PER_MARKET:
+            print('\tToo many open orders: ' + name)
+            continue
+
+        if row[0].ask < MIN_PRICE:
+            print('\t{} costs less than {}.'.format(name, MIN_PRICE))
+            continue
+
+        gain.append(
+            (
+                name,
+                percent_gain(row[0].ask, row[1].ask),
+                row[1].ask,
+                row[0].ask,
+                'https://bittrex.com/Market/Index?MarketName={0}'.format(name),
+            )
+        )
+
+    gain = sorted(gain, key=lambda r: r[1], reverse=True)
+    return gain
+
+
+def topcoins(exchange, number_of_coins):
+    top = analyze_gain(exchange)
 
     # print 'TOP: {}.. now filtering'.format(top[:10])
     top = [t for t in top if t[1] >= MIN_GAIN]
@@ -315,7 +319,7 @@ def topcoins(exchange, min_volume, number_of_coins):
 
     print("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
         MIN_GAIN,
-        min_volume,
+        MIN_VOLUME,
         pprint.pformat(top[:5], indent=4)))
 
     return top[:number_of_coins]
@@ -327,10 +331,8 @@ def process(config_file):
 
     exchange = mybittrex.make_bittrex(config)
 
-    # min_volume = config_min_volume(config)
-
     amount_to_buy = config_top(config)
-    top_coins = topcoins(exchange, MIN_VOLUME, amount_to_buy)
+    top_coins = topcoins(exchange, amount_to_buy)
 
     print("Buying coins for: {}".format(config_file))
     buycoin(config_file, config, exchange, top_coins)
