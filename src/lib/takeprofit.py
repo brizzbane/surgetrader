@@ -47,7 +47,8 @@ def _takeprofit(exchange, percent, order, row):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
 
-    amount_to_sell = order['Quantity'] - 1e-8
+    #amount_to_sell = order['Quantity'] - 1e-8
+    amount_to_sell = order['Quantity']
 
     print("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
     result = exchange.sell_limit(row.market, amount_to_sell, profit_target)
@@ -90,7 +91,7 @@ def _clearprofit(exchange, row, order):
         db.commit()
     else:
         raise Exception("Order cancel failed: {}".format(result))
-        
+
     # TODO: only update records on Success
     # Why am I updating in all cases. Because of feedback like this from the program:
     # Clearing Profit for {} with order data = {} <Row {'id': 1885, 'order_id': '07f42744-6a05-4686-9649-7fc50bdb209f', 'config_file': 'ini-steadyvest@protonmail.ini', 'market': 'BTC-BCY', 'purchase_price': 5.4e-05, 'selling_price': 5.508e-05, 'sell_id': 'b8f2e141-5e1b-4e16-a40d-a5363676c965', 'amount': 1666.6666666666667, 'timestamp': datetime.datetime(2017, 11, 5, 16, 0, 27)}> {'AccountId': None, 'OrderUuid': 'b8f2e141-5e1b-4e16-a40d-a5363676c965', 'Exchange': 'BTC-BCY', 'Type': 'LIMIT_SELL', 'Quantity': 1666.66666666, 'QuantityRemaining': 1666.66666666, 'Limit': 5.508e-05, 'Reserved': 1666.66666666, 'ReserveRemaining': 1666.66666666, 'CommissionReserved': 0.0, 'CommissionReserveRemaining': 0.0, 'CommissionPaid': 0.0, 'Price': 0.0, 'PricePerUnit': None, 'Opened': '2017-11-05T21:05:02.7', 'Closed': None, 'IsOpen': True, 'Sentinel': 'fc4f3b40-5d92-4376-8a27-d82d16df573f', 'CancelInitiated': False, 'ImmediateOrCancel': False, 'IsConditional': False, 'Condition': 'NONE', 'ConditionTarget': None}
@@ -98,7 +99,7 @@ def _clearprofit(exchange, row, order):
     # You read that right: the exchange returned True for IsOpen yet when I tell the exchange to cancel the order it says ORDER_NOT_OPEN
 
 
-        
+
 
 def clearprofit(config_file, exchange):
 
@@ -116,7 +117,7 @@ def prep(config_file):
     config = users.read(config_file)
     exchange = mybittrex.make_bittrex(config)
     return config, exchange
-    
+
 def take_profit(config_file):
 
     config, exchange = prep(config_file)
@@ -125,7 +126,7 @@ def take_profit(config_file):
     print("Setting profit targets for {}".format(config_file))
 
     takeprofit(config_file, exchange, percent)
-    
+
 def clear_profit(config_file):
     config, exchange= prep(config_file)
     clearprofit(config_file, exchange)

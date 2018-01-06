@@ -1,7 +1,38 @@
+"""Define a collection of tasks invokable from the command-line/cron.
+
+This module leverages `PyInvoke`_ to create tasks relevant ot the execution
+of SurgeTrader.
+
+Example:
+
+
+        $ invoke download
+
+Todo:
+    * For module TODOs
+    * You have to also use ``sphinx.ext.todo`` extension
+
+.. _PyInvoke:
+   http://www.pyinvoke.org/
+"""
+
 from invoke import task
 
 
 def listify_ini(ini):
+    """Coerce the ini argument to a list of 1+ ini-file names.
+
+    When provided with a value V, return a list consisting solely of V.
+    When no value is provided, return a list consisting of the ini files of
+    all active users:
+
+    Args:
+        ini (str): The name of an ini file or a falsy value.
+
+    Returns:
+        A list of 1+ ini-file names
+
+    """
     if ini:
         inis = [ini]
     else:
@@ -13,9 +44,22 @@ def listify_ini(ini):
 
 @task
 def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
+    """Generate and email a profit report for a certain time frame.
+
+    Args:
+        ini (str): The name of an ini file or a falsy value.
+        date_string : "yesterday" and "lastmonth" are valid values
+        skip_markets: Coins to exclude from calculating the profit report.
+            This is used when a market is under maintenance becauase at that
+            point the exchange API does not return data for that coin.
+
+    Returns:
+        Nothing. It dumps a csv and html of the email profit report in src/tmp.
+
+    """
     import lib.report.profit
-    
-    
+
+
     print("tasks.SKIP MARKETS={}".format(skip_markets))
 
 
@@ -30,19 +74,19 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
             date_string = "Last month"
             from dateutil.relativedelta import relativedelta
             today = date.today()
-            d = today - relativedelta(months=1)
-            startOfLastMonth = date(d.year, d.month, 1)
-            endOfLastMonth = date(today.year, today.month, 1) - relativedelta(days=1)
+            diff = today - relativedelta(months=1)
+            start_of_last_month = date(diff.year, diff.month, 1)
+            end_of_last_month = date(today.year, today.month, 1) - relativedelta(days=1)
             print("Date range for profit report. Start={}. End={}".format(
-                    startOfLastMonth, endOfLastMonth))
-            _date = [startOfLastMonth, endOfLastMonth]
+                start_of_last_month, end_of_last_month))
+            _date = [start_of_last_month, end_of_last_month]
         else:
             raise Exception("Unrecognized date option")
     else:
         _date = None
-        
+
     if skip_markets:
-        skip_markets=skip_markets.split()
+        skip_markets = skip_markets.split()
 
     print("tasks2.SKIP MARKETS={}".format(skip_markets))
 

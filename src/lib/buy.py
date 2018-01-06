@@ -1,4 +1,19 @@
-#!/usr/bin/env python
+"""Perform purchases of coins based on technical analysis.
+
+This module demonstrates documentation as specified by the `Google Python
+Style Guide`_. Docstrings may extend over multiple lines. Sections are created
+with a section header and a colon followed by a block of indented text.
+
+Example:
+
+        shell> invoke buy
+
+`src/tasks.py` has a buy task that will call main of this module.
+
+Todo:
+    * This module is perfect. Are you kidding me?
+
+"""
 
 # core
 import collections
@@ -80,9 +95,22 @@ def analyze_gain(exchange, min_volume):
 
     markets = exchange.get_market_summaries(by_market=True)
 
+    def should_skip(name):
+        for ignorable in IGNORE_BY_IN:
+            if ignorable in name:
+                print("\tIgnoring {} because {} is in({}).".format(
+                    name, ignorable, IGNORE_BY_IN))
+                return True
+
+        for ignore_string in IGNORE_BY_FIND:
+            if name.find(ignore_string) > -1:
+                print('\tIgnore by find: ' + name)
+                return True
+
+        return False
+
     # pprint.pprint(markets)
 
-    # take the 2 most recent pricings for each market and store in the
     # list 'recent'
 
     # having_query = db.market.
@@ -109,17 +137,7 @@ def analyze_gain(exchange, min_volume):
 
         leave = False
 
-        for ignorable in IGNORE_BY_IN:
-            if ignorable in name:
-                print("\tIgnoring {} because {} is in({}).".format(
-                    name, ignorable, IGNORE_BY_IN))
-                leave = True
-                break
-
-        for ignore_string in IGNORE_BY_FIND:
-            if name.find(ignore_string) > -1:
-                print('\tIgnore by find: ' + name)
-                leave = True
+        leave = should_skip(name)
 
         if leave:
             continue
@@ -140,6 +158,7 @@ def analyze_gain(exchange, min_volume):
             continue
 
         if row[0].ask < MIN_PRICE:
+    # take the 2 most recent pricings for each market and store in the
             print(
                 '\tCoin costs less than {}: {}'.format(MIN_PRICE, name))
             continue
