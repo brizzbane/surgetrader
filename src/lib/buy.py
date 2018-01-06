@@ -233,7 +233,24 @@ def buycoin(config_file, config, exchange, top_coins):
 
 @supycache(cache_key='result')
 def analyze_gain(exchange):
+    """Find the increase in coin price.
 
+    The market database table stores the current ask price of all coins.
+    Every hour `invoke download` creates another row in this table. Then when
+    `invoke buy` gets to the analyze_gain function, analyze_gain pulls the 2
+    most recent rows from market and subtracts the ask prices to determine the
+    1-hour price gain.
+
+    Returns:
+        list : A list of 5-tuples of this form
+           (
+                name,  # the market name, e.g. "BTC-NEO"
+                percent_gain(row[0].ask, row[1].ask), # 1-hour price gain
+                row[1].ask, # price this hour
+                row[0].ask, # prince 1 hour ago
+                'https://bittrex.com/Market/Index?MarketName={0}'.format(name),
+            )
+    """
     def should_skip(name):
         for ignorable in IGNORE_BY_IN:
             if ignorable in name:
@@ -264,7 +281,7 @@ def analyze_gain(exchange):
     markets = exchange.get_market_summaries(by_market=True)
     recent = get_recent_market_data()
 
-    print("Number of markets = {0}".format(len(list(recent.keys()))))
+    print("<ANALYZE_GAIN numberofmarkets{0}>".format(len(list(recent.keys()))))
 
     gain = list()
 
@@ -304,6 +321,8 @@ def analyze_gain(exchange):
                 'https://bittrex.com/Market/Index?MarketName={0}'.format(name),
             )
         )
+
+    print("</ANALYZE_GAIN>")
 
     gain = sorted(gain, key=lambda r: r[1], reverse=True)
     return gain
