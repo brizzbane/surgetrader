@@ -126,7 +126,7 @@ def record_buy(config_file, order_id, mkt, rate, amount):
 
 
 def rate_for(exchange, mkt, btc):
-    "Return the rate that works for a particular amount of BTC."
+    "Return the rate that allows you to spend a particular amount of BTC."
 
     coin_amount = 0
     btc_spent = 0
