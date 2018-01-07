@@ -54,7 +54,7 @@ surge and buys it:
 
     00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download ; $INVOKE buy
     */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
-    @weekly      cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
+    @daily       cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
     11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
     22   0 1 * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
 
@@ -91,14 +91,16 @@ is under maintenance, you will see something like [this](http://take.ms/WtFsc) w
 
 ### Market Under Maintenance
 
-You may get errors when the profit report runs if a market is under maintenance. If this is the case, then when you invoke the profit report, tell it
-to skip certain markets. Let's say the market "BTC-CRW" is currently under maintenance. Here is how to skip it in the profit report:
+You may get errors when the profit report runs if a market is under maintenance. For example on January 7, 2018 the market `BTC-SHIFT` was
+undergoing automated maintence [as this screenshot shows](http://take.ms/Dz9Rb). So, when I rain the daily profit report, I got [this execution
+log and error](https://gist.github.com/metaperl/5bc3e5bbebf9aa9c88073511b887b6cb). If this is the case, then when you invoke the profit report,
+tell it to skip certain markets (or wait until maintenance is through). Here is how to skip `BTC-SHIFT` in the profit report:
 
-    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s CRW
+    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s SHIFT
 
 You can put as many markets there as you like:
 
-    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s "CRW NBT OK"
+    cd ~/prg/surgetrader/src/ ; invoke profitreport -d yesterday -s "SHIFT CRW NBT OK"
 
 
 ### Market Delisted

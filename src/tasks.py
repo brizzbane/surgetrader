@@ -26,6 +26,8 @@ Todo:
    http://www.pyinvoke.org/
 """
 
+import random
+
 from invoke import task
 
 
@@ -68,7 +70,6 @@ def download(_ctx):
         https://bittrex.com/Home/Api
 
     """
-    import random
     from users import users
     from lib import download as _download
 
@@ -178,6 +179,20 @@ def cancelsells(_ctx, ini=None):
         print("Processing {}".format(_))
         _takeprofit.clear_profit(_)
 
+@task
+def cancelsellid(_ctx, id):
+    """Cancel a sell order in the rdbms table.
+
+    If for some reason `invoke cancelsells` misses re-issuing an open transaction,
+    then you can cancel a specific transaction by providing the `buy.sell_id`
+    column value in the rdbms table buy.
+    """
+    import lib.takeprofit
+    from users import users
+
+    _, exchange = lib.takeprofit.prep(random.choice(users.inis()))
+
+    lib.takeprofit.clear_order_id(exchange, id)
 
 @task
 def sellall(_ctx, ini):

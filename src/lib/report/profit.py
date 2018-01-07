@@ -80,7 +80,11 @@ def numeric(p):
 def obtain_ticker(exchange, order):
     market = order['Exchange']
     ticker = exchange.get_ticker(market)
+    if ticker['result'] is None:
+        print("Got no result from get_ticker")
+        raise GetTickerError(market)
     if ticker['success']:
+        print("...success in ticker: {}".format(ticker))
         if ticker['result']['Bid'] is None:
             raise NullTickerError(market)
         else:
@@ -146,7 +150,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
         print("\tGet order")
         so = obtain_order(exchange, buy.sell_id)
 
-        print("\tDate check")
+        print("\tDate checking {} against {}".format(on_date, so['Closed']))
 
         if on_date:
             if open_order(so):
@@ -305,7 +309,7 @@ def system_config():
 
 def notify_admin(msg, user_config, sys_config):
 
-    print("Cancelling all open orders before notifying admin about {}".format(msg))
+    print("Notifying admin about {}".format(msg))
 
     subject = "SurgeTraderBOT aborted execution on exception"
     sender = sys_config.get('email', 'sender')
