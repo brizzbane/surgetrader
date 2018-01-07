@@ -9,7 +9,8 @@ of time (typically an hour). It then buys that coin at market value and sets a p
 ## How well has it worked?
 
 I record performance in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
-You may ask questions in the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/).
+You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/) 
+or [our Discord channel](https://discord.gg/5WPHMwu).
 
 Here are some other ways to learn about it:
 
@@ -42,7 +43,7 @@ these settings work well:
     Each trade should use 3% of the account. Aim for a 5% profit margin.
 
 You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
-profits, you should only aim for 2% profit.
+profits, you should only aim for 5% profit.
 
 ## Cron
 
