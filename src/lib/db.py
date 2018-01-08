@@ -1,5 +1,15 @@
-from pydal import DAL, Field
+"""Define the relational database schema.
+
+Todo:
+    * `db`, `market` and `buy` are invalid constant names. However capitalizing
+    them requires a lot of corrections throughout the code.
+"""
+
+# Core
 from datetime import datetime
+
+# 3rd Party
+from pydal import DAL, Field
 
 db = DAL('sqlite://storage.sqlite3')
 
@@ -25,25 +35,3 @@ buy = db.define_table(
     Field('timestamp', type='datetime', default=datetime.now)
     )
 db.executesql('CREATE INDEX IF NOT EXISTS sidx ON buy (selling_price);')
-
-def recent_buys():
-    import inis
-
-    number_of_same_buys = len(inis.INI)
-
-    # 168 hours in a week. Dont buy the same coin for a week
-    recency = 168
-
-    relevant_records = recency * number_of_same_buys
-
-    recents = db().select(
-        db.buy.ALL,
-        orderby=~db.buy.timestamp,
-        limitby=(0, number_of_same_buys)
-        )
-
-    market_names = [r.market for r in recents]
-
-    print("recent buys: {}".format(market_names))
-
-    return market_names

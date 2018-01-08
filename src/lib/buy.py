@@ -95,7 +95,6 @@ def percent_gain(new, old):
     return gain
 
 
-
 def obtain_btc_balance(exchange):
     """Get BTC balance.
 
@@ -119,6 +118,13 @@ def available_btc(exchange):
 
 
 def record_buy(config_file, order_id, mkt, rate, amount):
+    """Store the details of a coin purchase.
+
+    Create a new record in the `buy` table.
+
+    Returns:
+        Nothing
+    """
     db.buy.insert(
         config_file=config_file,
         order_id=order_id, market=mkt, purchase_price=rate, amount=amount)
@@ -137,17 +143,23 @@ def rate_for(exchange, mkt, btc):
             coin_amount = btc / order['Rate']
             return order['Rate'], coin_amount
 
+
 def config_top(config):
+    "Return the `top` config param from the trade section of a user config file."
     _ = config.get('trade', 'top')
     return int(_)
 
 
 def config_preserve(config):
+    "Return the `preserve` param from the trade section of a user config file."
+
     _ = config.get('trade', 'preserve')
     return float(_)
 
 
 def config_min_volume(config):
+    "Return `volume_min` from the trade section of a user config file."
+
     _ = config.get('trade', 'volume_min')
     return float(_)
 
@@ -156,7 +168,16 @@ def percent2ratio(percentage):
     return percentage / 100.0
 
 
-def config_trade_size(config):
+def calculate_trade_size(config):
+    """How much BTC to allocate to a trade.
+
+    Given the seed deposit and the percentage of the seed to allocate to each
+    trade.
+
+    Returns:
+        float : the amount of BTC to spend on trade.
+    """
+
     holdings = float(config.get('trade', 'deposit'))
     trade_ratio = percent2ratio(float(config.get('trade', 'trade')))
 
@@ -178,7 +199,7 @@ def get_trade_size(config, btc):
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
-    trade_size = config_trade_size(config)
+    trade_size = calculate_trade_size(config)
     print("\tTrade size   ={}".format(trade_size))
     if btc >= trade_size:
         return trade_size
