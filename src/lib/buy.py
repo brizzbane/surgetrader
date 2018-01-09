@@ -19,9 +19,9 @@ import pprint
 
 # 3rd party
 import argh
-from bittrex.bittrex import SELL_ORDERBOOK
 from retry import retry
 from supycache import supycache
+from bittrex.bittrex import SELL_ORDERBOOK
 
 # local
 from .db import db
@@ -142,6 +142,7 @@ def rate_for(exchange, mkt, btc):
         if btc_spent > 1.2* btc:
             coin_amount = btc / order['Rate']
             return order['Rate'], coin_amount
+    return 0
 
 
 def config_top(config):
@@ -165,6 +166,12 @@ def config_min_volume(config):
 
 
 def percent2ratio(percentage):
+    """Convert a percentage to a float.
+
+    Example:
+        if percentage == 5, then return 5/100.0:
+
+    """
     return percentage / 100.0
 
 
@@ -184,12 +191,8 @@ def calculate_trade_size(config):
     return holdings * trade_ratio
 
 
-def config_trade_fallback(config):
-    _ = config.get('trade', 'fallback')
-    return float(_) / 100.0
-
-
 def get_trade_size(config, btc):
+    "Determine how much BTC to spend on a buy."
 
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
@@ -206,17 +209,6 @@ def get_trade_size(config, btc):
 
     # Otherwise do not trade
     return 0
-
-
-def profitable_rate(entry, gain):
-
-    x_percent = gain / 100.0
-    take_profit = entry * x_percent + entry
-
-    print(("On an entry of {0:.8f}, TP={1:.8f} for a {2} percent gain".format(
-        entry, take_profit, gain)))
-
-    return take_profit
 
 
 def _buycoin(config_file, config, exchange, mkt, btc):
@@ -273,6 +265,12 @@ def analyze_gain(exchange):
             )
     """
     def should_skip(name):
+        """Decide if a coin should be part of surge analysis.
+
+        IGNORE_BY_IN filters out coins that I do not trust.
+        IGNORE_BY_FIND filters out markets that are not BTC-based.
+          E.g: ETH and USDT markets.
+        """
         for ignorable in IGNORE_BY_IN:
             if ignorable in name:
                 print("\tIgnoring {} because {} is in({}).".format(
@@ -287,6 +285,13 @@ def analyze_gain(exchange):
         return False
 
     def get_recent_market_data():
+        """Get price data for the 2 time points.
+
+        SurgeTrader detects changes in coin price. To do so, it subtracts the
+        price of the coin at one point in time versus another point in time.
+        This function gets the price data for 2 points in time so the difference
+        can be calculated.
+        """
         retval = collections.defaultdict(list)
 
         for row in db().select(db.market.ALL, groupby=db.market.name):
@@ -350,6 +355,21 @@ def analyze_gain(exchange):
 
 
 def topcoins(exchange, number_of_coins):
+    """Find the coins with the greatest change in price.
+
+    Calculate the gain of all BTC-based markets. A market is where
+    one coin is exchanged for another, e.g: BTC-XRP.
+
+    Markets must meet certain criteria:
+        * 24-hr volume of MIN_VOLUME
+        * price gain of MIN_GAIN
+        * BTC-based market only
+        * Not filtered out because of should_skip()
+        * Cost is 125 satoshis or more
+
+    Returns:
+        list : the markets which are surging.
+    """
     top = analyze_gain(exchange)
 
     # print 'TOP: {}.. now filtering'.format(top[:10])
@@ -366,6 +386,7 @@ def topcoins(exchange, number_of_coins):
 
 
 def process(config_file):
+    """Buy coins for every configured user of the bot."""
     from users import users
     config = users.read(config_file)
 
@@ -379,6 +400,7 @@ def process(config_file):
 
 
 def main(inis):
+    """Buy coins for every configured user of the bot."""
 
     for config_file in inis:
         process(config_file)
