@@ -58,7 +58,7 @@ MIN_GAIN = 5
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
-def number_of_open_orders_in(exchange, market):
+def number_of_open_orders_in(openorders, market):
     """Maximum number of unclosed SELL LIMIT orders for a coin.
 
     SurgeTrader detects hourly surges. On occasion the hourly surge is part
@@ -75,7 +75,7 @@ def number_of_open_orders_in(exchange, market):
 
     """
     orders = list()
-    open_orders_list = exchange.get_open_orders(market)['result']
+    open_orders_list = openorders['result']
     if open_orders_list:
         for order in open_orders_list:
             if order['Exchange'] == market:
@@ -307,6 +307,8 @@ def analyze_gain(exchange):
     markets = exchange.get_market_summaries(by_market=True)
     recent = get_recent_market_data()
 
+    openorders = exchange.get_open_orders();
+
     print("<ANALYZE_GAIN numberofmarkets{0}>".format(len(list(recent.keys()))))
 
     gain = list()
@@ -330,7 +332,7 @@ def analyze_gain(exchange):
             print("\tKeyError locating {}".format(name))
             continue
 
-        if number_of_open_orders_in(exchange, name) >= MAX_ORDERS_PER_MARKET:
+        if number_of_open_orders_in(openorders, name) >= MAX_ORDERS_PER_MARKET:
             print('\tToo many open orders: ' + name)
             continue
 
@@ -391,6 +393,8 @@ def process(config_file):
     config = users.read(config_file)
 
     exchange = mybittrex.make_bittrex(config)
+
+
 
     amount_to_buy = config_top(config)
     top_coins = topcoins(exchange, amount_to_buy)
