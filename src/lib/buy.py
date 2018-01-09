@@ -309,7 +309,7 @@ def analyze_gain(exchange):
 
     openorders = exchange.get_open_orders();
 
-    print("<ANALYZE_GAIN numberofmarkets{0}>".format(len(list(recent.keys()))))
+    print("<ANALYZE_GAIN numberofmarkets={0}>".format(len(list(recent.keys()))))
 
     gain = list()
 
