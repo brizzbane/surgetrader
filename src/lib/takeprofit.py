@@ -76,7 +76,8 @@ def takeprofit(config_file, exchange, percent):
         if not order['IsOpen']:
             _takeprofit(exchange, percent, order, row)
         else:
-            print("Order is not open. Not setting profit target")
+            print("""Buy has not been filled. Cannot sell for profit until it does.
+                  You may want to manually cancel this buy order.""")
 
 
 def _clearprofit(exchange, row, order):
