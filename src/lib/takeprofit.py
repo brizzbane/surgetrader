@@ -7,7 +7,6 @@ import logging
 import pprint
 
 # pypi
-import argh
 
 # local
 from . import mybittrex
@@ -76,6 +75,8 @@ def takeprofit(config_file, exchange, percent):
         order = order['result']
         if not order['IsOpen']:
             _takeprofit(exchange, percent, order, row)
+        else:
+            print("Order is not open. Not setting profit target")
 
 
 def _clearprofit(exchange, row, order):
@@ -130,8 +131,5 @@ def take_profit(config_file):
     takeprofit(config_file, exchange, percent)
 
 def clear_profit(config_file):
-    config, exchange= prep(config_file)
+    _, exchange = prep(config_file)
     clearprofit(config_file, exchange)
-
-if __name__ == '__main__':
-    argh.dispatch_command(main)
