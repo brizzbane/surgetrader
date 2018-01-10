@@ -221,3 +221,8 @@ Various orientation posts on SurgeTraderBot:
 
 The author of this software is in no way responsible for any type of loss incurred
 by those who chose to download and use it.
+
+# Other free bots
+
+* [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
+* 
