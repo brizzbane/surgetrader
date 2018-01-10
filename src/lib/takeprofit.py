@@ -82,7 +82,7 @@ def _clearprofit(exchange, row, order):
 
     print("Clearing Profit for {} with order data = {}".format(row, order))
 
-    result = exchange.cancel(row['order_id'])
+    result = exchange.cancel(row['sell_id'])
     print("\tResult of clearing profit: {}".format(pprint.pformat(result)))
 
     if result['success']:
@@ -95,6 +95,7 @@ def _clearprofit(exchange, row, order):
 def clearorder(exchange, row):
     order = exchange.get_order(row['sell_id'])
     order = order['result']
+    print("Order to clear {}".format(order))
     if order['IsOpen']:
         _clearprofit(exchange, row, order)
 

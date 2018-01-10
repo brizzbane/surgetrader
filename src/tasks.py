@@ -207,3 +207,17 @@ def sellall(_ctx, ini):
     from lib import sellall as _sellall
 
     _sellall.main(ini)
+
+@task
+def openorders(_ctx, ini):
+    """List the open orders for a particular user..
+
+
+    """
+    import lib.takeprofit
+
+    _, exchange = lib.takeprofit.prep(ini)
+
+    openorders = exchange.get_open_orders();
+    for order in openorders['result']:
+        print(order)
