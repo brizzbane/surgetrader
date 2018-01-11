@@ -9,7 +9,7 @@ of time (typically an hour). It then buys that coin at market value and sets a p
 ## How well has it worked?
 
 I record performance in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
-You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/) 
+You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/)
 or [our Discord channel](https://discord.gg/5WPHMwu).
 
 Here are some other ways to learn about it:
@@ -215,6 +215,8 @@ Various orientation posts on SurgeTraderBot:
 - make the bot run on multiple exchanges: use Bitex and dependency injection instead of my homegrown python-bittrex to interact with Bittrex.
 - log program information via logging instead of print statements and save them to disk as well as printing them.
 - use unique names for profit reports written to HTML/CSV
+- if takeprofit.py notices an unfilled buy that is older than 30 minutes, then it should
+cancel the buy and delete the database entry
 
 
 # DISCLAIMER
@@ -225,4 +227,4 @@ by those who chose to download and use it.
 # Other free bots
 
 * [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
-* 
+*

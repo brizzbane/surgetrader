@@ -31,7 +31,7 @@ import random
 from invoke import task
 
 
-def listify_ini(ini):
+def listify_ini(ini, randomize=False):
     """Coerce the ini argument to a list of 1+ ini-file names.
 
     When provided with a value V, return a list consisting solely of V.
@@ -50,6 +50,8 @@ def listify_ini(ini):
     else:
         from users import users
         inis = users.inis()
+        if randomize:
+            inis = random.shuffle(inis)
 
     return inis
 
@@ -89,7 +91,7 @@ def buy(_ctx, ini=None):
     """
     from lib import buy as _buy
 
-    inis = listify_ini(ini)
+    inis = listify_ini(ini, random=True)
     _buy.main(inis)
 
 

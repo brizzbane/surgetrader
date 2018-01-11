@@ -42,7 +42,7 @@ def sellall(b):
             continue
 
 
-        skipcoin = "CRYPT TIT GHC UNO"
+        skipcoin = "CRYPT TIT GHC UNO DAR"
         if balance['Currency'] in skipcoin:
             print("\tthis is a skipcoin")
             continue

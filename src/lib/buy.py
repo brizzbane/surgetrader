@@ -139,7 +139,7 @@ def rate_for(exchange, mkt, btc):
     orders = exchange.get_orderbook(mkt, SELL_ORDERBOOK)
     for order in orders['result']:
         btc_spent += order['Rate'] * order['Quantity']
-        if btc_spent > 1.2* btc:
+        if btc_spent > 1.4* btc:
             coin_amount = btc / order['Rate']
             return order['Rate'], coin_amount
     return 0
