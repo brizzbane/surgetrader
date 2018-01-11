@@ -51,7 +51,7 @@ def listify_ini(ini, randomize=False):
         from users import users
         inis = users.inis()
         if randomize:
-            inis = random.shuffle(inis)
+            random.shuffle(inis)
 
     return inis
 
