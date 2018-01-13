@@ -26,7 +26,7 @@ try:
         JSONDecodeError = ValueError
 except ImportError:
     import json
-JSONDecodeError = ValueError
+    JSONDecodeError = ValueError
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
