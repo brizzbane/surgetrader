@@ -91,7 +91,7 @@ def buy(_ctx, ini=None):
     """
     from lib import buy as _buy
 
-    inis = listify_ini(ini, randomize=True)
+    inis = listify_ini(ini, randomize=False)
     _buy.main(inis)
 
 

@@ -17,7 +17,18 @@ from . import mybittrex
 
 logger = logging.getLogger(__name__)
 
-import json
+try:
+    import simplejson as json
+    try:
+        JSONDecodeError = json.JSONDecodeError
+    except AttributeError:
+        # simplejson < 2.1.0 does not have the JSONDecodeError exception class
+        JSONDecodeError = ValueError
+except ImportError:
+    import json
+JSONDecodeError = ValueError
+
+
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def main(ini):
 
