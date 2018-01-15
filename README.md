@@ -52,7 +52,7 @@ surge and buys it:
 
     INVOKE=/home/schemelab/install/miniconda3/bin/invoke
 
-    00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download ; $INVOKE buy
+    00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download buy takeprofit
     */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
     @daily       cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
     11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
