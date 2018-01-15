@@ -244,7 +244,8 @@ Also because the panicky sell-offs that occur upon news of delisting, you probab
 ### Markets under maintenance
 
 If a market is under maintenance and you skipped it in your profit report by using `invoke profitreport -d yesterday --skip=$delistedMarket` then
-that actually could add to your base capital without you knowing it.
+that actually could add to your base capital without you knowing it. In fact, I started a particular account with 1.0BTC and it is now worth 1.65BTC and that is including
+30 lost trades.
 
 ## Compounding
 
