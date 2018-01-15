@@ -32,7 +32,7 @@ and not a Python 2 one by typing `which pip` and looking at the path of the exec
 
 1. At the shell, copy `src/system.ini.sample` to `src/system.ini` and configure the file as documented.
 1. Change to the `src/users` directory. Copy `src/users/sample.ini` to a new name of your choosing, e.g. myaccount.ini.
-1. Update the variable `inis` in the file `src/system.ini` with the name of this new ini file.
+1. In the file `src/system.ini`, update the variable `inis` in the `[users]` section with the name of this new ini file. 
 
 ### Optimal Settings
 
