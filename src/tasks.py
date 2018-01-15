@@ -30,6 +30,9 @@ import random
 
 from invoke import task
 
+import lib.config
+
+SYS_INI = lib.config.System()
 
 def listify_ini(ini, randomize=False):
     """Coerce the ini argument to a list of 1+ ini-file names.
@@ -48,8 +51,7 @@ def listify_ini(ini, randomize=False):
     if ini:
         inis = [ini]
     else:
-        from users import users
-        inis = users.inis()
+        inis = SYS_INI.users_inis
         if randomize:
             random.shuffle(inis)
 
@@ -72,10 +74,9 @@ def download(_ctx):
         https://bittrex.com/Home/Api
 
     """
-    from users import users
     from lib import download as _download
 
-    _download.main(random.choice(users.inis()))
+    _download.main(random.choice(SYS_INI.users_inis))
 
 
 @task
@@ -190,9 +191,9 @@ def cancelsellid(_ctx, id):
     column value in the rdbms table buy.
     """
     import lib.takeprofit
-    from users import users
+    import lib.config
 
-    _, exchange = lib.takeprofit.prep(random.choice(users.inis()))
+    _, exchange = lib.takeprofit.prep(lib.config.any_users_ini())
 
     lib.takeprofit.clear_order_id(exchange, id)
 

@@ -26,20 +26,17 @@ from bittrex.bittrex import SELL_ORDERBOOK
 # local
 from .db import db
 from . import mybittrex
-
+import lib.config
 
 LOGGER = logging.getLogger(__name__)
 """TODO: move print statements to logging"""
 
-IGNORE_BY_IN = list()
-"""TODO: move this list of coins to the system.ini file so users can customize"""
-IGNORE_BY_IN.append('BURST') # https://steemit.com/cryptocurrency/@iceburst/the-death-of-burst-coin
-IGNORE_BY_IN.append('UNO')   # in the processs of being delisted?
-IGNORE_BY_IN.append('START')
-IGNORE_BY_IN.append('UNB')
 
+SYS_INI = lib.config.System()
 
-IGNORE_BY_FIND = 'ETH- USDT-'.split()
+IGNORE_BY_IN = SYS_INI.ignore_markets_by_in
+IGNORE_BY_FIND = SYS_INI.ignore_markets_by_find
+
 """We do not trade the markets based on ETH or USDT."""
 MAX_ORDERS_PER_MARKET = 3
 """The maximum number of purchases of a coin we will have open sell orders for

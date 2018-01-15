@@ -5,10 +5,28 @@
 # In other words, if you are running SurgeTraderBot on a server called
 # bigprofits.com and you login to bigprofits.com as trader, then
 # sender should be trader@bigprofits.com
-
 sender = clientservices@MYDOMAIN.com
 
 # All profit reports are sent to the sysadmin so he is aware of the
 # profit of all people using the system
 # In many cases this could be the same email as above
 bcc = profitreports@MYDOMAIN.com
+
+
+[users]
+
+# SurgeTraderBot is capable of trading for multiple users.
+# Each user has an ini file in the src/users directory
+# We list them all here, space-separated
+inis = my.ini myfriend.ini myfatpocketclient.ini
+
+[ignore]
+
+# We only trade the BTC-based markets. Not the ETH or USDT ones
+market = ETH USDT
+
+# Certain markets we stay from because of various reasons:
+# - we know it is about to be delisted
+# - we know the coin is headed to the graveyard
+# - we dont like the fundamentals
+coin = BURST UNO START UNB
