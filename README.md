@@ -248,7 +248,8 @@ that actually could add to your base capital without you knowing it. In fact, I 
 30 severely losing trades, some nearing 30 days of age and over 50% in drawdown - [Screenshot of account  value](http://take.ms/L5ibH)
 
 When you notice that your estimated total account value is more than your initial capital deposit, you can liquidate all of your positions to BTC by typing:
-    shell> invoke sellall users/$myaccount.ini
+
+    shell> cd surgetrader/src ; invoke sellall users/$myaccount.ini
     
     
 
