@@ -217,6 +217,34 @@ Various orientation posts on SurgeTraderBot:
 - if takeprofit.py notices an unfilled buy that is older than 30 minutes, then it should
 cancel the buy and delete the database entry
 
+# Advanced Usage
+
+## Getting Free of Fee Parasitism 
+
+After 2-3 months of usage of SurgeTraderBot, you will notice that transaction fees and withdrawal fees have eaten into your base capital. This means you are actually 
+trading with less capital than you started, because of these fees. Here are a few suggestions to deal with this:
+
+* Only withdraw the first 2 decimal places of profit. E.g. if you earned 0.12345678 BTC of profit, only withdraw 0.1 - the rest you leave in their *should* cover the
+withdrawal fees and transaction fees for your buy/sell.
+* Use 2 accounts and only withdraw from 1 account on each day. I use 2 accounts with the same percent traded on each trade and the same takeprofit target. However, just for
+kicks, on one account I trade the top 3 surging coins and on the other I trade the top 1 surging coin. And each day I just see which is the two accounts made more money and
+withdraw it. 
+
+## Compounding
+
+Compounding is a funny topic that I cannot get entirely into. I would say that my usage of two accounts represents a form of compounding because each account is growing in
+the capital available for trading. Another thing you must understand about compounding is best understood after looking at this picture:
+![Alt text](https://monosnap.com/file/SIKh30k0EuMoHdEQIMcKY7mjDkpwb6.png)
+
+What you are seeing is the current loss associated with open trades on a 1BTC account with 3% allocated to each trade. I.e., each trade represents about 0.03 BTC of loss.
+Now, when this trade closes SurgeTrader will immediately open another trade using 0.03BTC while you are free to withdraw the profit.
+Now, let's say that you instead "compound" your earnings so that you are trading 3% of a 2BTC account - if you do that, then each trade will require **0.06** BTC instead of
+0.03. So now, when any of these trades close, a new trade is **not** opened. In fact it requires 2 old trades to close before there is enough BTC for a new trade at the 
+new size. This could lead to serious account stagnation.
+
+I think a better way to compound is to use 2 accounts and I describe above. Do not change the base capital parameter, simply let each account open more and more trades:
+because you are only withdrwawing from 1 account each day, the other account accumulates extra BTC, which over time will lead to more trades opening and more trades profiting.
+
 
 # DISCLAIMER
 
@@ -226,4 +254,4 @@ by those who chose to download and use it.
 # Other free bots
 
 * [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
-*
+* [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading)
