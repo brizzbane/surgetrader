@@ -247,6 +247,11 @@ If a market is under maintenance and you skipped it in your profit report by usi
 that actually could add to your base capital without you knowing it. In fact, I started a particular account with 1.0BTC and it is now worth 1.65BTC and that is including
 30 severely losing trades, some nearing 30 days of age and over 50% in drawdown - [Screenshot of account  value](http://take.ms/L5ibH)
 
+When you notice that your estimated total account value is more than your initial capital deposit, you can liquidate all of your positions to BTC by typing:
+    shell> invoke sellall users/$myaccount.ini
+    
+    
+
 ## Compounding
 
 Compounding is a funny topic that I cannot get entirely into. I would say that my usage of two accounts represents a form of compounding because each account is growing in
