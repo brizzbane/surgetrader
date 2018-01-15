@@ -3,11 +3,14 @@
 *~
 
 *.sqlite3
-inis.py
 system.ini
+
+.spyproject
+profitreport.out
 
 *.key
 src/users/*.ini
+src/tmp
 secrets.json
 markets.json
 *.table
