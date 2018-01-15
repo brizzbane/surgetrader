@@ -219,7 +219,9 @@ cancel the buy and delete the database entry
 
 # Advanced Usage
 
-## Getting Free of Fee Parasitism 
+## Help! My Base Capital Is Slowly Decreasing! 
+
+### Trade and Withdrawal Fees
 
 After 2-3 months of usage of SurgeTraderBot, you will notice that transaction fees and withdrawal fees have eaten into your base capital. This means you are actually 
 trading with less capital than you started, because of these fees. Here are a few suggestions to deal with this:
@@ -229,6 +231,13 @@ withdrawal fees and transaction fees for your buy/sell.
 * Use 2 accounts and only withdraw from 1 account on each day. I use 2 accounts with the same percent traded on each trade and the same takeprofit target. However, just for
 kicks, on one account I trade the top 3 surging coins and on the other I trade the top 1 surging coin. And each day I just see which is the two accounts made more money and
 withdraw it. 
+
+### Handling delisted and markets under maintenance
+
+If you transfer out coins you bought that are delisted, that means you spent BTC for the coins but did not get BTC back when you transferred the coin elsewhere.
+Also because the panicky sell-offs that occur upon news of delisting, you probably lost some BTC when this occurred.
+If a market is under maintenance and you skipped it in your profit report by using `invoke profitreport -d yesterday --skip=$delistedMarket` then
+that actually could add to your base capital without you knowing it.
 
 ## Compounding
 
