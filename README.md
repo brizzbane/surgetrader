@@ -232,10 +232,17 @@ withdrawal fees and transaction fees for your buy/sell.
 kicks, on one account I trade the top 3 surging coins and on the other I trade the top 1 surging coin. And each day I just see which is the two accounts made more money and
 withdraw it. 
 
-### Handling delisted and markets under maintenance
+### Delisted markets
 
 If you transfer out coins you bought that are delisted, that means you spent BTC for the coins but did not get BTC back when you transferred the coin elsewhere.
-Also because the panicky sell-offs that occur upon news of delisting, you probably lost some BTC when this occurred.
+Also because the panicky sell-offs that occur upon news of delisting, you probably lost some BTC when this occurred. So when a market is being delisted here is what I suggest:
+* transfer the coin out of the exchange
+* set a break-even profit target somewhere else
+* look through the open transactions to see what your loss was on purchasing the coin
+* send that much BTC into this trading account to equalize things.
+
+### Markets under maintenance
+
 If a market is under maintenance and you skipped it in your profit report by using `invoke profitreport -d yesterday --skip=$delistedMarket` then
 that actually could add to your base capital without you knowing it.
 
