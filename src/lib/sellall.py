@@ -25,8 +25,11 @@ def cancelall(b):
 
     for order in orders['result']:
         pprint(order)
-        r = b.cancel(order['OrderUuid'])
+        sell_id = order['OrderUuid']
+        r = b.cancel(sell_id)
         pprint(r)
+        db(db.buy.sell_id == sell_id).delete()
+        db.commit()
 
 
 
@@ -41,8 +44,7 @@ def sellall(b):
             print("\tno balance or this is BTC")
             continue
 
-
-        skipcoin = "CRYPT TIT GHC UNO DAR"
+        skipcoin = "CRYPT TIT GHC UNO DAR ARDR DGD MTL SNGLS SWIFT TIME TKN XAUR"
         if balance['Currency'] in skipcoin:
             print("\tthis is a skipcoin")
             continue
@@ -54,7 +56,7 @@ def sellall(b):
         ticker = b.get_ticker(market)['result']
         pprint(ticker)
 
-        my_ask = ticker['Bid'] - 5e-8
+        my_ask = ticker['Bid'] - 1e-8
 
         print(("My Ask = {}".format(my_ask)))
 

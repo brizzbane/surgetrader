@@ -35,22 +35,28 @@ LOGGER = logging.getLogger(__name__)
 SYS_INI = lib.config.System()
 
 IGNORE_BY_IN = SYS_INI.ignore_markets_by_in
-IGNORE_BY_FIND = SYS_INI.ignore_markets_by_find
+"Coins we wish to avoid"
 
-"""We do not trade the markets based on ETH or USDT."""
-MAX_ORDERS_PER_MARKET = 3
+IGNORE_BY_FIND = SYS_INI.ignore_markets_by_find
+"We do not trade ETH or USDT based markets"
+
+
+MAX_ORDERS_PER_MARKET = SYS_INI.max_open_trades_per_market
 """The maximum number of purchases of a coin we will have open sell orders for
 is 3. Sometimes a coin will surge on the hour, but drop on the day or week.
 And then surge again on the hour, while dropping on the longer time charts.
 We do not want to suicide our account by continually chasing a coin with this
 chart pattern. MANA did this for a long time before recovering. But we dont
 need that much risk."""
-MIN_PRICE = 0.00000125
+
+MIN_PRICE = SYS_INI.min_price
 """The coin must cost 100 sats or more because any percentage markup for a
 cheaper coin will not lead to a change in price."""
-MIN_VOLUME = 12
-"Must have at least 12 BTC in transactions over last 24 hours"
-MIN_GAIN = 5
+
+MIN_VOLUME = SYS_INI.min_volume
+"Must have at least a certain amount of BTC in transactions over last 24 hours"
+
+MIN_GAIN = SYS_INI.min_gain
 "1-hour gain must be 5% or more"
 
 
@@ -208,6 +214,24 @@ def get_trade_size(config, btc):
     return 0
 
 
+def fee_adjust(btc, exchange):
+    """The amount of BTC that can be spent on coins sans fees.
+
+    For instance if you want to spend 0.03BTC per trade, but the exchange charges 0.25% per trade,
+    then you can spend 0.03 -  0.03 * 0.0025 instead of 0.03
+    """
+
+    exchange_fee = 0.25 # 0.25% on Bittrex
+    print("Adjusting {} trade size to respect {}% exchange fee on {}".format(
+            btc, exchange_fee, exchange))
+
+    exchange_fee /= 100.0
+
+    adjusted_spend = btc - btc * exchange_fee
+    return adjusted_spend
+
+
+
 def _buycoin(config_file, config, exchange, mkt, btc):
     "Buy into market using BTC. Current allocately 2% of BTC to each trade."
 
@@ -216,6 +240,8 @@ def _buycoin(config_file, config, exchange, mkt, btc):
     if not size:
         print("No trade size. Returning.")
         return
+    else:
+        size = fee_adjust(size, exchange)
 
     print("I will trade {0} BTC.".format(size))
 
@@ -396,6 +422,7 @@ def process(config_file):
     amount_to_buy = config_top(config)
     top_coins = topcoins(exchange, amount_to_buy)
 
+    print("------------------------------------------------------------")
     print("Buying coins for: {}".format(config_file))
     buycoin(config_file, config, exchange, top_coins)
 

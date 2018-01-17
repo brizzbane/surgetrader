@@ -224,3 +224,33 @@ def openorders(_ctx, ini):
     openorders = exchange.get_open_orders();
     for order in openorders['result']:
         print(order)
+
+@task
+def orderhistory(_ctx, ini, mkt):
+    """List the order history of a user for a market, e.g: BTC-NLG.
+
+
+    """
+    import lib.takeprofit
+
+    _, exchange = lib.takeprofit.prep(ini)
+
+    records = exchange.get_order_history(mkt);
+    for record in records['result']:
+        print(record)
+
+
+@task
+def getorder(_ctx, ini, uuid):
+    """Get  order details
+
+
+    """
+    import lib.takeprofit
+
+    _, exchange = lib.takeprofit.prep(ini)
+
+    _ = exchange.get_order(uuid);
+    print(_)
+
+

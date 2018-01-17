@@ -83,8 +83,8 @@ def obtain_ticker(exchange, order):
     if ticker['result'] is None:
         print("Got no result from get_ticker")
         raise GetTickerError(market)
+
     if ticker['success']:
-        print("...success in ticker: {}".format(ticker))
         if ticker['result']['Bid'] is None:
             raise NullTickerError(market)
         else:
@@ -182,7 +182,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
 
         profit = sell_proceeds - buy_proceeds
 
-        print("Sell order={}".format(so))
+        print("For buy order id ={}, Sell order={}".format(buy.order_id, so))
 
         if open_order(so):
             p = percent(so['Quantity'] - so['QuantityRemaining'], so['Quantity'])
@@ -221,7 +221,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
         else:
             print("\tClosed order: {}".format(calculations))
             if so['PricePerUnit'] is None:
-                raise Exception("Order closed but did not sell: {}".format(so))
+                raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so,bo))
             csv_writer.writerow(calculations)
             closed_orders.append(calculations)
 

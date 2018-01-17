@@ -42,12 +42,13 @@ def __takeprofit(entry, gain):
 
     return profit_target
 
-def _takeprofit(exchange, percent, order, row):
+def _takeprofit(exchange, percent, row):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
 
     #amount_to_sell = order['Quantity'] - 1e-8
-    amount_to_sell = order['Quantity']
+    #amount_to_sell = order['Quantity']
+    amount_to_sell = row['amount']
 
     print("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
     result = exchange.sell_limit(row.market, amount_to_sell, profit_target)
@@ -74,18 +75,17 @@ def takeprofit(config_file, exchange, percent):
         print("unsold row {}".format(pprint.pformat(order)))
         order = order['result']
         if not order['IsOpen']:
-            _takeprofit(exchange, percent, order, row)
+            _takeprofit(exchange, percent, row)
         else:
             print("""Buy has not been filled. Cannot sell for profit until it does.
                   You may want to manually cancel this buy order.""")
 
 
-def _clearprofit(exchange, row, order):
+def _clearprofit(exchange, row):
 
-    print("Clearing Profit for {} with order data = {}".format(row, order))
+    print("Clearing Profit for {}".format(row))
 
     result = exchange.cancel(row['sell_id'])
-    print("\tResult of clearing profit: {}".format(pprint.pformat(result)))
 
     if result['success']:
         print("\t\tSuccess: {}".format(result))
@@ -94,25 +94,32 @@ def _clearprofit(exchange, row, order):
     else:
         raise Exception("Order cancel failed: {}".format(result))
 
-def clearorder(exchange, row):
-    order = exchange.get_order(row['sell_id'])
-    order = order['result']
-    print("Order to clear {}".format(order))
-    if order['IsOpen']:
-        _clearprofit(exchange, row, order)
+def clearorder(exchange, sell_id):
+    row = db((db.buy.sell_id == sell_id)).select().first()
+    if not row:
+        raise Exception("Could not find row with sell_id {}".format(sell_id))
+
+    _clearprofit(exchange, row)
 
 def clear_order_id(exchange, sell_order_id):
-    row = db((db.buy.sell_id == sell_order_id)).select().first()
-    if row:
-        clearorder(exchange, row)
-    else:
-        raise Exception("Could not find row with id {}".format(sell_order_id))
+    "Used in conjunction with `invoke clearorderid`"
+    clearorder(exchange, sell_order_id)
 
-def clearprofit(config_file, exchange):
 
-    rows = db((db.buy.sell_id != None) & (db.buy.config_file == config_file)).select()
-    for row in rows:
-        clearorder(exchange, row)
+def clearprofit(exchange):
+    "Used in conjunction with `invoke cancelsells`"
+    openorders = exchange.get_open_orders()['result']
+    count = 0
+    for openorder in openorders:
+        if openorder['OrderType'] == 'LIMIT_SELL':
+            count += 1
+            print("{}: {} --->{}".format(count, openorder, openorder['OrderUuid']))
+            clearorder(exchange, openorder['OrderUuid'])
+
+#    rows = db((db.buy.sell_id != None) & (db.buy.config_file == config_file)).select()
+#    for i, row in enumerate(rows):
+#        print("  -- Row {}".format(i))
+#        clearorder(exchange, row)
 
 
 def prep(config_file):
@@ -133,4 +140,4 @@ def take_profit(config_file):
 
 def clear_profit(config_file):
     _, exchange = prep(config_file)
-    clearprofit(config_file, exchange)
+    clearprofit(exchange)

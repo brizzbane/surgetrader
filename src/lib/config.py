@@ -29,3 +29,35 @@ class System:
     def ignore_markets_by_find(self):
         _ = self.config.get('ignore', 'market').split()
         return _
+
+    @property
+    def max_open_trades_per_market(self):
+        _ = self.config.get('trade', 'per_market')
+        return int(_)
+
+    @property
+    def min_price(self):
+        _ = self.config.get('trade', 'min_price')
+        return float(_)
+
+    @property
+    def min_volume(self):
+        _ = self.config.get('trade', 'min_volume')
+        return float(_)
+
+    @property
+    def min_gain(self):
+        _ = self.config.get('trade', 'min_gain')
+        return float(_)
+
+
+class User(System):
+
+    def __init__(self, ini):
+        config = configparser.RawConfigParser()
+        with open("users/" + ini) as f:
+            config.readfp(f)
+        self.config = config
+
+        super().__init__()
+
