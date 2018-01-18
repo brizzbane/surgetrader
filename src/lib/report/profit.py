@@ -299,6 +299,11 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
         # setting, elem, val))
         elem.content(val)
 
+    elem = html_template.findmeld('available')
+    val = exchange.get_balance('BTC')['result']
+    val = "Balance={}BTC, Available={}BTC".format(val['Balance'], val['Available'])
+    elem.content(val)
+
     print("HTML OUTFILE: {}".format(html_outfile))
     strfs = io.BytesIO()
     html_template.write_html(html_outfile)
