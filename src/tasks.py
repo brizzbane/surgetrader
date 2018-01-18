@@ -128,10 +128,6 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
     """
     import lib.report.profit
 
-
-    print("tasks.SKIP MARKETS={}".format(skip_markets))
-
-
     inis = listify_ini(ini)
 
     if date_string:
@@ -156,8 +152,6 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
 
     if skip_markets:
         skip_markets = skip_markets.split()
-
-    print("tasks2.SKIP MARKETS={}".format(skip_markets))
 
     for user_ini in inis:
         print("Processing {}".format(user_ini))

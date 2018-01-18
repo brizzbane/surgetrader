@@ -50,14 +50,45 @@ class System:
         _ = self.config.get('trade', 'min_gain')
         return float(_)
 
+    @property
+    def email_bcc(self):
+        _ = self.config.get('email', 'bcc')
+        return _
+
+    @property
+    def email_sender(self):
+        _ = self.config.get('email', 'sender')
+        return _
+
 
 class User(System):
 
     def __init__(self, ini):
-        config = configparser.RawConfigParser()
-        with open("users/" + ini) as f:
-            config.readfp(f)
-        self.config = config
-
         super().__init__()
+
+        config = configparser.RawConfigParser()
+        self.filename = "users/" + ini
+        self.basename = ini
+        with open(self.filename) as f:
+            config.readfp(f)
+
+        self.config = config
+        # print("USER CONFIG SECTIONS: {}".format(config._sections))
+
+
+
+    @property
+    def client_email(self):
+        _ = self.config.get('client', 'email')
+        return _
+
+    @property
+    def client_name(self):
+        _ = self.config.get('client', 'name')
+        return _
+
+    @property
+    def trade_deposit(self):
+        _ = self.config.get('trade', 'deposit')
+        return float(_)
 

@@ -5,22 +5,20 @@
 import io
 import json
 import logging
-from pprint import pprint, pformat
 import traceback
 
 # 3rd party
-import meld3
 from retry import retry
+import meld3
 
 # local
+import lib.config
 from ..db import db
 from .. import emailer
 from .. import mybittrex
-from users import users
 
 
-logger = logging.getLogger(__name__)
-
+LOGGER = logging.getLogger(__name__)
 
 def open_order(result):
 
@@ -47,33 +45,39 @@ class ReportError(Exception):
     """Base class for exceptions in this module."""
     pass
 
+
 class GetTickerError(ReportError):
-    """Exception raised for when exchange does not return a result for a ticker (normally due to a network glitch).
+    """Exception raised for when exchange does not return a result for a ticker
+    (normally due to a network glitch).
 
     Attributes:
         market -- market in which the error occurred
     """
 
     def __init__(self, market):
+        super().__init__()
         self.market = market
-        self.message = "Unable to obtain ticker for ".format(market)
+        self.message = "Unable to obtain ticker for {}".format(market)
+
 
 class NullTickerError(ReportError):
-    """Exception raised for when exchange does not return a result for a ticker (normally due to a network glitch).
+    """Exception raised for when exchange does not return a result for a ticker
+    (normally due to a network glitch).
 
     Attributes:
         market -- market in which the error occurred
     """
 
     def __init__(self, market):
+        super().__init__()
         self.market = market
-        self.message = "None price values in ticker for ".format(market)
+        self.message = "None price values in ticker for {}".format(market)
+
 
 def numeric(p):
     if p is None:
         return 0
-    else:
-        return p
+    return p
 
 
 @retry(exceptions=GetTickerError, tries=10, delay=5)
@@ -94,29 +98,59 @@ def obtain_ticker(exchange, order):
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=3, delay=5)
-def obtain_order(exchange, id):
-    order = exchange.get_order(id)
+def obtain_order(exchange, uuid):
+    order = exchange.get_order(uuid)
     # print("Order = {}".format(order))
     return order['result']
 
 
-def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
+def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
-    print("SKIP MARKETS={}".format(skip_markets))
 
-    user_config = users.read(user_config_file)
+    def profit_from(buy_order, sell_order):
+        "Calculate profit given the related buy and sell order."
 
+        sell_proceeds = sell_order['Price'] - sell_order['CommissionPaid']
+        buy_proceeds = buy_order['Price'] + buy_order['CommissionPaid']
+        # print("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
+        profit = sell_proceeds - buy_proceeds
+        return profit
+
+    def best_bid(sell_order):
+        ticker = obtain_ticker(exchange, sell_order)
+        _ = ticker['result']['Bid']
+        print("ticker = {}".format(ticker))
+        return _
+
+    def in_skip_markets(market, skip_markets):
+        "Decide if market should be skipped"
+
+        if skip_markets:
+            for _skip_market in skip_markets:
+                # print("Testing {} against {}".format(_skip_market, buy.market))
+                if _skip_market in market:
+                    print("{} is being skipped for this report".format(_skip_market))
+                    return True
+
+        return False
+
+    def should_skip(buy_row):
+        if buy_row.config_file != user_config.basename:
+            # print("config file != {}... skipping".format(user_config_file))
+            return True
+
+        if (not buy_row.sell_id) or (len(buy_row.sell_id) < 12):
+            #print("No sell id ... skipping")
+            return True
+
+        if in_skip_markets(buy_row.market, skip_markets):
+            return True
+
+        return False
 
     html_template = open('lib/report/profit.html', 'r').read()
     html_template = meld3.parse_htmlstring(html_template)
-    html_outfile = open("tmp/" + user_config_file + ".html", 'wb')
-
-    import csv
-    csv_file = "tmp/" + user_config_file + ".csv"
-    csvfile = open(csv_file, 'w', newline='')
-    fieldnames = 'sell_closed buy_opened market units_sold sell_price sell_commission units_bought buy_price buy_commission profit'.split()
-    csv_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    csv_writer.writeheader()
+    html_outfile = open("tmp/" + user_config.basename + ".html", 'wb')
 
     open_orders = list()
     closed_orders = list()
@@ -125,24 +159,10 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
         db.buy.ALL,
         orderby=~db.buy.timestamp
     ):
-        if buy.config_file != user_config_file:
-            #print("config file != {}... skipping".format(user_config_file))
+
+        if should_skip(buy):
+            print("Skipping {}".format(buy))
             continue
-
-        if (not buy.sell_id) or (len(buy.sell_id) < 12):
-            #print("No sell id ... skipping")
-            continue
-
-        if skip_markets:
-            leave = False
-            for _skip_market in skip_markets:
-                # print("Testing {} against {}".format(_skip_market, buy.market))
-                if _skip_market in buy.market:
-                    print("{} is being skipped for this report".format(_skip_market))
-                    leave = True
-
-            if leave:
-                continue
 
 
         print("-------------------{}--------------".format(buy.order_id))
@@ -169,24 +189,15 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
                 elif _close_date != on_date:
                     continue
 
-        # pprint(buy)
-        # pprint(so)
-
-        sell_proceeds = so['Price'] - so['CommissionPaid']
 
         bo = exchange.get_order(buy.order_id)['result']
-
-        buy_proceeds = bo['Price'] + bo['CommissionPaid']
-
-        # print("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
-
-        profit = sell_proceeds - buy_proceeds
 
         print("For buy order id ={}, Sell order={}".format(buy.order_id, so))
 
         if open_order(so):
-            p = percent(so['Quantity'] - so['QuantityRemaining'], so['Quantity'])
-            so['Quantity'] = "{:d}%".format(int(p))
+            so['Quantity'] = "{:d}%".format(int(
+                 percent(so['Quantity'] - so['QuantityRemaining'], so['Quantity'])
+            ))
 
         calculations = {
             'sell_closed': so['Closed'],
@@ -198,38 +209,33 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
             'units_bought': bo['Quantity'],
             'buy_price': numeric(bo['PricePerUnit']),
             'buy_commission': bo['CommissionPaid'],
-            'profit': profit
+            'profit': profit_from(bo, so)
         }
 
         print("\tCalculations")
         if open_order(so):
-            del(calculations['sell_commission'])
-            del(calculations['sell_price'])
+            del calculations['sell_commission']
+            del calculations['sell_price']
             calculations['sell_closed'] = 'n/a'
             print("\tOpen order...")
-            ticker = obtain_ticker(exchange, so)
-            best_bid = ticker['result']['Bid']
-            print("ticker = {}".format(ticker))
-            print("difference = {} - {}".format(calculations['buy_price'], best_bid))
 
-            difference = calculations['buy_price'] - best_bid
-            calculations['best_bid'] = best_bid
+            _ = best_bid(so)
+            difference = calculations['buy_price'] - _
+            calculations['best_bid'] = _
             calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
-            # print("Ticker {}".format(ticker))
             open_orders.append(calculations)
 
         else:
             print("\tClosed order: {}".format(calculations))
             if so['PricePerUnit'] is None:
-                raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so,bo))
-            csv_writer.writerow(calculations)
+                raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so, bo))
             closed_orders.append(calculations)
 
 
     # open_orders.sort(key=lambda r: r['difference'])
 
-    html_template.findmeld('acctno').content(user_config_file)
-    html_template.findmeld('name').content(user_config.get('client', 'name'))
+    html_template.findmeld('acctno').content(user_config.filename)
+    html_template.findmeld('name').content(user_config.client_name)
     html_template.findmeld('date').content("Transaction Log for Previous Day")
 
 
@@ -257,11 +263,12 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
         return profit
 
     total_profit = 0
+    data = dict()
     iterator = html_template.findmeld('closed_orders').repeat(closed_orders)
     for element, data in iterator:
         total_profit += render_row(element, data)
 
-    deposit = float(user_config.get('trade', 'deposit'))
+    deposit = float(user_config.trade_deposit)
     percent_profit = percent(total_profit, deposit)
     pnl = "{} ({:.2f} % of {})".format(
         satoshify(total_profit), percent_profit, deposit)
@@ -287,7 +294,7 @@ def report_profit(user_config_file, exchange, on_date=None, skip_markets=None):
 
     for setting in 'deposit trade top takeprofit preserve'.split():
         elem = html_template.findmeld(setting)
-        val = user_config.get('trade', setting)
+        val = user_config.config.get('trade', setting)
         # print("In looking for {} we found {} with setting {}".format(
         # setting, elem, val))
         elem.content(val)
@@ -307,13 +314,13 @@ def system_config():
     return config
 
 
-def notify_admin(msg, user_config, sys_config):
+def notify_admin(msg, sys_config):
 
     print("Notifying admin about {}".format(msg))
 
     subject = "SurgeTraderBOT aborted execution on exception"
-    sender = sys_config.get('email', 'sender')
-    recipient = sys_config.get('email', 'bcc')
+    sender = sys_config.email_sender
+    recipient = sys_config.email_bcc
     emailer.send(subject,
                  text=msg, html=None,
                  sender=sender,
@@ -323,39 +330,33 @@ def notify_admin(msg, user_config, sys_config):
 
 
 
-import json
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
-def main(ini, english_date, _date=None, email=True, skip_markets=None):
+def main(config_file, english_date, _date=None, email=True, skip_markets=None):
 
     print("profit.main.SKIP MARKETS={}".format(skip_markets))
 
+    USER_CONFIG = lib.config.User(config_file)
+    SYS_CONFIG = lib.config.System()
 
-    config_file = ini
-
-    user_config = users.read(config_file)
-    sys_config = system_config()
-
-    exchange = mybittrex.make_bittrex(user_config)
+    exchange = mybittrex.make_bittrex(USER_CONFIG.config)
     try:
-        html, total_profit = report_profit(config_file, exchange, _date, skip_markets)
+        html, _ = report_profit(USER_CONFIG, exchange, _date, skip_markets)
 
         if email:
-            subject = "{}'s Profit Report for {}".format(english_date, ini)
-            sender = sys_config.get('email', 'sender')
-            recipient = user_config.get('client', 'email')
+            subject = "{}'s Profit Report for {}".format(english_date, config_file)
             emailer.send(subject,
                          text='hi my name is slim shady', html=html.getvalue(),
-                         sender=sender,
-                         recipient=recipient,
-                         bcc=sys_config.get('email', 'bcc')
+                         sender=SYS_CONFIG.email_sender,
+                         recipient=USER_CONFIG.client_email,
+                         bcc=SYS_CONFIG.email_bcc
                          )
 
-    except Exception as e:
+    except Exception:
         error_msg = traceback.format_exc()
         print('Aborting: {}'.format(error_msg))
         if email:
             print("Notifying admin via email")
-            notify_admin(error_msg, user_config, sys_config)
+            notify_admin(error_msg, SYS_CONFIG)
 
 
 
