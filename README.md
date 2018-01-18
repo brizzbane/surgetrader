@@ -278,3 +278,5 @@ by those who chose to download and use it.
 
 * [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
 * [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading)
+* [Gekko (freaking amazing)](https://gekko.wizb.it/)
+* 
