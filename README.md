@@ -31,8 +31,9 @@ and not a Python 2 one by typing `which pip` and looking at the path of the exec
 ## Configuration
 
 1. At the shell, copy `src/system.ini.sample` to `src/system.ini` and configure the file as documented.
-1. Change to the `src/users` directory. Copy `src/users/sample.ini` to a new name of your choosing, e.g. myaccount.ini.
-1. In the file `src/system.ini`, update the variable `inis` in the `[users]` section with the name of this new ini file. 
+1. Change to the `src/users` directory. Copy `src/users/useraccount.ini.sample` to a new name of your choosing, e.g. myaccount.ini.
+Edit your account ini file as documented.
+1. In the file `src/system.ini`, update the variable `inis` in the `[users]` section with the name of this new ini file.
 
 ### Optimal Settings
 
@@ -219,18 +220,18 @@ cancel the buy and delete the database entry
 
 # Advanced Usage
 
-## Help! My Base Capital Is Slowly Decreasing! 
+## Help! My Base Capital Is Slowly Decreasing!
 
 ### Trade and Withdrawal Fees
 
-After 2-3 months of usage of SurgeTraderBot, you will notice that transaction fees and withdrawal fees have eaten into your base capital. This means you are actually 
+After 2-3 months of usage of SurgeTraderBot, you will notice that transaction fees and withdrawal fees have eaten into your base capital. This means you are actually
 trading with less capital than you started, because of these fees. Here are a few suggestions to deal with this:
 
 * Only withdraw the first 2 decimal places of profit. E.g. if you earned 0.12345678 BTC of profit, only withdraw 0.1 - the rest you leave in their *should* cover the
 withdrawal fees and transaction fees for your buy/sell.
 * Use 2 accounts and only withdraw from 1 account on each day. I use 2 accounts with the same percent traded on each trade and the same takeprofit target. However, just for
 kicks, on one account I trade the top 3 surging coins and on the other I trade the top 1 surging coin. And each day I just see which is the two accounts made more money and
-withdraw it. 
+withdraw it.
 
 ### Delisted markets
 
@@ -250,8 +251,8 @@ that actually could add to your base capital without you knowing it. In fact, I 
 When you notice that your estimated total account value is more than your initial capital deposit, you can liquidate all of your positions to BTC by typing:
 
     shell> cd surgetrader/src ; invoke sellall users/$myaccount.ini
-    
-    
+
+
 
 ## Compounding
 
@@ -262,7 +263,7 @@ the capital available for trading. Another thing you must understand about compo
 What you are seeing is the current loss associated with open trades on a 1BTC account with 3% allocated to each trade. I.e., each trade represents about 0.03 BTC of loss.
 Now, when this trade closes SurgeTrader will immediately open another trade using 0.03BTC while you are free to withdraw the profit.
 Now, let's say that you instead "compound" your earnings so that you are trading 3% of a 2BTC account - if you do that, then each trade will require **0.06** BTC instead of
-0.03. So now, when any of these trades close, a new trade is **not** opened. In fact it requires 2 old trades to close before there is enough BTC for a new trade at the 
+0.03. So now, when any of these trades close, a new trade is **not** opened. In fact it requires 2 old trades to close before there is enough BTC for a new trade at the
 new size. This could lead to serious account stagnation.
 
 I think a better way to compound is to use 2 accounts and I describe above. Do not change the base capital parameter, simply let each account open more and more trades:
@@ -279,4 +280,4 @@ by those who chose to download and use it.
 * [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
 * [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading)
 * [Gekko (freaking amazing)](https://gekko.wizb.it/)
-* 
+*
