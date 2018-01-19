@@ -24,9 +24,9 @@ from supycache import supycache
 from bittrex.bittrex import SELL_ORDERBOOK
 
 # local
+import lib.config
 from .db import db
 from . import mybittrex
-import lib.config
 
 LOGGER = logging.getLogger(__name__)
 """TODO: move print statements to logging"""
@@ -148,24 +148,8 @@ def rate_for(exchange, mkt, btc):
     return 0
 
 
-def config_top(config):
-    "Return the `top` config param from the trade section of a user config file."
-    _ = config.get('trade', 'top')
-    return int(_)
 
 
-def config_preserve(config):
-    "Return the `preserve` param from the trade section of a user config file."
-
-    _ = config.get('trade', 'preserve')
-    return float(_)
-
-
-def config_min_volume(config):
-    "Return `volume_min` from the trade section of a user config file."
-
-    _ = config.get('trade', 'volume_min')
-    return float(_)
 
 
 def percent2ratio(percentage):
@@ -178,7 +162,7 @@ def percent2ratio(percentage):
     return percentage / 100.0
 
 
-def calculate_trade_size(config):
+def calculate_trade_size(user_config):
     """How much BTC to allocate to a trade.
 
     Given the seed deposit and the percentage of the seed to allocate to each
@@ -188,24 +172,24 @@ def calculate_trade_size(config):
         float : the amount of BTC to spend on trade.
     """
 
-    holdings = float(config.get('trade', 'deposit'))
-    trade_ratio = percent2ratio(float(config.get('trade', 'trade')))
+    holdings = user_config.trade_deposit
+    trade_ratio = percent2ratio(user_config.trade_trade)
 
     return holdings * trade_ratio
 
 
-def get_trade_size(config, btc):
+def get_trade_size(user_config, btc):
     "Determine how much BTC to spend on a buy."
 
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
-    if btc <= config_preserve(config):
+    if btc <= user_config.trade_preserve:
         print("BTC balance <= amount to preserve")
         return 0
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
-    trade_size = calculate_trade_size(config)
+    trade_size = calculate_trade_size(user_config)
     print("\tTrade size   ={}".format(trade_size))
     if btc >= trade_size:
         return trade_size
@@ -223,7 +207,7 @@ def fee_adjust(btc, exchange):
 
     exchange_fee = 0.25 # 0.25% on Bittrex
     print("Adjusting {} trade size to respect {}% exchange fee on {}".format(
-            btc, exchange_fee, exchange))
+        btc, exchange_fee, exchange))
 
     exchange_fee /= 100.0
 
@@ -232,10 +216,10 @@ def fee_adjust(btc, exchange):
 
 
 
-def _buycoin(config_file, config, exchange, mkt, btc):
-    "Buy into market using BTC. Current allocately 2% of BTC to each trade."
+def _buycoin(config_file, user_config, exchange, mkt, btc):
+    "Buy into market using BTC."
 
-    size = get_trade_size(config, btc)
+    size = get_trade_size(user_config, btc)
 
     if not size:
         print("No trade size. Returning.")
@@ -258,13 +242,13 @@ def _buycoin(config_file, config, exchange, mkt, btc):
         print("\tBuy FAILED: {}".format(result))
 
 
-def buycoin(config_file, config, exchange, top_coins):
+def buycoin(config_file, user_config, exchange, top_coins):
     "Buy top N cryptocurrencies."
 
     avail = available_btc(exchange)
 
     for market in top_coins:
-        _buycoin(config_file, config, exchange, market[0], avail)
+        _buycoin(config_file, user_config, exchange, market[0], avail)
 
 
 @supycache(cache_key='result')
@@ -330,7 +314,7 @@ def analyze_gain(exchange):
     markets = exchange.get_market_summaries(by_market=True)
     recent = get_recent_market_data()
 
-    openorders = exchange.get_open_orders();
+    openorders = exchange.get_open_orders()
 
     print("<ANALYZE_GAIN numberofmarkets={0}>".format(len(list(recent.keys()))))
 
@@ -412,19 +396,15 @@ def topcoins(exchange, number_of_coins):
 
 def process(config_file):
     """Buy coins for every configured user of the bot."""
-    from users import users
-    config = users.read(config_file)
+    user_config = lib.config.User(config_file)
 
-    exchange = mybittrex.make_bittrex(config)
+    exchange = mybittrex.make_bittrex(user_config.config)
 
-
-
-    amount_to_buy = config_top(config)
-    top_coins = topcoins(exchange, amount_to_buy)
+    top_coins = topcoins(exchange, user_config.trade_top)
 
     print("------------------------------------------------------------")
     print("Buying coins for: {}".format(config_file))
-    buycoin(config_file, config, exchange, top_coins)
+    buycoin(config_file, user_config, exchange, top_coins)
 
 
 def main(inis):

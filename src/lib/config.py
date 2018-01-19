@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""Provide object-oriented access to the ini files.
+
+SurgeTrader uses a system.ini file and a user ini file. This module provides
+OO access to both.
+"""
 
 import configparser
 import random
@@ -7,8 +12,9 @@ class System:
 
     def __init__(self):
         config = configparser.RawConfigParser()
-        with open("system.ini") as f:
-            config.readfp(f)
+        with open("system.ini") as file_pointer:
+            #config.readfp(f)
+            config.read_file(file_pointer)
         self.config = config
 
     @property
@@ -69,8 +75,9 @@ class User(System):
         config = configparser.RawConfigParser()
         self.filename = "users/" + ini
         self.basename = ini
-        with open(self.filename) as f:
-            config.readfp(f)
+        with open(self.filename) as file_pointer:
+            #config.readfp(f)
+            config.read_file(file_pointer)
 
         self.config = config
         # print("USER CONFIG SECTIONS: {}".format(config._sections))
@@ -92,3 +99,20 @@ class User(System):
         _ = self.config.get('trade', 'deposit')
         return float(_)
 
+    @property
+    def trade_top(self):
+        _ = self.config.get('trade', 'top')
+        return int(_)
+
+    @property
+    def trade_preserve(self):
+        "Return the `preserve` param from the trade section of a user config file."
+
+        _ = self.config.get('trade', 'preserve')
+        return float(_)
+
+    @property
+    def trade_trade(self):
+        "Percentage of seed capital to trade."
+        _ = self.config.get('trade', 'trade')
+        return float(_)
