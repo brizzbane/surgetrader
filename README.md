@@ -53,11 +53,13 @@ surge and buys it:
 
     INVOKE=/home/schemelab/install/miniconda3/bin/invoke
 
-    00   * * * * cd ~/prg/surgetrader/src/ ; $INVOKE download buy takeprofit
-    */5  * * * * cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
-    @daily       cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
-    11   0 * * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
-    22   0 1 * * cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
+    00   *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE download buy takeprofit
+    */5  *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
+    07   07 *   *   07  cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
+    15   00 *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
+    15   01 01  *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
+    59   08 *   *   *   cd ~/prg/surgetrader/src/ ; cp storage.sqlite3 backup/storage.sqlite3-$(date -Is)
+
 
 ### Note
 
