@@ -54,7 +54,6 @@ surge and buys it:
     INVOKE=/home/schemelab/install/miniconda3/bin/invoke
     # SURGE TRADER
     # mn hr dom mon dow command
-
     00   *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE download buy takeprofit
     */5  *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
     07   07 *   *   07  cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
