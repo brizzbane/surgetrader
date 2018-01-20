@@ -162,14 +162,15 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
     ):
 
         if should_skip(buy):
-            print("Skipping {}".format(buy))
+            print("\tSkipping buy order {}".format(buy))
             continue
 
 
-        print("-------------------{}- {} -------------".format(buy.order_id, buy.market))
+        print("--------------------- {} {}".format(buy.market, buy.order_id))
 
-        print("\tGet order")
         so = obtain_order(exchange, buy.sell_id)
+
+        print("\t{}".format(so))
 
         print("\tDate checking {} against {}".format(on_date, so['Closed']))
 
@@ -195,7 +196,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
         bo = exchange.get_order(buy.order_id)['result']
 
-        print("For buy order id ={}, Sell order={}".format(buy.order_id, so))
+        # print("For buy order id ={}, Sell order={}".format(buy.order_id, so))
 
         if open_order(so):
             so['Quantity'] = "{:d}%".format(int(
