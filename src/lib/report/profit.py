@@ -166,7 +166,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
             continue
 
 
-        print("-------------------{}--------------".format(buy.order_id))
+        print("-------------------{}- {} -------------".format(buy.order_id, buy.market))
 
         print("\tGet order")
         so = obtain_order(exchange, buy.sell_id)
