@@ -136,14 +136,15 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
     def should_skip(buy_row):
         if buy_row.config_file != user_config.basename:
-            # print("config file != {}... skipping".format(user_config_file))
+            print("\tconfig file != {}... skipping".format(user_config.basename))
             return True
 
         if (not buy_row.sell_id) or (len(buy_row.sell_id) < 12):
-            #print("No sell id ... skipping")
+            print("\tNo sell id ... skipping")
             return True
 
         if in_skip_markets(buy_row.market, skip_markets):
+            print("\tin {}".format(skip_markets))
             return True
 
         return False
@@ -174,6 +175,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
         if on_date:
             if open_order(so):
+                print("\t\tOpen order")
                 so['Closed'] = 'n/a'
             else:
                 _close_date = close_date(so['Closed'])
@@ -181,12 +183,13 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
                 if type(on_date) is list:
                     if _close_date < on_date[0]:
-                        print("Trade is too old for report.")
+                        print("\t\tTrade is too old for report.")
                         continue
                     elif _close_date > on_date[1]:
-                        print("Trade is too new for report.")
+                        print("\t\tTrade is too new for report.")
                         continue
                 elif _close_date != on_date:
+                    print("\t\tclose date of trade {} != {}".format(_close_date, on_date))
                     continue
 
 
