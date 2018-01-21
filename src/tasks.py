@@ -26,13 +26,26 @@ Todo:
    http://www.pyinvoke.org/
 """
 
+# core
+import logging
 import random
 
+# 3rd party
 from invoke import task
 
+#local
 import lib.config
+import lib.logconfig
+import lib.report.profit
+import lib.takeprofit
+
+
+
 
 SYS_INI = lib.config.System()
+
+LOG = logging.getLogger('app')
+
 
 def listify_ini(ini, randomize=False):
     """Coerce the ini argument to a list of 1+ ini-file names.
@@ -103,13 +116,12 @@ def takeprofit(_ctx, ini=None):
     Every 5 minutes this task runs to see if any new coins have been bought.
     If so, it then sets a profit target for them.
     """
-    from lib import takeprofit as _takeprofit
 
     inis = listify_ini(ini)
 
     for _ in inis:
-        print("Processing {}".format(_))
-        _takeprofit.take_profit(_)
+        LOG.debug("Processing {}".format(_))
+        lib.takeprofit.take_profit(_)
 
 @task
 def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
@@ -126,7 +138,6 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
         Nothing. It dumps a csv and html of the email profit report in src/tmp.
 
     """
-    import lib.report.profit
 
     inis = listify_ini(ini)
 
@@ -154,7 +165,7 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
         skip_markets = skip_markets.split()
 
     for user_ini in inis:
-        print("Processing {}".format(user_ini))
+        LOG.debug("Processing {}".format(user_ini))
         lib.report.profit.main(user_ini, date_string, _date=_date, skip_markets=skip_markets)
 
 
@@ -168,28 +179,25 @@ def cancelsells(_ctx, ini=None):
     to cancel and re-issue the order so that it remains active as long as
     necessary to close for a profit.
     """
-    from lib import takeprofit as _takeprofit
-
     inis = listify_ini(ini)
 
     for _ in inis:
-        print("Processing {}".format(_))
-        _takeprofit.clear_profit(_)
+        LOG.debug("Processing {}".format(_))
+        lib.takeprofit.clear_profit(_)
 
 @task
-def cancelsellid(_ctx, id):
+def cancelsellid(_ctx, order_id):
     """Cancel a sell order in the rdbms table.
 
     If for some reason `invoke cancelsells` misses re-issuing an open transaction,
     then you can cancel a specific transaction by providing the `buy.sell_id`
     column value in the rdbms table buy.
     """
-    import lib.takeprofit
-    import lib.config
 
-    _, exchange = lib.takeprofit.prep(lib.config.any_users_ini())
 
-    lib.takeprofit.clear_order_id(exchange, id)
+    _, exchange = lib.takeprofit.prep(SYS_INI.any_users_ini)
+
+    lib.takeprofit.clear_order_id(exchange, order_id)
 
 @task
 def sellall(_ctx, ini):
@@ -211,13 +219,13 @@ def openorders(_ctx, ini):
 
 
     """
-    import lib.takeprofit
 
     _, exchange = lib.takeprofit.prep(ini)
 
-    openorders = exchange.get_open_orders();
-    for order in openorders['result']:
+    open_orders = exchange.get_open_orders()
+    for order in open_orders['result']:
         print(order)
+
 
 @task
 def orderhistory(_ctx, ini, mkt):
@@ -225,11 +233,10 @@ def orderhistory(_ctx, ini, mkt):
 
 
     """
-    import lib.takeprofit
 
     _, exchange = lib.takeprofit.prep(ini)
 
-    records = exchange.get_order_history(mkt);
+    records = exchange.get_order_history(mkt)
     for record in records['result']:
         print(record)
 
@@ -240,11 +247,8 @@ def getorder(_ctx, ini, uuid):
 
 
     """
-    import lib.takeprofit
 
     _, exchange = lib.takeprofit.prep(ini)
 
-    _ = exchange.get_order(uuid);
+    _ = exchange.get_order(uuid)
     print(_)
-
-
