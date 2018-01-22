@@ -4,6 +4,8 @@
 
 backup/*
 
+
+
 *.sqlite3
 *.sqlite3*
 system.ini
@@ -14,6 +16,10 @@ profitreport.out
 *.key
 src/users/*.ini
 src/tmp
+
+src/log/app.log
+src/backup/storage*
+
 secrets.json
 markets.json
 *.table
