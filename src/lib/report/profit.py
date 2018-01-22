@@ -13,18 +13,20 @@ import meld3
 
 # local
 import lib.config
+import lib.logconfig
 from ..db import db
 from .. import emailer
 from .. import mybittrex
 
 
-LOGGER = logging.getLogger(__name__)
+#LOG = logging.getLogger('app')
+LOG = lib.logconfig.app_log
 
 def open_order(result):
 
-    # pprint(result['IsOpen'])
+    # pLOG.debug(result['IsOpen'])
     is_open = result['IsOpen']
-    # print("\tOrder is open={}".format(is_open))
+    # LOG.debug("\tOrder is open={}".format(is_open))
     return is_open
 
 
@@ -85,7 +87,7 @@ def obtain_ticker(exchange, order):
     market = order['Exchange']
     ticker = exchange.get_ticker(market)
     if ticker['result'] is None:
-        print("Got no result from get_ticker")
+        LOG.debug("Got no result from get_ticker")
         raise GetTickerError(market)
 
     if ticker['success']:
@@ -100,7 +102,7 @@ def obtain_ticker(exchange, order):
 @retry(exceptions=json.decoder.JSONDecodeError, tries=3, delay=5)
 def obtain_order(exchange, uuid):
     order = exchange.get_order(uuid)
-    # print("Order = {}".format(order))
+    # LOG.debug("Order = {}".format(order))
     return order['result']
 
 
@@ -112,14 +114,14 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
         sell_proceeds = sell_order['Price'] - sell_order['CommissionPaid']
         buy_proceeds = buy_order['Price'] + buy_order['CommissionPaid']
-        # print("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
+        # LOG.debug("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
         profit = sell_proceeds - buy_proceeds
         return profit
 
     def best_bid(sell_order):
         ticker = obtain_ticker(exchange, sell_order)
         _ = ticker['result']['Bid']
-        print("ticker = {}".format(ticker))
+        LOG.debug("ticker = {}".format(ticker))
         return _
 
     def in_skip_markets(market, skip_markets):
@@ -127,24 +129,24 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
         if skip_markets:
             for _skip_market in skip_markets:
-                # print("Testing {} against {}".format(_skip_market, buy.market))
+                # LOG.debug("Testing {} against {}".format(_skip_market, buy.market))
                 if _skip_market in market:
-                    print("{} is being skipped for this report".format(_skip_market))
+                    LOG.debug("{} is being skipped for this report".format(_skip_market))
                     return True
 
         return False
 
     def should_skip(buy_row):
         if buy_row.config_file != user_config.basename:
-            print("\tconfig file != {}... skipping".format(user_config.basename))
+            LOG.debug("\tconfig file != {}... skipping".format(user_config.basename))
             return True
 
         if (not buy_row.sell_id) or (len(buy_row.sell_id) < 12):
-            print("\tNo sell id ... skipping")
+            LOG.debug("\tNo sell id ... skipping")
             return True
 
         if in_skip_markets(buy_row.market, skip_markets):
-            print("\tin {}".format(skip_markets))
+            LOG.debug("\tin {}".format(skip_markets))
             return True
 
         return False
@@ -162,41 +164,41 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
     ):
 
         if should_skip(buy):
-            print("\tSkipping buy order {}".format(buy))
+            LOG.debug("\tSkipping buy order {}".format(buy))
             continue
 
 
-        print("--------------------- {} {}".format(buy.market, buy.order_id))
+        LOG.debug("--------------------- {} {}".format(buy.market, buy.order_id))
 
         so = obtain_order(exchange, buy.sell_id)
 
-        print("\t{}".format(so))
+        LOG.debug("\t{}".format(so))
 
-        print("\tDate checking {} against {}".format(on_date, so['Closed']))
+        LOG.debug("\tDate checking {} against {}".format(on_date, so['Closed']))
 
         if on_date:
             if open_order(so):
-                print("\t\tOpen order")
+                LOG.debug("\t\tOpen order")
                 so['Closed'] = 'n/a'
             else:
                 _close_date = close_date(so['Closed'])
-                # print("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
+                # LOG.debug("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
 
                 if type(on_date) is list:
                     if _close_date < on_date[0]:
-                        print("\t\tTrade is too old for report.")
+                        LOG.debug("\t\tTrade is too old for report.")
                         continue
                     elif _close_date > on_date[1]:
-                        print("\t\tTrade is too new for report.")
+                        LOG.debug("\t\tTrade is too new for report.")
                         continue
                 elif _close_date != on_date:
-                    print("\t\tclose date of trade {} != {}".format(_close_date, on_date))
+                    LOG.debug("\t\tclose date of trade {} != {}".format(_close_date, on_date))
                     continue
 
 
         bo = exchange.get_order(buy.order_id)['result']
 
-        # print("For buy order id ={}, Sell order={}".format(buy.order_id, so))
+        # LOG.debug("For buy order id ={}, Sell order={}".format(buy.order_id, so))
 
         if open_order(so):
             so['Quantity'] = "{:d}%".format(int(
@@ -216,12 +218,12 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
             'profit': profit_from(bo, so)
         }
 
-        print("\tCalculations")
+        LOG.debug("\tCalculations")
         if open_order(so):
             del calculations['sell_commission']
             del calculations['sell_price']
             calculations['sell_closed'] = 'n/a'
-            print("\tOpen order...")
+            LOG.debug("\tOpen order...")
 
             _ = best_bid(so)
             difference = calculations['buy_price'] - _
@@ -230,7 +232,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
             open_orders.append(calculations)
 
         else:
-            print("\tClosed order: {}".format(calculations))
+            LOG.debug("\tClosed order: {}".format(calculations))
             if so['PricePerUnit'] is None:
                 raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so, bo))
             closed_orders.append(calculations)
@@ -260,7 +262,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
             if append:
                 field_name += append
 
-            # print("Field_value={}. Looking for {} in {}".format(field_value, field_name, element))
+            # LOG.debug("Field_value={}. Looking for {} in {}".format(field_value, field_name, element))
 
             element.findmeld(field_name).content(str(field_value))
 
@@ -284,11 +286,11 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
     else:
         render_row(s, data, append="2")
 
-    print("Open Orders={}".format(open_orders))
+    LOG.debug("Open Orders={}".format(open_orders))
     open_orders_element = html_template.findmeld('open_orders')
-    print("Open Orders Element={}".format(vars(open_orders_element)))
+    LOG.debug("Open Orders Element={}".format(vars(open_orders_element)))
     for child in open_orders_element.__dict__['_children']:
-        print("\t{}".format(vars(child)))
+        LOG.debug("\t{}".format(vars(child)))
 
 
     iterator = open_orders_element.repeat(open_orders)
@@ -299,7 +301,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
     for setting in 'deposit trade top takeprofit preserve'.split():
         elem = html_template.findmeld(setting)
         val = user_config.config.get('trade', setting)
-        # print("In looking for {} we found {} with setting {}".format(
+        # LOG.debug("In looking for {} we found {} with setting {}".format(
         # setting, elem, val))
         elem.content(val)
 
@@ -308,7 +310,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
     val = "Balance={}BTC, Available={}BTC".format(val['Balance'], val['Available'])
     elem.content(val)
 
-    print("HTML OUTFILE: {}".format(html_outfile))
+    LOG.debug("HTML OUTFILE: {}".format(html_outfile))
     strfs = io.BytesIO()
     html_template.write_html(html_outfile)
     html_template.write_html(strfs)
@@ -325,7 +327,7 @@ def system_config():
 
 def notify_admin(msg, sys_config):
 
-    print("Notifying admin about {}".format(msg))
+    LOG.debug("Notifying admin about {}".format(msg))
 
     subject = "SurgeTraderBOT aborted execution on exception"
     sender = sys_config.email_sender
@@ -342,7 +344,7 @@ def notify_admin(msg, sys_config):
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
 def main(config_file, english_date, _date=None, email=True, skip_markets=None):
 
-    print("profit.main.SKIP MARKETS={}".format(skip_markets))
+    LOG.debug("profit.main.SKIP MARKETS={}".format(skip_markets))
 
     USER_CONFIG = lib.config.User(config_file)
     SYS_CONFIG = lib.config.System()
@@ -362,9 +364,9 @@ def main(config_file, english_date, _date=None, email=True, skip_markets=None):
 
     except Exception:
         error_msg = traceback.format_exc()
-        print('Aborting: {}'.format(error_msg))
+        LOG.debug('Aborting: {}'.format(error_msg))
         if email:
-            print("Notifying admin via email")
+            LOG.debug("Notifying admin via email")
             notify_admin(error_msg, SYS_CONFIG)
 
 
@@ -372,4 +374,4 @@ def main(config_file, english_date, _date=None, email=True, skip_markets=None):
 if __name__ == '__main__':
     ts = '2017-10-15T21:28:21.05'
     dt = close_date(ts)
-    print(dt)
+    LOG.debug(dt)

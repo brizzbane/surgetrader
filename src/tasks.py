@@ -27,6 +27,7 @@ Todo:
 """
 
 # core
+import inspect
 import logging
 import random
 
@@ -41,10 +42,10 @@ import lib.takeprofit
 
 
 
-
 SYS_INI = lib.config.System()
 
-LOG = logging.getLogger('app')
+#LOG = logging.getLogger('app')
+LOG = lib.logconfig.app_log
 
 
 def listify_ini(ini, randomize=False):
@@ -70,6 +71,22 @@ def listify_ini(ini, randomize=False):
 
     return inis
 
+
+def open_task(closing_process=False):
+
+    if closing_process:
+        begin_end = "END"
+        process_name = inspect.stack()[2].function
+    else:
+        begin_end = "BEGIN"
+        process_name = inspect.stack()[1].function
+
+    return "<{} process={}>".format(begin_end, process_name)
+
+def close_task():
+    return open_task(True)
+
+
 @task
 def download(_ctx):
     """Download the current price data for all markets on Bittrex.
@@ -89,7 +106,10 @@ def download(_ctx):
     """
     from lib import download as _download
 
+    LOG.debug(open_task())
     _download.main(random.choice(SYS_INI.users_inis))
+    LOG.debug(close_task())
+
 
 
 @task
@@ -105,8 +125,14 @@ def buy(_ctx, ini=None):
     """
     from lib import buy as _buy
 
+    LOG.debug(open_task())
+
+
     inis = listify_ini(ini, randomize=False)
     _buy.main(inis)
+
+    LOG.debug(close_task())
+
 
 
 @task
@@ -117,11 +143,17 @@ def takeprofit(_ctx, ini=None):
     If so, it then sets a profit target for them.
     """
 
+    LOG.debug(open_task())
+
+
     inis = listify_ini(ini)
 
     for _ in inis:
         LOG.debug("Processing {}".format(_))
         lib.takeprofit.take_profit(_)
+
+    LOG.debug(close_task())
+
 
 @task
 def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
@@ -138,6 +170,9 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
         Nothing. It dumps a csv and html of the email profit report in src/tmp.
 
     """
+
+    LOG.debug(open_task())
+
 
     inis = listify_ini(ini)
 
@@ -168,6 +203,7 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
         LOG.debug("Processing {}".format(user_ini))
         lib.report.profit.main(user_ini, date_string, _date=_date, skip_markets=skip_markets)
 
+    LOG.debug(close_task())
 
 
 @task
@@ -179,11 +215,18 @@ def cancelsells(_ctx, ini=None):
     to cancel and re-issue the order so that it remains active as long as
     necessary to close for a profit.
     """
+
+    LOG.debug(open_task())
+
+
     inis = listify_ini(ini)
 
     for _ in inis:
         LOG.debug("Processing {}".format(_))
         lib.takeprofit.clear_profit(_)
+
+    LOG.debug(close_task())
+
 
 @task
 def cancelsellid(_ctx, order_id):
@@ -194,10 +237,15 @@ def cancelsellid(_ctx, order_id):
     column value in the rdbms table buy.
     """
 
+    LOG.debug(open_task())
+
 
     _, exchange = lib.takeprofit.prep(SYS_INI.any_users_ini)
 
     lib.takeprofit.clear_order_id(exchange, order_id)
+
+    LOG.debug(close_task())
+
 
 @task
 def sellall(_ctx, ini):
@@ -210,8 +258,12 @@ def sellall(_ctx, ini):
         ini (str): the ini file that connects to the account to liquidate.
     """
     from lib import sellall as _sellall
+    LOG.debug(open_task())
 
     _sellall.main(ini)
+
+    LOG.debug(close_task())
+
 
 @task
 def openorders(_ctx, ini):

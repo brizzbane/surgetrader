@@ -25,11 +25,13 @@ from bittrex.bittrex import SELL_ORDERBOOK
 
 # local
 import lib.config
+import lib.logconfig
 from .db import db
 from . import mybittrex
 
-LOGGER = logging.getLogger(__name__)
-"""TODO: move print statements to logging"""
+#LOGGER = logging.getLogger(__name__)
+LOG = lib.logconfig.app_log
+"""TODO: move LOG.debug statements to logging"""
 
 
 SYS_INI = lib.config.System()
@@ -116,7 +118,7 @@ def available_btc(exchange):
     """
     bal = obtain_btc_balance(exchange)
     avail = bal['Available']
-    print("\tAvailable btc={0}".format(avail))
+    LOG.debug("\tAvailable btc={0}".format(avail))
     return avail
 
 
@@ -184,13 +186,13 @@ def get_trade_size(user_config, btc):
     # Do not trade if we are configured to accumulate btc
     # (presumably for withdrawing a percentage for profits)
     if btc <= user_config.trade_preserve:
-        print("BTC balance <= amount to preserve")
+        LOG.debug("BTC balance <= amount to preserve")
         return 0
 
     # If we have more BTC than the size of each trade, then
     # make a trade of that size
     trade_size = calculate_trade_size(user_config)
-    print("\tTrade size   ={}".format(trade_size))
+    LOG.debug("\tTrade size   ={}".format(trade_size))
     if btc >= trade_size:
         return trade_size
 
@@ -206,7 +208,7 @@ def fee_adjust(btc, exchange):
     """
 
     exchange_fee = 0.25 # 0.25% on Bittrex
-    print("Adjusting {} trade size to respect {}% exchange fee on {}".format(
+    LOG.debug("Adjusting {} trade size to respect {}% exchange fee on {}".format(
         btc, exchange_fee, exchange))
 
     exchange_fee /= 100.0
@@ -222,24 +224,24 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
     size = get_trade_size(user_config, btc)
 
     if not size:
-        print("No trade size. Returning.")
+        LOG.debug("No trade size. Returning.")
         return
     else:
         size = fee_adjust(size, exchange)
 
-    print("I will trade {0} BTC.".format(size))
+    LOG.debug("I will trade {0} BTC.".format(size))
 
     rate, amount_of_coin = rate_for(exchange, mkt, size)
 
-    print("I get {0} units of {1} at the rate of {2:.8f} BTC per coin.".format(
+    LOG.debug("I get {0} units of {1} at the rate of {2:.8f} BTC per coin.".format(
         amount_of_coin, mkt, rate))
 
     result = exchange.buy_limit(mkt, amount_of_coin, rate)
     if result['success']:
-        print("\tBuy was a success = {}".format(result))
+        LOG.debug("\tBuy was a success = {}".format(result))
         record_buy(config_file, result['result']['uuid'], mkt, rate, amount_of_coin)
     else:
-        print("\tBuy FAILED: {}".format(result))
+        LOG.debug("\tBuy FAILED: {}".format(result))
 
 
 def buycoin(config_file, user_config, exchange, top_coins):
@@ -280,13 +282,13 @@ def analyze_gain(exchange):
         """
         for ignorable in IGNORE_BY_IN:
             if ignorable in name:
-                print("\tIgnoring {} because {} is in({}).".format(
+                LOG.debug("\tIgnoring {} because {} is in({}).".format(
                     name, ignorable, IGNORE_BY_IN))
                 return True
 
         for ignore_string in IGNORE_BY_FIND:
             if name.find(ignore_string) > -1:
-                print('\tIgnore by find: ' + name)
+                LOG.debug('\tIgnore by find: ' + name)
                 return True
 
         return False
@@ -316,16 +318,16 @@ def analyze_gain(exchange):
 
     openorders = exchange.get_open_orders()
 
-    print("<ANALYZE_GAIN numberofmarkets={0}>".format(len(list(recent.keys()))))
+    LOG.debug("<ANALYZE_GAIN numberofmarkets={0}>".format(len(list(recent.keys()))))
 
     gain = list()
 
     for name, row in recent.items():
 
-        print("Analysing {}...".format(name))
+        LOG.debug("Analysing {}...".format(name))
 
         if len(row) != 2:
-            print("\t2 entries for market required. Perhaps this is the first run?")
+            LOG.debug("\t2 entries for market required. Perhaps this is the first run?")
             continue
 
         if should_skip(name):
@@ -333,18 +335,18 @@ def analyze_gain(exchange):
 
         try:
             if markets[name]['BaseVolume'] < MIN_VOLUME:
-                print("\t{} 24hr vol < {}".format(markets[name], MIN_VOLUME))
+                LOG.debug("\t{} 24hr vol < {}".format(markets[name], MIN_VOLUME))
                 continue
         except KeyError:
-            print("\tKeyError locating {}".format(name))
+            LOG.debug("\tKeyError locating {}".format(name))
             continue
 
         if number_of_open_orders_in(openorders, name) >= MAX_ORDERS_PER_MARKET:
-            print('\tToo many open orders: ' + name)
+            LOG.debug('\tToo many open orders: ' + name)
             continue
 
         if row[0].ask < MIN_PRICE:
-            print('\t{} costs less than {}.'.format(name, MIN_PRICE))
+            LOG.debug('\t{} costs less than {}.'.format(name, MIN_PRICE))
             continue
 
         gain.append(
@@ -357,7 +359,7 @@ def analyze_gain(exchange):
             )
         )
 
-    print("</ANALYZE_GAIN>")
+    LOG.debug("</ANALYZE_GAIN>")
 
     gain = sorted(gain, key=lambda r: r[1], reverse=True)
     return gain
@@ -381,12 +383,12 @@ def topcoins(exchange, number_of_coins):
     """
     top = analyze_gain(exchange)
 
-    # print 'TOP: {}.. now filtering'.format(top[:10])
+    # LOG.debug 'TOP: {}.. now filtering'.format(top[:10])
     top = [t for t in top if t[1] >= MIN_GAIN]
-    # print 'TOP filtered on MIN_GAIN : {}'.format(top)
+    # LOG.debug 'TOP filtered on MIN_GAIN : {}'.format(top)
 
 
-    print("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
+    LOG.debug("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
         MIN_GAIN,
         MIN_VOLUME,
         pprint.pformat(top[:5], indent=4)))
@@ -402,8 +404,8 @@ def process(config_file):
 
     top_coins = topcoins(exchange, user_config.trade_top)
 
-    print("------------------------------------------------------------")
-    print("Buying coins for: {}".format(config_file))
+    LOG.debug("------------------------------------------------------------")
+    LOG.debug("Buying coins for: {}".format(config_file))
     buycoin(config_file, user_config, exchange, top_coins)
 
 

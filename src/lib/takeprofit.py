@@ -9,22 +9,18 @@ import pprint
 # pypi
 
 # local
+import lib.logconfig
 from . import mybittrex
 from .db import db
 
 
 
-logging.basicConfig(
-    format='%(lineno)s %(message)s',
-    level=logging.WARN
-)
-
 ONE_PERCENT = 1.0 / 100.0
 TWO_PERCENT = 2.0 / 100.0
 
 
-LOGGER = logging.getLogger(__name__)
-
+#LOG = logging.getLogger(__name__)
+LOG = lib.logconfig.app_log
 
 
 def single_and_double_satoshi_scalp(price):
@@ -37,22 +33,22 @@ def __takeprofit(entry, gain):
     x_percent = gain / 100.0
     profit_target = entry * x_percent + entry
 
-    print(("On an entry of {0:.8f}, TP={1:.8f} for a {2} percent gain".format(
+    LOG.debug(("On an entry of {0:.8f}, TP={1:.8f} for a {2} percent gain".format(
         entry, profit_target, gain)))
 
     return profit_target
 
-def _takeprofit(exchange, percent, row):
+def _takeprofit(exchange, percent, row, order):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
 
     #amount_to_sell = order['Quantity'] - 1e-8
-    #amount_to_sell = order['Quantity']
-    amount_to_sell = row['amount']
+    amount_to_sell = order['Quantity']
+    #amount_to_sell = row['amount']
 
-    print("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
+    LOG.debug("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
     result = exchange.sell_limit(row.market, amount_to_sell, profit_target)
-    pprint.pprint(result)
+    LOG.debug("%s" % result)
 
     if result['success']:
         row.update_record(selling_price=profit_target, sell_id=result['result']['uuid'])
@@ -64,31 +60,31 @@ def takeprofit(config_file, exchange, percent):
 
     rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select()
     for row in rows:
-        print("\t", row)
+        LOG.debug("\t %s" % row)
 
         # if row['config_file'] != config_file:
-        #     print "my config file is {} but this one is {}. skipping".format(
+        #     LOG.debug "my config file is {} but this one is {}. skipping".format(
         #         config_file, row['config_file'])
         #     continue
 
         order = exchange.get_order(row['order_id'])
-        print("unsold row {}".format(pprint.pformat(order)))
+        LOG.debug("unsold row {}".format(pprint.pformat(order)))
         order = order['result']
         if not order['IsOpen']:
-            _takeprofit(exchange, percent, row)
+            _takeprofit(exchange, percent, row, order)
         else:
-            print("""Buy has not been filled. Cannot sell for profit until it does.
+            LOG.debug("""Buy has not been filled. Cannot sell for profit until it does.
                   You may want to manually cancel this buy order.""")
 
 
 def _clearprofit(exchange, row):
 
-    print("Clearing Profit for {}".format(row))
+    LOG.debug("Clearing Profit for {}".format(row))
 
     result = exchange.cancel(row['sell_id'])
 
     if result['success']:
-        print("\t\tSuccess: {}".format(result))
+        LOG.debug("\t\tSuccess: {}".format(result))
         row.update_record(selling_price=None, sell_id=None)
         db.commit()
     else:
@@ -113,12 +109,12 @@ def clearprofit(exchange):
     for openorder in openorders:
         if openorder['OrderType'] == 'LIMIT_SELL':
             count += 1
-            print("{}: {} --->{}".format(count, openorder, openorder['OrderUuid']))
+            LOG.debug("{}: {} --->{}".format(count, openorder, openorder['OrderUuid']))
             clearorder(exchange, openorder['OrderUuid'])
 
 #    rows = db((db.buy.sell_id != None) & (db.buy.config_file == config_file)).select()
 #    for i, row in enumerate(rows):
-#        print("  -- Row {}".format(i))
+#        LOG.debug("  -- Row {}".format(i))
 #        clearorder(exchange, row)
 
 
@@ -134,7 +130,7 @@ def take_profit(config_file):
     config, exchange = prep(config_file)
     percent = float(config.get('trade', 'takeprofit'))
 
-    print("Setting profit targets for {}".format(config_file))
+    LOG.debug("Setting profit targets for {}".format(config_file))
 
     takeprofit(config_file, exchange, percent)
 

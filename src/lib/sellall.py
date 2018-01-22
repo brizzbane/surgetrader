@@ -1,16 +1,25 @@
 #!/usr/bin/env python
 
-
+# core
 import configparser
-import argh
 import collections
 import logging
 import pprint
+from pprint import pprint
+
+# 3rd party
+import argh
 from retry import retry
-from .db import db
+
+# local
+import lib.logconfig
 from . import mybittrex
 from bittrex.bittrex import SELL_ORDERBOOK
-from pprint import pprint
+from .db import db
+
+
+LOG = lib.logconfig.app_log
+
 
 def loop_forever():
     while True:
@@ -24,10 +33,10 @@ def cancelall(b):
     orders = b.get_open_orders()
 
     for order in orders['result']:
-        pprint(order)
+        LOG.debug(order)
         sell_id = order['OrderUuid']
         r = b.cancel(sell_id)
-        pprint(r)
+        LOG.debug(r)
         db(db.buy.sell_id == sell_id).delete()
         db.commit()
 
@@ -37,31 +46,31 @@ def sellall(b):
     cancelall(b)
     balances = b.get_balances()
     for balance in balances['result']:
-        print("-------------------- {}".format(balance['Currency']))
-        pprint(balance)
+        LOG.debug("-------------------- {}".format(balance['Currency']))
+        LOG.debug(balance)
 
         if not balance['Available'] or balance['Currency'] == 'BTC':
-            print("\tno balance or this is BTC")
+            LOG.debug("\tno balance or this is BTC")
             continue
 
         skipcoin = "CRYPT TIT GHC UNO DAR ARDR DGD MTL SNGLS SWIFT TIME TKN XAUR"
         if balance['Currency'] in skipcoin:
-            print("\tthis is a skipcoin")
+            LOG.debug("\tthis is a skipcoin")
             continue
 
         market = "BTC-" + balance['Currency']
 
-        pprint(balance)
+        LOG.debug(balance)
 
         ticker = b.get_ticker(market)['result']
-        pprint(ticker)
+        LOG.debug(ticker)
 
         my_ask = ticker['Bid'] - 1e-8
 
-        print(("My Ask = {}".format(my_ask)))
+        LOG.debug(("My Ask = {}".format(my_ask)))
 
         r = b.sell_limit(market, balance['Balance'], my_ask)
-        pprint(r)
+        LOG.debug(r)
 
 
 def main(ini):

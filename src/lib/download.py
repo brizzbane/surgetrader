@@ -11,11 +11,14 @@ import argh
 from retry import retry
 
 # Local
+import lib.logconfig
 from .db import db
 from . import mybittrex
 
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
+LOG = lib.logconfig.app_log
+
 
 try:
     import simplejson as json
@@ -40,13 +43,13 @@ def main(ini):
     b = mybittrex.make_bittrex(config)
 
 
-    print("Getting market summaries")
+    LOG.debug("Getting market summaries")
     markets = b.get_market_summaries()
 
     with open("tmp/markets.json", "w") as markets_file:
         markets_file.write(pprint.pformat(markets['result']))
 
-    print("Populating database")
+    LOG.debug("Populating database")
     for market in markets['result']:
 
         db.market.insert(
