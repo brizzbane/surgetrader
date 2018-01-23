@@ -85,6 +85,34 @@ But it's better to test it by typing `invoke takeprofit`
 
 ## System Hygiene
 
+### Dwindling BTC - is your bot stuck?
+
+Over time, your seed capital may dwindle away - you deposit 1BTC of seed capital and a few months or weeks later, you do not have 1BTC active in the account.
+In the ideal world, your 1BTC would either be in purchased coins or available to purchase other coins and nowhere else. However the following scenarios can 
+can all lead to your seed capital vanishing into thin air:
+
+#### Overwithdrawing
+
+We will cover this obvious one first. If you withdraw more than the calculated daily profit, then obviously you can expect less BTC over time. I typically 
+only withdraw the first 2 or 3 places of profit, e.g: if the daily profit is `0.12345678` I withdraw `0.12` or `0.123`.
+
+#### Zombie Coins
+
+Overtime purchased coins in your account will not be on the market for sale. That is to say, the bot may have purchased the coin, but `invoke takeprofit` or some combination 
+`invoke cancelsells` and `invoke takeprofit` failed to place a sell order for the coin. Why? I dont know, but I can show you how to find Zombie Coins as I have two on 
+my account right now. Go to your Wallets tab and sort by the `Reserved` column. All the purchased coins should be entirely reserved, meaning that they are up for sale.
+However, as you can see, there are 2 coins in my account which are not up for sale:
+
+![Alt text](https://monosnap.com/file/rbp4ZzdpWFFyXdxaTxoUdMimz3gEYL.png)
+
+For the first coin, it looks like there was an attempt to sell it, but the sell order only partially filled.
+
+
+
+
+
+### Market Under Maintenance
+
 Occasionally, the daily profit report will email you, informing you that the system crashed. The two common reasons for crashing are:
 1. Bittrex is performing temporary maintenance on a coin
 2. Bittrex is delisting a market
@@ -92,8 +120,6 @@ Occasionally, the daily profit report will email you, informing you that the sys
 
 You need to go to Bittrex and see why the bot crashed ... or connect with me in [Discord](https://discord.me/cashmoney). If the coin
 is under maintenance, you will see something like [this](http://take.ms/WtFsc) when you visit the market.
-
-### Market Under Maintenance
 
 You may get errors when the profit report runs if a market is under maintenance. For example on January 7, 2018 the market `BTC-SHIFT` was
 undergoing automated maintence [as this screenshot shows](http://take.ms/Dz9Rb). So, when I rain the daily profit report, I got [this execution
