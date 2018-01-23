@@ -107,7 +107,11 @@ However, as you can see, there are 2 coins in my account which are not up for sa
 
 For the first coin, it looks like there was an attempt to sell it, but the sell order only partially filled.
 
+#### Delisted Markets
 
+There may be a case where SurgeTrader buys a coin and cannot sell it because the market has been delisted. When you send those
+coins to another exchange, you need to account for the fact that your BTC balance has dropped by re-upping it or decreasing the seed
+capital value in your config file.
 
 
 
