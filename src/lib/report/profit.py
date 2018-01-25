@@ -137,9 +137,9 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
         return False
 
     def should_skip(buy_row):
-        if buy_row.config_file != user_config.basename:
-            LOG.debug("\tconfig file != {}... skipping".format(user_config.basename))
-            return True
+#        if buy_row.config_file != user_config.basename:
+#            LOG.debug("\tconfig file != {}... skipping".format(user_config.basename))
+#            return True
 
         if (not buy_row.sell_id) or (len(buy_row.sell_id) < 12):
             LOG.debug("\tNo sell id ... skipping")
@@ -155,10 +155,15 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
     html_template = meld3.parse_htmlstring(html_template)
     html_outfile = open("tmp/" + user_config.basename + ".html", 'wb')
 
+    locked_capital = 0
+
     open_orders = list()
     closed_orders = list()
 
-    for buy in db().select(
+
+    query = (db.buy.config_file == user_config.basename)
+
+    for buy in db(query).select(
         db.buy.ALL,
         orderby=~db.buy.timestamp
     ):
@@ -198,7 +203,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
 
         bo = exchange.get_order(buy.order_id)['result']
 
-        # LOG.debug("For buy order id ={}, Sell order={}".format(buy.order_id, so))
+        LOG.debug("For buy order {}, Sell order={}".format(bo, so))
 
         if open_order(so):
             so['Quantity'] = "{:d}%".format(int(
@@ -218,7 +223,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
             'profit': profit_from(bo, so)
         }
 
-        LOG.debug("\tCalculations")
+        LOG.debug("\tCalculations: {}".format(calculations))
         if open_order(so):
             del calculations['sell_commission']
             del calculations['sell_price']
@@ -228,8 +233,9 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
             _ = best_bid(so)
             difference = calculations['buy_price'] - _
             calculations['best_bid'] = _
-            calculations['difference'] = '{:.2f}'.format(100 * (difference / calculations['buy_price']))
+            calculations['difference'] = '{:.2f}%'.format(100 * (difference / calculations['buy_price']))
             open_orders.append(calculations)
+            locked_capital += calculations['units_bought'] * calculations['buy_price']
 
         else:
             LOG.debug("\tClosed order: {}".format(calculations))
@@ -306,8 +312,18 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
         elem.content(val)
 
     elem = html_template.findmeld('available')
-    val = exchange.get_balance('BTC')['result']
-    val = "Balance={}BTC, Available={}BTC".format(val['Balance'], val['Available'])
+    bal = exchange.get_balance('BTC')['result']
+    LOG.debug("bal={}".format(bal))
+    btc = bal['Balance']
+    val = "Balance={}BTC, Available={}BTC".format(bal['Balance'], bal['Available'])
+    elem.content(val)
+
+    elem = html_template.findmeld('locked')
+    val = "{}BTC".format(locked_capital)
+    elem.content(val)
+
+    elem = html_template.findmeld('operating')
+    val = "{}BTC".format(locked_capital + btc)
     elem.content(val)
 
     LOG.debug("HTML OUTFILE: {}".format(html_outfile))

@@ -35,3 +35,5 @@ buy = db.define_table(
     Field('timestamp', type='datetime', default=datetime.now)
     )
 db.executesql('CREATE INDEX IF NOT EXISTS sidx ON buy (selling_price);')
+db.executesql('CREATE INDEX IF NOT EXISTS cidx ON buy (config_file);')
+

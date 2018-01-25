@@ -39,7 +39,7 @@ import lib.config
 import lib.logconfig
 import lib.report.profit
 import lib.takeprofit
-
+from lib.db import db
 
 
 SYS_INI = lib.config.System()
@@ -205,6 +205,17 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
 
     LOG.debug(close_task())
 
+@task
+def deleteorder(_ctx, order_id):
+
+    LOG.debug(open_task())
+
+    query = (db.buy.sell_id == order_id)
+
+    db(query).delete()
+    db.commit()
+
+    LOG.debug(close_task())
 
 @task
 def cancelsells(_ctx, ini=None):

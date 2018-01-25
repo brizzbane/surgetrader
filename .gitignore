@@ -17,7 +17,10 @@ profitreport.out
 src/users/*.ini
 src/tmp
 
-src/log/app.log
+src/log/app.log*
+src/log/surgetrader
+
+
 src/backup/storage*
 
 secrets.json
