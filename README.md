@@ -6,6 +6,14 @@ A python **3** bot designed to profit on price surges detected at BitTrex.
 SurgeTrader finds what coin has had the greatest percent growth in price over a period
 of time (typically an hour). It then buys that coin at market value and sets a profit target.
 
+**READ THIS CAREFULLY** SurgeTraderBot is designed to generate BTC profits and then go back into more trades immediately.
+It opens a large number of "losing" transactions in the _hopes_ of closing a few profit targets on a daily basis. Be prepared for
+the estimated value of your account to drop to 20 to 50% of your initial deposit and remain that way. If you are not comfortable
+with the large number of open transactions that you see in [my live account](https://surgetraderbot.blogspot.com/), where each open
+transaction is losing 20 to 60% of the initial value of the trade before it (hopefully) closes, then you have a few options:
+* fork the code and implement an artificial stop loss (crypto is too volatile for this IMHO)
+* Do not use the bot
+
 ## How well has it worked?
 
 I record performance in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
