@@ -70,7 +70,7 @@ class System:
 class User(System):
 
     def __init__(self, ini):
-        super().__init__()
+        self.system = System()
 
         config = configparser.RawConfigParser()
         self.filename = "users/" + ini
@@ -103,6 +103,14 @@ class User(System):
     def trade_top(self):
         _ = self.config.get('trade', 'top')
         return int(_)
+
+    @property
+    def trade_min_volume(self):
+        try:
+            _ = self.config.getfloat('trade', 'min_volume')
+            return _
+        except configparser.NoOptionError:
+            return self.system.min_volume
 
     @property
     def trade_preserve(self):

@@ -43,17 +43,19 @@ def cancelall(b):
 
 
 def sellall(b):
+
+
     cancelall(b)
     balances = b.get_balances()
     for balance in balances['result']:
         LOG.debug("-------------------- {}".format(balance['Currency']))
         LOG.debug(balance)
 
-        if not balance['Available'] or balance['Currency'] == 'BTC':
+        if ((balance['Available'] < 4e-8) or (balance['Currency'] == 'BTC')):
             LOG.debug("\tno balance or this is BTC")
             continue
 
-        skipcoin = "CRYPT TIT GHC UNO DAR ARDR DGD MTL SNGLS SWIFT TIME TKN XAUR"
+        skipcoin = "GEO NEM CRYPT TIT GHC UNO DAR DGD MTL SNGLS SWIFT TIME TKN XAUR"
         if balance['Currency'] in skipcoin:
             LOG.debug("\tthis is a skipcoin")
             continue
@@ -77,9 +79,13 @@ def main(ini):
 
     config_file = ini
     config = configparser.RawConfigParser()
+    LOG.debug("Reading config file")
     config.read(config_file)
 
+    LOG.debug("Creating exchange object")
     b = mybittrex.make_bittrex(config)
+
+    LOG.debug("Selling all coins")
     sellall(b)
 
 if __name__ == '__main__':

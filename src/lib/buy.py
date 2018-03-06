@@ -55,8 +55,7 @@ MIN_PRICE = SYS_INI.min_price
 """The coin must cost 100 sats or more because any percentage markup for a
 cheaper coin will not lead to a change in price."""
 
-MIN_VOLUME = SYS_INI.min_volume
-"Must have at least a certain amount of BTC in transactions over last 24 hours"
+
 
 MIN_GAIN = SYS_INI.min_gain
 "1-hour gain must be 5% or more"
@@ -254,7 +253,7 @@ def buycoin(config_file, user_config, exchange, top_coins):
 
 
 @supycache(cache_key='result')
-def analyze_gain(exchange):
+def analyze_gain(exchange, min_volume):
     """Find the increase in coin price.
 
     The market database table stores the current ask price of all coins.
@@ -334,8 +333,8 @@ def analyze_gain(exchange):
             continue
 
         try:
-            if markets[name]['BaseVolume'] < MIN_VOLUME:
-                LOG.debug("\t{} 24hr vol < {}".format(markets[name], MIN_VOLUME))
+            if markets[name]['BaseVolume'] < min_volume:
+                LOG.debug("\t{} 24hr vol < {}".format(markets[name], min_volume))
                 continue
         except KeyError:
             LOG.debug("\tKeyError locating {}".format(name))
@@ -365,7 +364,7 @@ def analyze_gain(exchange):
     return gain
 
 
-def topcoins(exchange, number_of_coins):
+def topcoins(exchange, user_config):
     """Find the coins with the greatest change in price.
 
     Calculate the gain of all BTC-based markets. A market is where
@@ -381,7 +380,7 @@ def topcoins(exchange, number_of_coins):
     Returns:
         list : the markets which are surging.
     """
-    top = analyze_gain(exchange)
+    top = analyze_gain(exchange, user_config.trade_min_volume)
 
     # LOG.debug 'TOP: {}.. now filtering'.format(top[:10])
     top = [t for t in top if t[1] >= MIN_GAIN]
@@ -390,10 +389,10 @@ def topcoins(exchange, number_of_coins):
 
     LOG.debug("Top 5 coins filtered on %gain={} and volume={}:\n{}".format(
         MIN_GAIN,
-        MIN_VOLUME,
+        user_config.trade_min_volume,
         pprint.pformat(top[:5], indent=4)))
 
-    return top[:number_of_coins]
+    return top[:user_config.trade_top]
 
 
 def process(config_file):
@@ -402,7 +401,7 @@ def process(config_file):
 
     exchange = mybittrex.make_bittrex(user_config.config)
 
-    top_coins = topcoins(exchange, user_config.trade_top)
+    top_coins = topcoins(exchange, user_config)
 
     LOG.debug("------------------------------------------------------------")
     LOG.debug("Buying coins for: {}".format(config_file))

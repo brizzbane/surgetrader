@@ -1,4 +1,11 @@
-# Provide the API key and secret that you get from Bittrex
+[DEFAULT]
+# exchange may be anything you see here
+# https://github.com/Crypto-toolbox/bitex#supported-exchanges
+# be aware that there are many more exchanges (e.g. Binance) on the
+# dev branch you were instructed to check out
+exchange = Bittrex
+
+
 [api]
 key = 7afdasdfafdasdfas
 secret = 9a8e4103137248asdfasd
@@ -11,6 +18,9 @@ email = awlamont@gmail.com
 
 # These parameters control how we buy and sell
 [trade]
+
+# OPTIONAL: if not defined, will take system.ini value
+min_volume = 20
 
 # How much BTC did we deposit to start trading with?
 deposit    = 1

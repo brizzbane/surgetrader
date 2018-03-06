@@ -39,7 +39,7 @@ import lib.config
 import lib.logconfig
 import lib.report.profit
 import lib.takeprofit
-from lib.db import db
+import lib.db
 
 
 SYS_INI = lib.config.System()
@@ -173,7 +173,6 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
 
     LOG.debug(open_task())
 
-
     inis = listify_ini(ini)
 
     if date_string:
@@ -210,10 +209,7 @@ def deleteorder(_ctx, order_id):
 
     LOG.debug(open_task())
 
-    query = (db.buy.sell_id == order_id)
-
-    db(query).delete()
-    db.commit()
+    lib.db.delete_sell_order(order_id)
 
     LOG.debug(close_task())
 
@@ -268,6 +264,20 @@ def sellall(_ctx, ini):
     Args:
         ini (str): the ini file that connects to the account to liquidate.
     """
+
+    def yes_or_no(question):
+        while "the answer is invalid":
+            reply = str(
+                input(
+                    question  + ' (YES/NO): ')).strip() # remove .lower()
+            if reply == 'YES':
+                return True
+            if reply == 'NO':
+                return False
+
+    if not yes_or_no(f"Sell all coins in {ini}?"):
+        return False
+
     from lib import sellall as _sellall
     LOG.debug(open_task())
 

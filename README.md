@@ -35,6 +35,8 @@ github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 1. `pip3 install -r requirements.txt`
 1. If `pip3` is not available, then you may try calling `pip` instead. But make sure that `pip` is indeed a Python **3** `pip`
 and not a Python 2 one by typing `which pip` and looking at the path of the executable.
+1. `git clone https://github.com/Crypto-toolbox/bitex ; cd bitex ; git checkout -b dev ; python3 setup.py install`
+1. in the `src/log` directory follow the directions in `0-README.md` to enable log rotation.
 
 ## Configuration
 
@@ -96,18 +98,18 @@ But it's better to test it by typing `invoke takeprofit`
 ### Dwindling BTC - is your bot stuck?
 
 Over time, your seed capital may dwindle away - you deposit 1BTC of seed capital and a few months or weeks later, you do not have 1BTC active in the account.
-In the ideal world, your 1BTC would either be in purchased coins or available to purchase other coins and nowhere else. However the following scenarios can 
+In the ideal world, your 1BTC would either be in purchased coins or available to purchase other coins and nowhere else. However the following scenarios can
 can all lead to your seed capital vanishing into thin air:
 
 #### Overwithdrawing
 
-We will cover this obvious one first. If you withdraw more than the calculated daily profit, then obviously you can expect less BTC over time. I typically 
+We will cover this obvious one first. If you withdraw more than the calculated daily profit, then obviously you can expect less BTC over time. I typically
 only withdraw the first 2 or 3 places of profit, e.g: if the daily profit is `0.12345678` I withdraw `0.12` or `0.123`.
 
 #### Zombie Coins
 
-Overtime purchased coins in your account will not be on the market for sale. That is to say, the bot may have purchased the coin, but `invoke takeprofit` or some combination 
-`invoke cancelsells` and `invoke takeprofit` failed to place a sell order for the coin. Why? I dont know, but I can show you how to find Zombie Coins as I have two on 
+Overtime purchased coins in your account will not be on the market for sale. That is to say, the bot may have purchased the coin, but `invoke takeprofit` or some combination
+`invoke cancelsells` and `invoke takeprofit` failed to place a sell order for the coin. Why? I dont know, but I can show you how to find Zombie Coins as I have two on
 my account right now. Go to your Wallets tab and sort by the `Reserved` column. All the purchased coins should be entirely reserved, meaning that they are up for sale.
 However, as you can see, there are 2 coins in my account which are not up for sale:
 

@@ -37,3 +37,10 @@ buy = db.define_table(
 db.executesql('CREATE INDEX IF NOT EXISTS sidx ON buy (selling_price);')
 db.executesql('CREATE INDEX IF NOT EXISTS cidx ON buy (config_file);')
 
+def delete_sell_order(order_id):
+
+    query = (db.buy.sell_id == order_id)
+
+    db(query).delete()
+    db.commit()
+

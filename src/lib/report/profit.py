@@ -102,11 +102,14 @@ def obtain_ticker(exchange, order):
 @retry(exceptions=json.decoder.JSONDecodeError, tries=3, delay=5)
 def obtain_order(exchange, uuid):
     order = exchange.get_order(uuid)
-    # LOG.debug("Order = {}".format(order))
-    return order['result']
+    LOG.debug("Order = {}".format(order))
+    _ = order['result']
+    if _ is None:
+        raise Exception("Could not obtain order")
+    return _
 
 
-def report_profit(user_config, exchange, on_date=None, skip_markets=None):
+def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete_unsold=False):
 
 
     def profit_from(buy_order, sell_order):
@@ -189,6 +192,11 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
                 _close_date = close_date(so['Closed'])
                 # LOG.debug("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
 
+
+#                if _close_date.day == 15 and _close_date.month == 1:
+#                    LOG.debug("\t\t\tSkipping Jan 15 order")
+#                    continue
+
                 if type(on_date) is list:
                     if _close_date < on_date[0]:
                         LOG.debug("\t\tTrade is too old for report.")
@@ -240,7 +248,11 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None):
         else:
             LOG.debug("\tClosed order: {}".format(calculations))
             if so['PricePerUnit'] is None:
-                raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so, bo))
+                if delete_unsold:
+                    import lib.db
+                    lib.db.delete_sell_order(so['OrderUuid'])
+                else:
+                    raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so, bo))
             closed_orders.append(calculations)
 
 
@@ -354,7 +366,6 @@ def notify_admin(msg, sys_config):
                  recipient=recipient,
                  bcc=None
                  )
-
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
