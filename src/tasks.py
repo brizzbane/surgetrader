@@ -38,6 +38,7 @@ from invoke import task
 import lib.config
 import lib.logconfig
 import lib.report.profit
+import lib.stoploss
 import lib.takeprofit
 import lib.db
 
@@ -134,6 +135,25 @@ def buy(_ctx, ini=None):
     LOG.debug(close_task())
 
 
+
+@task
+def stoploss(_ctx, ini=None):
+    """Issue SELL LIMIT orders on the coin(s) that have been bought.
+
+    Every 5 minutes this task runs to see if any new coins have been bought.
+    If so, it then sets a profit target for them.
+    """
+
+    LOG.debug(open_task())
+
+
+    inis = listify_ini(ini)
+
+    for _ in inis:
+        LOG.debug("Stop loss Processing {}".format(_))
+        lib.stoploss.stop_loss(_)
+
+    LOG.debug(close_task())
 
 @task
 def takeprofit(_ctx, ini=None):

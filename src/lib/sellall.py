@@ -29,21 +29,23 @@ def loop_forever():
 logger = logging.getLogger(__name__)
 
 
+def cancel_sell_order(exchange, sell_id):
+    r = exchange.cancel(sell_id)
+    LOG.debug(r)
+    db(db.buy.sell_id == sell_id).delete()
+    db.commit()
+
+
 def cancelall(b):
     orders = b.get_open_orders()
 
     for order in orders['result']:
         LOG.debug(order)
         sell_id = order['OrderUuid']
-        r = b.cancel(sell_id)
-        LOG.debug(r)
-        db(db.buy.sell_id == sell_id).delete()
-        db.commit()
-
+        cancel_sell_order(sell_id)
 
 
 def sellall(b):
-
 
     cancelall(b)
     balances = b.get_balances()
@@ -55,7 +57,7 @@ def sellall(b):
             LOG.debug("\tno balance or this is BTC")
             continue
 
-        skipcoin = "GEO NEM CRYPT TIT GHC UNO DAR DGD MTL SNGLS SWIFT TIME TKN XAUR"
+        skipcoin = "BTCD BTCP CPC GEO NEM PDC RISE CRYPT TIT GHC GCR INFX UNO DAR DGD MTL SNGLS SWIFT TIME TKN XAUR"
         if balance['Currency'] in skipcoin:
             LOG.debug("\tthis is a skipcoin")
             continue

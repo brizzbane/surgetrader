@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 
-
 # core
 import logging
 import pprint
@@ -38,6 +37,7 @@ def __takeprofit(entry, gain):
 
     return profit_target
 
+
 def _takeprofit(exchange, percent, row, order):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
@@ -56,7 +56,7 @@ def _takeprofit(exchange, percent, row, order):
 
 
 #@retry()
-def takeprofit(config_file, exchange, percent):
+def takeprofit(config_file, exchange, take_profit, stop_loss):
 
     rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select()
     for row in rows:
@@ -71,7 +71,7 @@ def takeprofit(config_file, exchange, percent):
         LOG.debug("unsold row {}".format(pprint.pformat(order)))
         order = order['result']
         if not order['IsOpen']:
-            _takeprofit(exchange, percent, row, order)
+            _takeprofit(exchange, take_profit, row, order)
         else:
             LOG.debug("""Buy has not been filled. Cannot sell for profit until it does.
                   You may want to manually cancel this buy order.""")
@@ -128,12 +128,13 @@ def prep(config_file):
 def take_profit(config_file):
 
     config, exchange = prep(config_file)
-    percent = float(config.get('trade', 'takeprofit'))
+    take_profit = float(config.get('trade', 'takeprofit'))
+    stop_loss = float(config.get('trade', 'stoploss'))
 
     LOG.debug("Setting profit targets for {}".format(config_file))
 
-    takeprofit(config_file, exchange, percent)
+    takeprofit(config_file, exchange, take_profile, stop_loss)
 
 def clear_profit(config_file):
-    _, exchange = prep(config_file)
+    config, exchange = prep(config_file)
     clearprofit(exchange)
