@@ -140,6 +140,7 @@ def rate_for(exchange, mkt, btc):
 
     coin_amount = 0
     btc_spent = 0
+    LOG.debug("Getting orderbook for {}".format(mkt))
     orders = exchange.get_orderbook(mkt, SELL_ORDERBOOK)
     for order in orders['result']:
         btc_spent += order['Rate'] * order['Quantity']
@@ -249,7 +250,7 @@ def buycoin(config_file, user_config, exchange, top_coins):
     avail = available_btc(exchange)
 
     for market in top_coins:
-        _buycoin(config_file, user_config, exchange, market[0], avail)
+        _buycoin(config_file, user_config, exchange, market, avail)
 
 
 @supycache(cache_key='result')
@@ -395,16 +396,19 @@ def topcoins(exchange, user_config):
     return top[:user_config.trade_top]
 
 
-def process(config_file):
+def process(config_file, coins=None):
     """Buy coins for every configured user of the bot."""
     user_config = lib.config.User(config_file)
 
     exchange = mybittrex.make_bittrex(user_config.config)
 
-    top_coins = topcoins(exchange, user_config)
+    if coins:
+        top_coins = coins
+    else:
+        top_coins = topcoins(exchange, user_config)
 
     LOG.debug("------------------------------------------------------------")
-    LOG.debug("Buying coins for: {}".format(config_file))
+    LOG.debug("Buying {} for: {}".format(top_coins, config_file))
     buycoin(config_file, user_config, exchange, top_coins)
 
 

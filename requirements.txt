@@ -4,5 +4,6 @@ invoke
 marrow.mailer
 meld3
 pyDAL
+pyrogram
 retry
 supycache

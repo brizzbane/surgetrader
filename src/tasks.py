@@ -36,11 +36,12 @@ from invoke import task
 
 #local
 import lib.config
+import lib.db
 import lib.logconfig
 import lib.report.profit
 import lib.stoploss
 import lib.takeprofit
-import lib.db
+import lib.telegram
 
 
 SYS_INI = lib.config.System()
@@ -135,6 +136,23 @@ def buy(_ctx, ini=None):
     LOG.debug(close_task())
 
 
+@task
+def telegrambot(_ctx, ini=None):
+    """Invoke the telegram bot and have it scan the group for posted signals.
+
+    Returns:
+        Nothing.
+    """
+    from lib import telegram as _telegram
+
+    LOG.debug(open_task())
+
+    inis = listify_ini(ini, randomize=False)
+    _telegram.main(inis)
+
+    LOG.debug(close_task())
+
+
 
 @task
 def stoploss(_ctx, ini=None):
@@ -154,6 +172,7 @@ def stoploss(_ctx, ini=None):
         lib.stoploss.stop_loss(_)
 
     LOG.debug(close_task())
+
 
 @task
 def takeprofit(_ctx, ini=None):

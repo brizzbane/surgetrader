@@ -9,6 +9,7 @@ backup/*
 *.sqlite3
 *.sqlite3*
 system.ini
+config.ini
 
 .spyproject
 profitreport.out
