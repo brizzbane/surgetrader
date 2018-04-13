@@ -9,6 +9,7 @@ from pyrogram.api import types
 # local
 import lib.buy
 import lib.logconfig
+import lib.takeprofit
 
 
 LOG = lib.logconfig.app_log
@@ -29,12 +30,20 @@ def maybe_trade(message):
     # match "Buy #XVG'
     re2 = re.compile(r'Buy\s+#(\S+)', re.IGNORECASE)
 
+    # match "#XVG Buy'
+    re3 = re.compile(r'\s+#(\S+)\s+Buy', re.IGNORECASE)
+
     m = re1.search(message)
     if m:
         coin, exchange = m.groups()
         return coin, exchange
 
     m = re2.match(message)
+    if m:
+        coin = m.group(1)
+        return coin, None
+
+    m = re3.match(message)
     if m:
         coin = m.group(1)
         return coin, None
@@ -76,6 +85,8 @@ def make_update_handler(inis):
                     LOG.debug("\tTrade {} on {} with ini={}.".format(market, exchange, ini))
 
                     lib.buy.process(ini, [market])
+                for ini in inis:
+                    lib.takeprofit.take_profit(ini)
         else:
             LOG.debug("Message is not from desired channel:")
             # LOG.debug(message)

@@ -133,7 +133,7 @@ def take_profit(config_file):
 
     LOG.debug("Setting profit targets for {}".format(config_file))
 
-    takeprofit(config_file, exchange, take_profile, stop_loss)
+    takeprofit(config_file, exchange, take_profit, stop_loss)
 
 def clear_profit(config_file):
     config, exchange = prep(config_file)

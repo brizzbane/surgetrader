@@ -129,6 +129,8 @@ def record_buy(config_file, order_id, mkt, rate, amount):
     Returns:
         Nothing
     """
+    db._adapter.reconnect()
+
     db.buy.insert(
         config_file=config_file,
         order_id=order_id, market=mkt, purchase_price=rate, amount=amount)
