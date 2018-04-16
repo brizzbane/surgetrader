@@ -41,6 +41,14 @@ def delete_sell_order(order_id):
 
     query = (db.buy.sell_id == order_id)
 
-    db(query).delete()
+    _ = db(query).delete()
+    print(_)
     db.commit()
 
+def delete_buy_order(order_id):
+
+    query = (db.buy.order_id == order_id)
+
+    _ = db(query).delete()
+    print(_)
+    db.commit()

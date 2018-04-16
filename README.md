@@ -4,19 +4,18 @@ A python **3** cryptocurrency trading bot that has gone through 2 incarnations:
 * Incarnation 1 involved simple technical analysis. Further discussion of it can be found
 in the `README-SurgeTraderOld.md` file. It is no longer making trades for me. Though it
 is for others.
-* Incarnation 2 scans the Telegram channel of a very astute technical and fundamental trader
-and automatically buys his posted signals and sets profit targets that are much more modest than he typically achieves.
+* Incarnation 2 scans [the Telegram channel of a very astute technical and fundamental trader](https://t.me/Tradingcryptocoach) and automatically buys his posted signals and sets profit targets that are much more modest than he typically achieves.
 
 ## How well has it worked?
 
-I record performance automatically in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
+I record performance automatically in [this blog](https://surgetradertelegram.blogspot.com/) on a daily basis.
 You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/)
-or [our Discord channel](https://discord.gg/5WPHMwu).
+or [our Discord channel](https://discord.gg/dB2YVg2).
 
 Here are some other ways to learn about it:
 
-* [AMA Chat on reddit cryptomarkets](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/)
-* [A comment I made](https://www.reddit.com/r/CryptoMarkets/comments/7dxyb4/bitcoin_cash_traders_lose_millions_as_exchange/dq1jeuk/) in response to a panic buy where people list millions - SurgeTraderBot can rightly be seen as a bot that sometimes buys into panic.
+* [AMA Chat on reddit cryptomarkets]()
+
 
 # How do I install this bad boy?
 
@@ -42,16 +41,12 @@ Edit your account ini file as documented.
 Over a period of experimentation, I have found that
 these settings work well:
 
-    Each trade should use 3% of the account. Aim for a 5% profit margin.
+    Each trade should use 3% of the seed capital. Aim for a 5% profit margin.
 
 You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
 profits, you should only aim for 5% profit.
 
 ## Cron
-
-Create 1 cron entry that downloads the market data every hour (or whatever
-sample period you like) and then scans for the coin with the strongest
-surge and buys it:
 
     INVOKE=/home/schemelab/install/miniconda3/bin/invoke
     # SURGE TRADER

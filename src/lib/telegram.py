@@ -27,8 +27,12 @@ def maybe_trade(message):
     # match "Coin #XVG on #Bittrex"
     re1 = re.compile(r'Coin\s+#(\S+)\s+\S+\s+#(\S+)', re.IGNORECASE)
 
-    # match "Buy #XVG'
-    re2 = re.compile(r'Buy\s+#(\S+)', re.IGNORECASE)
+    # match #SYS Coin at #Bittrex
+    re1_1 = re.compile(r'#(\S+)\s+Coin\s+\S+\s+#(\S+)', re.IGNORECASE)
+
+    # match "Buy #XVG' or Accumulate #EXCL at #Bittrex
+    # note: He sometimes says Accumulate Some #GAME and the `some` throws me off
+    re2 = re.compile(r'(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
 
     # match "#XVG Buy'
     re3 = re.compile(r'\s+#(\S+)\s+Buy', re.IGNORECASE)
@@ -38,12 +42,17 @@ def maybe_trade(message):
         coin, exchange = m.groups()
         return coin, exchange
 
-    m = re2.match(message)
+    m = re1_1.search(message)
     if m:
-        coin = m.group(1)
+        coin, exchange = m.groups()
+        return coin, exchange
+
+    m = re2.search(message)
+    if m:
+        coin = m.group(2)
         return coin, None
 
-    m = re3.match(message)
+    m = re3.search(message)
     if m:
         coin = m.group(1)
         return coin, None
@@ -63,6 +72,9 @@ def make_update_handler(inis):
             LOG.debug("Ignoring...")
             return
         elif isinstance(update, types.UpdateReadHistoryInbox):
+            LOG.debug("Ignoring...")
+            return
+        elif isinstance(update, types.UpdateEditChannelMessage):
             LOG.debug("Ignoring...")
             return
 

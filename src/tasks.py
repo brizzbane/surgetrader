@@ -244,11 +244,20 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
     LOG.debug(close_task())
 
 @task
-def deleteorder(_ctx, order_id):
+def deletesellorder(_ctx, order_id):
 
     LOG.debug(open_task())
 
     lib.db.delete_sell_order(order_id)
+
+    LOG.debug(close_task())
+
+@task
+def deletebuyorder(_ctx, order_id):
+
+    LOG.debug(open_task())
+
+    lib.db.delete_buy_order(order_id)
 
     LOG.debug(close_task())
 

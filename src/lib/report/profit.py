@@ -239,7 +239,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
             LOG.debug("\tOpen order...")
 
             _ = best_bid(so)
-            difference = calculations['buy_price'] - _
+            difference = _ - calculations['buy_price']
             calculations['best_bid'] = _
             calculations['difference'] = '{:.2f}%'.format(100 * (difference / calculations['buy_price']))
             open_orders.append(calculations)

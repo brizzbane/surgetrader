@@ -60,7 +60,6 @@ def takeprofit(config_file, exchange, take_profit, stop_loss):
 
     rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select()
     for row in rows:
-        LOG.debug("\t %s" % row)
 
         # if row['config_file'] != config_file:
         #     LOG.debug "my config file is {} but this one is {}. skipping".format(
@@ -68,7 +67,10 @@ def takeprofit(config_file, exchange, take_profit, stop_loss):
         #     continue
 
         order = exchange.get_order(row['order_id'])
-        LOG.debug("unsold row {}".format(pprint.pformat(order)))
+        LOG.debug("""
+This row is unsold <row>{}</row>.
+Here is it's order <order>{}</order>.
+""")
         order = order['result']
         if not order['IsOpen']:
             _takeprofit(exchange, take_profit, row, order)
