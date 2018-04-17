@@ -137,12 +137,14 @@ def buy(_ctx, ini=None):
 
 
 @task
-def telegrambot(_ctx, telegram_client, inis):
+def telegrambot(_ctx, telegram_client, ini_parm):
     """Invoke the telegram bot and have it scan the group for posted signals.
     When a signal is posted, trade each ini file using the specified exchange section within that ini-file
 
     Example invocation:
-        invoke telegrambot QualitySignals "bill/binance.1 bill/bittrex.2"
+        invoke telegrambot QualitySignals inis
+        
+        "bill/binance.1 bill/bittrex.2"
         # This will scan the quality_signals telegram group and when a buy signal is detected,
         # it will trade the signal and set profit targets using the configuration data in the 
         # bill.ini file and exchange-specific config settings listed in [binance.1] and [binance.2]
@@ -155,9 +157,14 @@ def telegrambot(_ctx, telegram_client, inis):
 
     LOG.debug(open_task())
 
-    inis = [lib.config.User.from_string(ini) for ini in inis.split()]
+    # look in the system.ini for a line indicating the list of user ini files to process
+    inis = SYS_INI.config.get('users', ini_parm).split()
     
-    _telegram.main(telegram_client, inis)
+    # Create lib.config.User instances 
+    user_inis = [lib.config.User.from_string(ini) for ini in inis]
+
+    # Parse a telegram chat room for signals and trade all the user ini files with the signal
+    _telegram.main(telegram_client, user_inis)
 
     LOG.debug(close_task())
 

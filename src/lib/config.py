@@ -83,9 +83,9 @@ class User(System):
         # print("USER CONFIG SECTIONS: {}".format(config._sections))
         
     @classmethod
-    def from_string(class, ini_string):
+    def from_string(klass, ini_string):
         ini_root, exchange_section = ini_string.split("/")
-        instance = User(ini_root)
+        instance = User(ini_root, exchange_section)
         return instance
 
     def exchange(self, parameter):
