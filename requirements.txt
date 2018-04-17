@@ -1,9 +1,10 @@
 argh
-python-dateutil
+ccxt
 invoke
 marrow.mailer
 meld3
 pyDAL
 pyrogram
+python-dateutil
 retry
 supycache

@@ -137,8 +137,16 @@ def buy(_ctx, ini=None):
 
 
 @task
-def telegrambot(_ctx, ini=None):
+def telegrambot(_ctx, telegram_client, inis):
     """Invoke the telegram bot and have it scan the group for posted signals.
+    When a signal is posted, trade each ini file using the specified exchange section within that ini-file
+
+    Example invocation:
+        invoke telegrambot QualitySignals "bill/binance.1 bill/bittrex.2"
+        # This will scan the quality_signals telegram group and when a buy signal is detected,
+        # it will trade the signal and set profit targets using the configuration data in the 
+        # bill.ini file and exchange-specific config settings listed in [binance.1] and [binance.2]
+        # QualitySignals is the class name of a TelegramClient subclass in src/lib/telegram.py
 
     Returns:
         Nothing.
@@ -147,8 +155,9 @@ def telegrambot(_ctx, ini=None):
 
     LOG.debug(open_task())
 
-    inis = listify_ini(ini, randomize=False)
-    _telegram.main(inis)
+    inis = [lib.config.User.from_string(ini) for ini in inis.split()]
+    
+    _telegram.main(telegram_client, inis)
 
     LOG.debug(close_task())
 

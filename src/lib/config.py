@@ -69,19 +69,28 @@ class System:
 
 class User(System):
 
-    def __init__(self, ini):
+    def __init__(self, ini_base, exchange_section):
         self.system = System()
 
         config = configparser.RawConfigParser()
-        self.filename = "users/" + ini
-        self.basename = ini
+        self.filename = "users/{}.ini".format(ini_base)
+        self.exchange_section = exchange_section
         with open(self.filename) as file_pointer:
             #config.readfp(f)
             config.read_file(file_pointer)
 
         self.config = config
         # print("USER CONFIG SECTIONS: {}".format(config._sections))
+        
+    @classmethod
+    def from_string(class, ini_string):
+        ini_root, exchange_section = ini_string.split("/")
+        instance = User(ini_root)
+        return instance
 
+    def exchange(self, parameter):
+        _ = self.config.get(self.exchange_section, parameter)
+        return _
 
 
     @property
@@ -96,31 +105,24 @@ class User(System):
 
     @property
     def trade_deposit(self):
-        _ = self.config.get('trade', 'deposit')
+        _ = self.exchange('deposit')
         return float(_)
 
     @property
     def trade_top(self):
-        _ = self.config.get('trade', 'top')
+        _ = self.exchange('top')
         return int(_)
 
-    @property
-    def trade_min_volume(self):
-        try:
-            _ = self.config.getfloat('trade', 'min_volume')
-            return _
-        except configparser.NoOptionError:
-            return self.system.min_volume
 
     @property
     def trade_preserve(self):
         "Return the `preserve` param from the trade section of a user config file."
 
-        _ = self.config.get('trade', 'preserve')
+        _ = self.exchange('preserve')
         return float(_)
 
     @property
-    def trade_trade(self):
+    def percent_per_trade(self):
         "Percentage of seed capital to trade."
-        _ = self.config.get('trade', 'trade')
+        _ = self.config('percent_per_trade')
         return float(_)
