@@ -412,6 +412,21 @@ def process(config_file, coins=None):
     LOG.debug("------------------------------------------------------------")
     LOG.debug("Buying {} for: {}".format(top_coins, config_file))
     buycoin(config_file, user_config, exchange, top_coins)
+    
+    
+def process2(configo, coins=None):
+    """Buy coins for every configured user of the bot."""
+
+    exchange = lib.exchange.abstract.Abstract.from_string(configo)
+
+    if coins:
+        top_coins = coins
+    else:
+        top_coins = topcoins(exchange, configp)
+
+    LOG.debug("------------------------------------------------------------")
+    LOG.debug("Buying {} for: {}".format(top_coins, configo))
+    buycoin(configo.config_name, configo, exchange, top_coins)
 
 
 def main(inis):

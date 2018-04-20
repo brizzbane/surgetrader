@@ -1,5 +1,6 @@
 argh
 ccxt
+configobj
 invoke
 marrow.mailer
 meld3

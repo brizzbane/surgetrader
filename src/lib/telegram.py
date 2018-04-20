@@ -17,6 +17,9 @@ LOG = lib.logconfig.app_log
 
 class TelegramClient(object):
     
+    def __init__(self, exchange_label):
+        self.exchange_label = exchange_label
+        
     def make_update_handler(self, inis):
 
         def update_handler(client, update, users, chats):
@@ -42,7 +45,7 @@ class TelegramClient(object):
                 return
 
             i = message.to_id.channel_id
-            if i in CHANNELS.values():
+            if i in self.CHANNELS.values():
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
                 LOG.debug(message.message)
                 (coin, exchange) = maybe_trade(message.message)
@@ -74,17 +77,17 @@ class TradingCryptoCoach(TelegramClient):
 
     def maybe_trade(message):
         # match "Coin #XVG on #Bittrex"
-        re1 = re.compile(r'Coin\s+#(\S+)\s+\S+\s+#(\S+)', re.IGNORECASE)
+        re1 = re.compile(r'Coin\s+#(\S+)(\s+\S+)?', re.IGNORECASE)
 
         # match #SYS Coin at #Bittrex
-        re1_1 = re.compile(r'#(\S+)\s+Coin\s+\S+\s+#(\S+)', re.IGNORECASE)
+        re1_1 = re.compile(r'#(\S+)\s+Coin(\s+\S+\s+#?(\S+))?', re.IGNORECASE)
 
         # match "Buy #XVG' or Accumulate #EXCL at #Bittrex
         # note: He sometimes says Accumulate Some #GAME and the `some` throws me off
         re2 = re.compile(r'(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
 
         # match "#XVG Buy'
-        re3 = re.compile(r'\s+#(\S+)\s+Buy', re.IGNORECASE)
+        re3 = re.compile(r'#(\S+)\s+Buy', re.IGNORECASE)
 
         m = re1.search(message)
         if m:
@@ -111,13 +114,10 @@ class TradingCryptoCoach(TelegramClient):
 
 class QualitySignals(TelegramClient):
 
-    # Trading Crypto Coach's Channel ID
-    CHANNEL_ID = 1147798110
-
-    # My Test Channel ID
-    TEST_CHANNEL_ID = 1312304347
-
-    client = Client(session_name="example")
+    CHANNELS = {
+            'easycoinpicks' : 1312304347,      # My Test Channel,
+            'QualitySignals' : 1226119909  # https://t.me/Tradingcryptocoach
+            }
 
 
     def maybe_trade(message):
@@ -157,11 +157,13 @@ class QualitySignals(TelegramClient):
         return None, None
 
 
-def main(telegram_class, inis):
+def main(telegram_class, exchange_label, inis):
     
+    LOG.debug("C={} E={} I={}".format(telegram_class, exchange_label, inis))
+
     client = Client(session_name="example")
 
-    chat_parser = eval("{}()".format(telegram_class))
+    chat_parser = eval("{}('{}')".format(telegram_class, exchange_label))
 
     update_handler = chat_parser.make_update_handler(inis)
 

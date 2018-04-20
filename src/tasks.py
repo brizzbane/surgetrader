@@ -137,7 +137,7 @@ def buy(_ctx, ini=None):
 
 
 @task
-def telegrambot(_ctx, telegram_client, ini_parm):
+def telegrambot(_ctx, telegram_client, exchange_label, ini_parm):
     """Invoke the telegram bot and have it scan the group for posted signals.
     When a signal is posted, trade each ini file using the specified exchange section within that ini-file
 
@@ -158,13 +158,15 @@ def telegrambot(_ctx, telegram_client, ini_parm):
     LOG.debug(open_task())
 
     # look in the system.ini for a line indicating the list of user ini files to process
-    inis = SYS_INI.config.get('users', ini_parm).split()
+    inis = SYS_INI.config['users'][ini_parm].split()
+    LOG.debug("INISET = {}".format(inis))
     
     # Create lib.config.User instances 
     user_inis = [lib.config.User.from_string(ini) for ini in inis]
+    LOG.debug("C = {} USER_INIS = {}. EXCH_LABEL={}".format(telegram_client, inis, exchange_label))
 
     # Parse a telegram chat room for signals and trade all the user ini files with the signal
-    _telegram.main(telegram_client, user_inis)
+    _telegram.main(telegram_client, exchange_label, user_inis)
 
     LOG.debug(close_task())
 
