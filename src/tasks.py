@@ -28,7 +28,6 @@ Todo:
 
 # core
 import inspect
-import logging
 import random
 
 # 3rd party

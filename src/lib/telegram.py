@@ -1,8 +1,8 @@
 # core
-from datetime import datetime
 import re
 
 # 3rd party
+import argh
 from pyrogram import Client
 from pyrogram.api import types
 
@@ -48,7 +48,7 @@ class TelegramClient(object):
             if i in self.CHANNELS.values():
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
                 LOG.debug(message.message)
-                (coin, exchange) = maybe_trade(message.message)
+                (coin, exchange) = self.maybe_trade(message.message)
                 if not coin:
                     LOG.debug("\tNot a trade message")
                 else:
@@ -56,7 +56,7 @@ class TelegramClient(object):
                         market = "BTC-{}".format(coin)
                         LOG.debug("\tTrade {} on {} with ini={}.".format(market, exchange, ini))
 
-                        lib.buy.process(ini, [market])
+                        lib.buy.process2(ini, [market])
                     for ini in inis:
                         lib.takeprofit.take_profit(ini)
             else:
@@ -75,7 +75,7 @@ class TradingCryptoCoach(TelegramClient):
             'Tradingcryptocoach' : 1147798110  # https://t.me/Tradingcryptocoach
             }
 
-    def maybe_trade(message):
+    def maybe_trade(self, message):
         # match "Coin #XVG on #Bittrex"
         re1 = re.compile(r'Coin\s+#(\S+)(\s+\S+)?', re.IGNORECASE)
 
@@ -120,42 +120,21 @@ class QualitySignals(TelegramClient):
             }
 
 
-    def maybe_trade(message):
-        # match "Coin #XVG on #Bittrex"
-        re1 = re.compile(r'Coin\s+#(\S+)\s+\S+\s+#(\S+)', re.IGNORECASE)
+    def maybe_trade(self, message):
 
         # match #SYS Coin at #Bittrex
-        re1_1 = re.compile(r'#(\S+)\s+Coin\s+\S+\s+#(\S+)', re.IGNORECASE)
-
-        # match "Buy #XVG' or Accumulate #EXCL at #Bittrex
-        # note: He sometimes says Accumulate Some #GAME and the `some` throws me off
-        re2 = re.compile(r'(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
-
-        # match "#XVG Buy'
-        re3 = re.compile(r'\s+#(\S+)\s+Buy', re.IGNORECASE)
+        re1 = re.compile(r'#(\S+)\s+at\s+(BITTREX|BINANCE)', re.IGNORECASE|re.MULTILINE|re.DOTALL)
 
         m = re1.search(message)
         if m:
             coin, exchange = m.groups()
             return coin, exchange
 
-        m = re1_1.search(message)
-        if m:
-            coin, exchange = m.groups()
-            return coin, exchange
-
-        m = re2.search(message)
-        if m:
-            coin = m.group(2)
-            return coin, None
-
-        m = re3.search(message)
-        if m:
-            coin = m.group(1)
-            return coin, None
-
         return None, None
 
+def make_chat_parser(telegram_class, exchange_label):
+    _ = eval("{}('{}')".format(telegram_class, exchange_label))
+    return _
 
 def main(telegram_class, exchange_label, inis):
     
@@ -163,7 +142,7 @@ def main(telegram_class, exchange_label, inis):
 
     client = Client(session_name="example")
 
-    chat_parser = eval("{}('{}')".format(telegram_class, exchange_label))
+    chat_parser = make_chat_parser(telegram_class, exchange_label)
 
     update_handler = chat_parser.make_update_handler(inis)
 

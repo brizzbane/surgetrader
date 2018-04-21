@@ -14,7 +14,6 @@ Todo:
 # core
 import collections
 import json
-import logging
 import pprint
 
 # 3rd party

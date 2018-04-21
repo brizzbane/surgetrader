@@ -345,3 +345,6 @@ by those who chose to download and use it.
 * [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading)
 * [Gekko (freaking amazing)](https://gekko.wizb.it/)
 *
+# Other cool bots
+
+* [Moon Bot](https://moon-bot.com/en/) - closed source but very well engineered.
