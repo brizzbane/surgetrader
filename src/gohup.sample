@@ -1,0 +1,1 @@
+nohup invoke telegrambot -e binance -t QualitySignals -i iniset_1 > qs.out

@@ -1,12 +1,15 @@
-class Abstract(ccxt):
+import ccxt
+
+
+class Abstract:
             
-    def bind_keys(self, exchange, configo):
+    @classmethod
+    def bind_keys(cls, exchange, configo):
         exchange.apikey = configo.apikey
         exchange.secret = configo.secret
         
-    def from_config(self, configo):
-
-        exchange_label = configo.exchange
+    @classmethod
+    def factory(cls, configo, exchange_label):
         
         if exchange_label == 'binance':
             import lib.exchange.binance
@@ -19,6 +22,6 @@ class Abstract(ccxt):
         else:
             raise Exception("Unknown exchange label.")
 
-        self.bind_keys(e, configo)
+        cls.bind_keys(e, configo)
         return e
 

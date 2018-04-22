@@ -1,5 +1,7 @@
+import ccxt.binance
 
-class Binance(lib.exchange.abstract):
+
+class Binance(ccxt.binance):
     
     pass        
         

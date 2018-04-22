@@ -413,15 +413,16 @@ def process(config_file, coins=None):
     buycoin(config_file, user_config, exchange, top_coins)
     
     
-def process2(configo, coins=None):
+def process2(configo, exchange_label, coins=None):
     """Buy coins for every configured user of the bot."""
 
-    exchange = lib.exchange.abstract.Abstract.from_string(configo)
+    import lib.exchange.abstract
+    exchange = lib.exchange.abstract.Abstract.factory(configo, exchange_label)
 
     if coins:
         top_coins = coins
     else:
-        top_coins = topcoins(exchange, configp)
+        top_coins = topcoins(exchange, configo)
 
     LOG.debug("------------------------------------------------------------")
     LOG.debug("Buying {} for: {}".format(top_coins, configo))

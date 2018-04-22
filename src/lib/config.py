@@ -67,26 +67,30 @@ class System:
 
 class User(System):
 
-    def __init__(self, ini_base, exchange_section):
+    def __init__(self, ini, exchange_section, exchange_subsection):
         self.system = System()
 
-        self.filename = "users/{}.ini".format(ini_base)
+        self.filename = "users/{}".format(ini)
         self._exchange_section = exchange_section
+        self._exchange_subsection = exchange_subsection
 
         self.config = ConfigObj(self.filename)
-        self.config_name = ini_base
+        self.config_name = ini
         # print("USER CONFIG SECTIONS: {}".format(config._sections))
 
     @classmethod
     def from_string(cls, ini_string):
-        ini_root, exchange_section = ini_string.split("/")
-        instance = User(ini_root, exchange_section)
+        user_ini, exchange_section, exchange_subsection = ini_string.split("/")
+        instance = User(user_ini, exchange_section, exchange_subsection)
         return instance
 
     def exchange_section(self, parameter):
         _ = self.config[self._exchange_section][parameter]
         return _
 
+    def exchange_subsection(self, parameter):
+        _ = self.config[self._exchange_section][self._exchange_subsection][parameter]
+        return _
 
     @property
     def client_email(self):
@@ -115,6 +119,16 @@ class User(System):
 
         _ = self.exchange_section('preserve')
         return float(_)
+    
+    @property
+    def apikey(self):
+        _ = self.exchange_subsection('apikey')
+        return _
+
+    @property
+    def secret(self):
+        _ = self.exchange_subsection('secret')
+        return _
 
     @property
     def percent_per_trade(self):

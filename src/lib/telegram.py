@@ -56,7 +56,7 @@ class TelegramClient(object):
                         market = "BTC-{}".format(coin)
                         LOG.debug("\tTrade {} on {} with ini={}.".format(market, exchange, ini))
 
-                        lib.buy.process2(ini, [market])
+                        lib.buy.process2(ini, self.exchange_label, [market])
                     for ini in inis:
                         lib.takeprofit.take_profit(ini)
             else:

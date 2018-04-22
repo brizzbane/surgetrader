@@ -22,9 +22,7 @@ src/tmp
 
 src/log/app.log*
 
-
-
-
+src/gohup
 
 src/backup/storage*
 
