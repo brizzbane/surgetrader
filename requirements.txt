@@ -4,6 +4,7 @@ configobj
 invoke
 marrow.mailer
 meld3
+objectpath
 pyDAL
 pyrogram
 python-dateutil

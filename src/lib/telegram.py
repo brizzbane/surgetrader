@@ -15,6 +15,10 @@ import lib.takeprofit
 LOG = lib.logconfig.app_log
 
 
+
+def ccxt_symbol(base,quote):
+    return "{}/{}".format(base, quote)
+
 class TelegramClient(object):
     
     def __init__(self, exchange_label):
@@ -54,6 +58,7 @@ class TelegramClient(object):
                 else:
                     for ini in inis:
                         market = "BTC-{}".format(coin)
+                        market = ccxt_symbol(coin, 'BTC')
                         LOG.debug("\tTrade {} on {} with ini={}.".format(market, exchange, ini))
 
                         lib.buy.process2(ini, self.exchange_label, [market])

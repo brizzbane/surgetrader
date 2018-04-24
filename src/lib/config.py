@@ -5,8 +5,13 @@ SurgeTrader uses a system.ini file and a user ini file. This module provides
 OO access to both.
 """
 
+# core
 import random
+
+# 3rd party
 from configobj import ConfigObj
+
+# local
 
 
 class System:
@@ -104,12 +109,12 @@ class User(System):
 
     @property
     def trade_deposit(self):
-        _ = self.exchange_section('deposit')
+        _ = self.exchange_subsection('deposit')
         return float(_)
 
     @property
     def trade_top(self):
-        _ = self.exchange_section('top')
+        _ = self.exchange_subsection('top')
         return int(_)
 
 
@@ -117,7 +122,7 @@ class User(System):
     def trade_preserve(self):
         "Return the `preserve` param from the trade section of a user config file."
 
-        _ = self.exchange_section('preserve')
+        _ = self.exchange_subsection('preserve')
         return float(_)
     
     @property
@@ -131,13 +136,13 @@ class User(System):
         return _
 
     @property
-    def percent_per_trade(self):
+    def trade(self):
         "Percentage of seed capital to trade."
-        _ = self.config['percent_per_trade']
+        _ = self.exchange_subsection('trade')
         return float(_)
 
     @property
     def take_profit(self):
         "Percentage of seed capital to trade."
-        _ = self.config['exchange']
+        _ = self.exchange_subsection('takeprofit')
         return float(_)

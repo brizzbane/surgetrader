@@ -1,11 +1,27 @@
+
+
+# core
+
+# 3rd party
 import ccxt
+
+#local
+import lib.config
+
+
+
+LOG = lib.logconfig.app_log
 
 
 class Abstract:
             
     @classmethod
     def bind_keys(cls, exchange, configo):
-        exchange.apikey = configo.apikey
+        LOG.debug("""
+                  exchange.apikey = {}
+        exchange.secret = {}
+        """.format(configo.apikey, configo.secret))
+        exchange.apiKey = configo.apikey
         exchange.secret = configo.secret
         
     @classmethod
@@ -22,6 +38,7 @@ class Abstract:
         else:
             raise Exception("Unknown exchange label.")
 
+        LOG.debug("BINDKEY e={} configo={}".format(e, configo))
         cls.bind_keys(e, configo)
         return e
 

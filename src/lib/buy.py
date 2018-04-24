@@ -18,12 +18,14 @@ import pprint
 
 # 3rd party
 import argh
+import objectpath
 from retry import retry
 from supycache import supycache
 from bittrex.bittrex import SELL_ORDERBOOK
 
 # local
 import lib.config
+import lib.exchange.abstract
 import lib.logconfig
 from .db import db
 from . import mybittrex
@@ -104,8 +106,13 @@ def obtain_btc_balance(exchange):
     Returns:
         dict: The account's balance of BTC.
     """
-    bal = exchange.get_balance('BTC')
-    return bal['result']
+    bal = exchange.fetch_balance()
+    tree = objectpath.Tree(bal)
+    btc_data = tree.execute("$.info.balances[@.asset is 'BTC'][0]")
+    LOG.debug("FETCHBAL={}".format(btc_data))
+
+    free_btc = btc_data['free']
+    return float(free_btc)
 
 
 def available_btc(exchange):
@@ -115,9 +122,8 @@ def available_btc(exchange):
         float: The account's balance of BTC.
     """
     bal = obtain_btc_balance(exchange)
-    avail = bal['Available']
-    LOG.debug("\tAvailable btc={0}".format(avail))
-    return avail
+
+    return bal
 
 
 def record_buy(config_file, order_id, mkt, rate, amount):
@@ -142,17 +148,13 @@ def rate_for(exchange, mkt, btc):
     coin_amount = 0
     btc_spent = 0
     LOG.debug("Getting orderbook for {}".format(mkt))
-    orders = exchange.get_orderbook(mkt, SELL_ORDERBOOK)
-    for order in orders['result']:
-        btc_spent += order['Rate'] * order['Quantity']
-        if btc_spent > 1.4* btc:
-            coin_amount = btc / order['Rate']
-            return order['Rate'], coin_amount
-    return 0
+    orders = exchange.fetchOrderBook(mkt)
+    LOG.debug("ORDERBOOK={}".format(orders))
+    best_ask = orders['asks'][0][0]
+    acceptable_rate = best_ask + best_ask * 0.02
 
-
-
-
+    coin_amount = btc / acceptable_rate
+    return acceptable_rate, coin_amount
 
 
 def percent2ratio(percentage):
@@ -176,7 +178,7 @@ def calculate_trade_size(user_config):
     """
 
     holdings = user_config.trade_deposit
-    trade_ratio = percent2ratio(user_config.trade_trade)
+    trade_ratio = percent2ratio(user_config.trade)
 
     return holdings * trade_ratio
 
@@ -237,7 +239,26 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
     LOG.debug("I get {0} units of {1} at the rate of {2:.8f} BTC per coin.".format(
         amount_of_coin, mkt, rate))
 
-    result = exchange.buy_limit(mkt, amount_of_coin, rate)
+# createLimitBuyOrder (symbol, amount, price[, params])
+
+    result = exchange.createLimitBuyOrder(mkt, amount_of_coin, rate)
+    LOG.debug("Result of limitbuy={}".format(result))
+    """
+    Result of limitbuy=
+    {'info': 
+        {
+        'symbol': 'TNBBTC', 'orderId': 7465651, 'clientOrderId': 'seX1LO0aOJBTc57j2ff1rh', 
+        'transactTime': 1524553655569, 'price': '0.00000597', 'origQty': '835.00000000', 
+        'executedQty': '835.00000000', 'status': 'FILLED', 'timeInForce': 'GTC', 
+        'type': 'LIMIT', 'side': 'BUY'
+        }, 
+        'id': '7465651', 'timestamp': 1524553655569, 
+        'datetime': '2018-04-24T07:07:36.569Z', 'symbol': 'TNB/BTC', 
+        'type': 'limit', 'side': 'buy', 'price': 5.97e-06, 'amount': 835.0, 
+        'cost': 0.004984949999999999, 'filled': 835.0, 'remaining': 0.0, 
+        'status': 'closed', 'fee': None
+    }
+    """
     if result['success']:
         LOG.debug("\tBuy was a success = {}".format(result))
         record_buy(config_file, result['result']['uuid'], mkt, rate, amount_of_coin)
@@ -416,13 +437,12 @@ def process(config_file, coins=None):
 def process2(configo, exchange_label, coins=None):
     """Buy coins for every configured user of the bot."""
 
-    import lib.exchange.abstract
     exchange = lib.exchange.abstract.Abstract.factory(configo, exchange_label)
 
     if coins:
         top_coins = coins
     else:
-        top_coins = topcoins(exchange, configo)
+        raise Exception("Must supply coins to process.")
 
     LOG.debug("------------------------------------------------------------")
     LOG.debug("Buying {} for: {}".format(top_coins, configo))
