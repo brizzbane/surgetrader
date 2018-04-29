@@ -316,12 +316,12 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
         data["sell_number"] = i+1
         render_row(element, data, append="3")
 
-#    for setting in 'deposit trade takeprofit preserve'.split():
-#        elem = html_template.findmeld(setting)
-#        val = user_configo.configo.get('account', setting)
-#        # LOG.debug("In looking for {} we found {} with setting {}".format(
-#        # setting, elem, val))
-#        elem.content(val)
+    for setting in 'deposit trade takeprofit preserve'.split():
+        elem = html_template.findmeld(setting)
+        val = user_configo.configo['account'][setting]
+        LOG.debug("In looking for {} we found elem={} with val={}".format(
+                setting, elem, val))
+        elem.content(val)
 
     elem = html_template.findmeld('available')
     btc = lib.buy.obtain_coin_balances('BTC', exchange)
