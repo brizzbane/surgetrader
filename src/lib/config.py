@@ -6,23 +6,30 @@ OO access to both.
 """
 
 # core
+import pprint
 import random
 
 # 3rd party
 from configobj import ConfigObj
 
 # local
+import lib.exchange.abstract
 
 
 class System:
 
     def __init__(self):
         config = ConfigObj("system.ini")
-        self.config = config
+        self.configo = config
+
+    def __str__(self):
+        return """{}:
+            configo  = {}
+            """.format(self.__class__, pprint.pformat(self.configo))
 
     @property
     def users_inis(self):
-        _ = self.config['users']['inis'].split()
+        _ = self.configo['users']['inis'].split()
         return _
 
     @property
@@ -31,57 +38,59 @@ class System:
 
     @property
     def ignore_markets_by_in(self):
-        _ = self.config['ignore']['coin'].split()
+        _ = self.configo['ignore']['coin'].split()
         return _
 
     @property
     def ignore_markets_by_find(self):
-        _ = self.config['ignore']['market'].split()
+        _ = self.configo['ignore']['market'].split()
         return _
 
     @property
     def max_open_trades_per_market(self):
-        _ = self.config['trade']['per_market']
+        _ = self.configo['trade']['per_market']
         return int(_)
 
     @property
     def min_price(self):
-        _ = self.config['trade']['min_price']
+        _ = self.configo['trade']['min_price']
         return float(_)
 
     @property
     def min_volume(self):
-        _ = self.config['trade']['min_volume']
+        _ = self.configo['trade']['min_volume']
         return float(_)
 
     @property
     def min_gain(self):
-        _ = self.config['trade']['min_gain']
+        _ = self.configo['trade']['min_gain']
         return float(_)
 
     @property
     def email_bcc(self):
-        _ = self.config['email']['bcc']
+        _ = self.configo['email']['bcc']
         return _
 
     @property
     def email_sender(self):
-        _ = self.config['email']['sender']
+        _ = self.configo['email']['sender']
         return _
 
 
 class User(System):
 
-    def __init__(self, ini, exchange_section, exchange_subsection):
+    def __init__(self, ini):
         self.system = System()
 
         self.filename = "users/{}".format(ini)
-        self._exchange_section = exchange_section
-        self._exchange_subsection = exchange_subsection
-
-        self.config = ConfigObj(self.filename)
+        self.configo  = ConfigObj(self.filename)
         self.config_name = ini
-        # print("USER CONFIG SECTIONS: {}".format(config._sections))
+
+    def __str__(self):
+        return """{}:
+            filename = {}
+            configo  = {}
+            """.format(self.__class__, self.filename, pprint.pformat(self.configo))
 
     @classmethod
     def from_string(cls, ini_string):
@@ -89,60 +98,61 @@ class User(System):
         instance = User(user_ini, exchange_section, exchange_subsection)
         return instance
 
-    def exchange_section(self, parameter):
-        _ = self.config[self._exchange_section][parameter]
-        return _
+    def make_exchangeo(self):
+        exchange = lib.exchange.abstract.Abstract.factory(self)
+        return exchange
 
-    def exchange_subsection(self, parameter):
-        _ = self.config[self._exchange_section][self._exchange_subsection][parameter]
+
+    def account(self, param):
+        _ = self.configo['account'][param]
         return _
 
     @property
+    def exchange(self):
+        _ = self.account('exchange')
+        return _
+
+
+    @property
     def client_email(self):
-        _ = self.config['client']['email']
+        _ = self.configo['client']['email']
         return _
 
     @property
     def client_name(self):
-        _ = self.config['client']['name']
+        _ = self.configo['client']['name']
         return _
 
     @property
     def trade_deposit(self):
-        _ = self.exchange_subsection('deposit')
+        _ = self.account('deposit')
         return float(_)
-
-    @property
-    def trade_top(self):
-        _ = self.exchange_subsection('top')
-        return int(_)
-
 
     @property
     def trade_preserve(self):
         "Return the `preserve` param from the trade section of a user config file."
 
-        _ = self.exchange_subsection('preserve')
+        _ = self.account('preserve')
         return float(_)
     
     @property
     def apikey(self):
-        _ = self.exchange_subsection('apikey')
+        _ = self.account('apikey')
         return _
 
     @property
     def secret(self):
-        _ = self.exchange_subsection('secret')
+        _ = self.account('secret')
         return _
 
     @property
     def trade(self):
         "Percentage of seed capital to trade."
-        _ = self.exchange_subsection('trade')
+        _ = self.account('trade')
         return float(_)
 
     @property
-    def take_profit(self):
+    def takeprofit(self):
         "Percentage of seed capital to trade."
-        _ = self.exchange_subsection('takeprofit')
+        _ = self.account('takeprofit')
         return float(_)

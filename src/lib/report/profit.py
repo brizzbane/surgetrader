@@ -4,7 +4,6 @@
 # core
 import io
 import json
-import logging
 import traceback
 
 # 3rd party
@@ -12,11 +11,11 @@ from retry import retry
 import meld3
 
 # local
+import lib.buy
 import lib.config
 import lib.logconfig
 from ..db import db
 from .. import emailer
-from .. import mybittrex
 
 
 #LOG = logging.getLogger('app')
@@ -109,22 +108,23 @@ def obtain_order(exchange, uuid):
     return _
 
 
-def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete_unsold=False):
+def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delete_unsold=False):
 
 
     def profit_from(buy_order, sell_order):
         "Calculate profit given the related buy and sell order."
 
-        sell_proceeds = sell_order['Price'] - sell_order['CommissionPaid']
-        buy_proceeds = buy_order['Price'] + buy_order['CommissionPaid']
+        sell_proceeds = sell_order['price'] - sell_order['cost']
+        buy_proceeds = buy_order['price'] + buy_order['cost']
         # LOG.debug("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
         profit = sell_proceeds - buy_proceeds
         return profit
 
     def best_bid(sell_order):
-        ticker = obtain_ticker(exchange, sell_order)
-        _ = ticker['result']['Bid']
+        ticker = exchange.fetchTicker(exchange, sell_order['symbol'])
         LOG.debug("ticker = {}".format(ticker))
+        _ = ticker['bid']
+
         return _
 
     def in_skip_markets(market, skip_markets):
@@ -156,7 +156,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
 
     html_template = open('lib/report/profit.html', 'r').read()
     html_template = meld3.parse_htmlstring(html_template)
-    html_outfile = open("tmp/" + user_config.basename + ".html", 'wb')
+    html_outfile = open("tmp/" + user_configo.config_name + ".html", 'wb')
 
     locked_capital = 0
 
@@ -164,7 +164,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
     closed_orders = list()
 
 
-    query = (db.buy.config_file == user_config.basename)
+    query = (db.buy.config_file == user_configo.config_name)
 
     for buy in db(query).select(
         db.buy.ALL,
@@ -182,14 +182,14 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
 
         LOG.debug("\t{}".format(so))
 
-        LOG.debug("\tDate checking {} against {}".format(on_date, so['Closed']))
+        LOG.debug("\tDate checking {} against {}".format(on_date, so['datetime']))
 
         if on_date:
             if open_order(so):
                 LOG.debug("\t\tOpen order")
                 so['Closed'] = 'n/a'
             else:
-                _close_date = close_date(so['Closed'])
+                _close_date = close_date(so['datetime'])
                 # LOG.debug("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
 
 
@@ -209,25 +209,25 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
                     continue
 
 
-        bo = exchange.get_order(buy.order_id)['result']
+        bo = exchange.fetchOrder(buy.order_id)
 
-        LOG.debug("For buy order {}, Sell order={}".format(bo, so))
+        LOG.debug("For buy order {}, the related Sell order is {}".format(bo, so))
 
         if open_order(so):
-            so['Quantity'] = "{:d}%".format(int(
-                 percent(so['Quantity'] - so['QuantityRemaining'], so['Quantity'])
+            so['amount'] = "{:d}%".format(int(
+                 percent(so['amount'] - so['remaining'], so['amount'])
             ))
 
         calculations = {
-            'sell_closed': so['Closed'],
-            'buy_opened': bo['Opened'],
-            'market': so['Exchange'],
-            'units_sold': so['Quantity'],
-            'sell_price': so['PricePerUnit'],
-            'sell_commission': so['CommissionPaid'],
-            'units_bought': bo['Quantity'],
-            'buy_price': numeric(bo['PricePerUnit']),
-            'buy_commission': bo['CommissionPaid'],
+            'sell_closed': so['datetime'],
+            'buy_opened': bo['datetime'],
+            'market': so['symbol'],
+            'units_sold': so['amount'],
+            'sell_price': so['price'],
+            'sell_commission': so['cost'],
+            'units_bought': bo['amount'],
+            'buy_price': numeric(bo['price']),
+            'buy_commission': bo['cost'],
             'profit': profit_from(bo, so)
         }
 
@@ -247,19 +247,19 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
 
         else:
             LOG.debug("\tClosed order: {}".format(calculations))
-            if so['PricePerUnit'] is None:
-                if delete_unsold:
-                    import lib.db
-                    lib.db.delete_sell_order(so['OrderUuid'])
-                else:
-                    raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so, bo))
+#            if so['PricePerUnit'] is None:
+#                if delete_unsold:
+#                    import lib.db
+#                    lib.db.delete_sell_order(so['OrderUuid'])
+#                else:
+#                    raise Exception("Order closed but did not sell: {}\t\trelated buy order={}".format(so, bo))
             closed_orders.append(calculations)
 
 
     # open_orders.sort(key=lambda r: r['difference'])
 
-    html_template.findmeld('acctno').content(user_config.filename)
-    html_template.findmeld('name').content(user_config.client_name)
+    html_template.findmeld('acctno').content(user_configo.config_name)
+    html_template.findmeld('name').content(user_configo.client_name)
     html_template.findmeld('date').content("Transaction Log for Previous Day")
 
 
@@ -292,7 +292,7 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
     for element, data in iterator:
         total_profit += render_row(element, data)
 
-    deposit = float(user_config.trade_deposit)
+    deposit = float(user_configo.trade_deposit)
     percent_profit = percent(total_profit, deposit)
     pnl = "{} ({:.2f} % of {})".format(
         satoshify(total_profit), percent_profit, deposit)
@@ -316,26 +316,24 @@ def report_profit(user_config, exchange, on_date=None, skip_markets=None, delete
         data["sell_number"] = i+1
         render_row(element, data, append="3")
 
-    for setting in 'deposit trade top takeprofit preserve'.split():
-        elem = html_template.findmeld(setting)
-        val = user_config.config.get('trade', setting)
-        # LOG.debug("In looking for {} we found {} with setting {}".format(
-        # setting, elem, val))
-        elem.content(val)
+#    for setting in 'deposit trade takeprofit preserve'.split():
+#        elem = html_template.findmeld(setting)
+#        val = user_configo.configo.get('account', setting)
+#        # LOG.debug("In looking for {} we found {} with setting {}".format(
+#        # setting, elem, val))
+#        elem.content(val)
 
     elem = html_template.findmeld('available')
-    bal = exchange.get_balance('BTC')['result']
-    LOG.debug("bal={}".format(bal))
-    btc = bal['Balance']
-    val = "Balance={}BTC, Available={}BTC".format(bal['Balance'], bal['Available'])
+    btc = lib.buy.obtain_coin_balances('BTC', exchange)
+    val = "{} BTC".format(btc['free'])
     elem.content(val)
 
     elem = html_template.findmeld('locked')
-    val = "{}BTC".format(locked_capital)
+    val = "{} BTC".format(locked_capital)
     elem.content(val)
 
     elem = html_template.findmeld('operating')
-    val = "{}BTC".format(locked_capital + btc)
+    val = "{} BTC".format(locked_capital + float(btc['free']))
     elem.content(val)
 
     LOG.debug("HTML OUTFILE: {}".format(html_outfile))
@@ -369,24 +367,21 @@ def notify_admin(msg, sys_config):
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
-def main(config_file, english_date, _date=None, email=True, skip_markets=None):
+def main(user_configo, english_date, _date=None, email=True, skip_markets=None):
 
     LOG.debug("profit.main.SKIP MARKETS={}".format(skip_markets))
 
-    USER_CONFIG = lib.config.User(config_file)
-    SYS_CONFIG = lib.config.System()
-
-    exchange = mybittrex.make_bittrex(USER_CONFIG.config)
+    exchange = user_configo.make_exchangeo()
     try:
-        html, _ = report_profit(USER_CONFIG, exchange, _date, skip_markets)
+        html, _ = report_profit(user_configo, exchange, _date, skip_markets)
 
         if email:
-            subject = "{}'s Profit Report for {}".format(english_date, config_file)
+            subject = "{}'s Profit Report for {}".format(english_date, user_configo.config_name)
             emailer.send(subject,
                          text='hi my name is slim shady', html=html.getvalue(),
-                         sender=SYS_CONFIG.email_sender,
-                         recipient=USER_CONFIG.client_email,
-                         bcc=SYS_CONFIG.email_bcc
+                         sender=user_configo.system.email_sender,
+                         recipient=user_configo.client_email,
+                         bcc=user_configo.system.email_bcc
                          )
 
     except Exception:
@@ -394,7 +389,7 @@ def main(config_file, english_date, _date=None, email=True, skip_markets=None):
         LOG.debug('Aborting: {}'.format(error_msg))
         if email:
             LOG.debug("Notifying admin via email")
-            notify_admin(error_msg, SYS_CONFIG)
+            notify_admin(error_msg, user_configo.system)
 
 
 

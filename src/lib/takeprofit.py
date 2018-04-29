@@ -2,14 +2,14 @@
 
 
 # core
-import logging
 import pprint
 
 # pypi
 
 # local
+import lib.config
+import lib.exchange.abstract
 import lib.logconfig
-from . import mybittrex
 from .db import db
 
 
@@ -43,22 +43,23 @@ def _takeprofit(exchange, percent, row, order):
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
 
     #amount_to_sell = order['Quantity'] - 1e-8
-    amount_to_sell = order['Quantity']
+    amount_to_sell = order['filled']
     #amount_to_sell = row['amount']
 
     LOG.debug("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
-    result = exchange.sell_limit(row.market, amount_to_sell, profit_target)
-    LOG.debug("%s" % result)
+    result = exchange.createLimitSellOrder(row.market, amount_to_sell, profit_target)
+    LOG.debug("Limit Sell Result = %s" % result)
 
-    if result['success']:
-        row.update_record(selling_price=profit_target, sell_id=result['result']['uuid'])
+    if result['status'] =='open':
+        row.update_record(selling_price=profit_target, sell_id=result['id'])
         db.commit()
 
 
 #@retry()
-def takeprofit(config_file, exchange, take_profit, stop_loss):
+def takeprofit(user_configo, exchange, take_profit, stop_loss):
 
-    rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select()
+    config_file = user_configo.config_name
+    rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select(orderby=~db.buy.id)
     for row in rows:
 
         # if row['config_file'] != config_file:
@@ -66,13 +67,13 @@ def takeprofit(config_file, exchange, take_profit, stop_loss):
         #         config_file, row['config_file'])
         #     continue
 
-        order = exchange.get_order(row['order_id'])
+        order = exchange.fetchOrder(row['order_id'], row['market'])
         LOG.debug("""
 This row is unsold <row>{}</row>.
 Here is it's order <order>{}</order>.
-""")
-        order = order['result']
-        if not order['IsOpen']:
+""".format(row, order))
+        # order = order['result']
+        if order['status'] == 'closed':
             _takeprofit(exchange, take_profit, row, order)
         else:
             LOG.debug("""Buy has not been filled. Cannot sell for profit until it does.
@@ -120,22 +121,26 @@ def clearprofit(exchange):
 #        clearorder(exchange, row)
 
 
-def prep(config_file):
-    from users import users
+def prep(user_configo):
+#    LOG.debug("""USER CONFIGO         {}:
+#            filename = {}
+#            configo  = {}
+#            """.format(user_configo.__class__, user_configo.filename, pprint.pformat(user_configo)))
+    LOG.debug("Prepping using <configo>{}</configo>".format(user_configo))
+    exchangeo = lib.exchange.abstract.Abstract.factory(user_configo)
 
-    config = users.read(config_file)
-    exchange = mybittrex.make_bittrex(config)
-    return config, exchange
+    return user_configo, exchangeo
 
-def take_profit(config_file):
 
-    config, exchange = prep(config_file)
-    take_profit = float(config.get('trade', 'takeprofit'))
-    stop_loss = float(config.get('trade', 'stoploss'))
+def take_profit(user_configo):
 
-    LOG.debug("Setting profit targets for {}".format(config_file))
+    configo, exchange = prep(user_configo)
+    take_profit = configo.takeprofit
+    stop_loss   = None
 
-    takeprofit(config_file, exchange, take_profit, stop_loss)
+    LOG.debug("Setting profit targets for {}".format(user_configo))
+
+    takeprofit(configo, exchange, take_profit, stop_loss)
 
 def clear_profit(config_file):
     config, exchange = prep(config_file)

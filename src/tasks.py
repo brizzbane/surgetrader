@@ -135,8 +135,18 @@ def buy(_ctx, ini=None):
     LOG.debug(close_task())
 
 
+def load_iniset(iniset):
+    inis = SYS_INI.configo['users'][iniset].split()
+    LOG.debug("INISET = {}".format(inis))
+    
+    # Create lib.config.User instances 
+    user_configos = [lib.config.User(ini) for ini in inis]   
+    
+    return user_configos
+
+
 @task
-def telegrambot(_ctx, telegram_client, exchange_label, ini_parm):
+def telegrambot(_ctx, telegram_client, iniset):
     """Invoke the telegram bot and have it scan the group for posted signals.
     When a signal is posted, trade each ini file using the specified exchange section within that ini-file
 
@@ -155,17 +165,13 @@ def telegrambot(_ctx, telegram_client, exchange_label, ini_parm):
     from lib import telegram as _telegram
 
     LOG.debug(open_task())
-
-    # look in the system.ini for a line indicating the list of user ini files to process
-    inis = SYS_INI.config['users'][ini_parm].split()
-    LOG.debug("INISET = {}".format(inis))
     
     # Create lib.config.User instances 
-    user_inis = [lib.config.User.from_string(ini) for ini in inis]
-    LOG.debug("C = {} USER_INIS = {}. EXCH_LABEL={}".format(telegram_client, inis, exchange_label))
+    user_configos = load_iniset(iniset)
+    LOG.debug("C = {} USER_CONFIGOS = {}. EXCHANGE={}".format(telegram_client, user_configos, user_configos[0].exchange))
 
     # Parse a telegram chat room for signals and trade all the user ini files with the signal
-    _telegram.main(telegram_client, exchange_label, user_inis)
+    _telegram.main(telegram_client, user_configos)
 
     LOG.debug(close_task())
 
@@ -212,7 +218,7 @@ def takeprofit(_ctx, ini=None):
 
 
 @task
-def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
+def profitreport(_ctx, iniset, date_string=None, skip_markets=None):
     """Generate and email a profit report for a certain time frame.
 
     Args:
@@ -229,7 +235,7 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
 
     LOG.debug(open_task())
 
-    inis = listify_ini(ini)
+    user_configos = load_iniset(iniset)
 
     if date_string:
         from datetime import date
@@ -254,9 +260,9 @@ def profitreport(_ctx, ini=None, date_string=None, skip_markets=None):
     if skip_markets:
         skip_markets = skip_markets.split()
 
-    for user_ini in inis:
-        LOG.debug("Processing {}".format(user_ini))
-        lib.report.profit.main(user_ini, date_string, _date=_date, skip_markets=skip_markets)
+    for user_configo in user_configos:
+        LOG.debug("Processing {}".format(user_configo))
+        lib.report.profit.main(user_configo, date_string, _date=_date, skip_markets=skip_markets)
 
     LOG.debug(close_task())
 

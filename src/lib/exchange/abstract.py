@@ -3,10 +3,9 @@
 # core
 
 # 3rd party
-import ccxt
 
 #local
-import lib.config
+import lib.logconfig
 
 
 
@@ -17,15 +16,13 @@ class Abstract:
             
     @classmethod
     def bind_keys(cls, exchange, configo):
-        LOG.debug("""
-                  exchange.apikey = {}
-        exchange.secret = {}
-        """.format(configo.apikey, configo.secret))
         exchange.apiKey = configo.apikey
         exchange.secret = configo.secret
         
     @classmethod
-    def factory(cls, configo, exchange_label):
+    def factory(cls, configo):
+        
+        exchange_label = configo.exchange
         
         if exchange_label == 'binance':
             import lib.exchange.binance

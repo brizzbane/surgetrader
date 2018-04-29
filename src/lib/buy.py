@@ -21,7 +21,6 @@ import argh
 import objectpath
 from retry import retry
 from supycache import supycache
-from bittrex.bittrex import SELL_ORDERBOOK
 
 # local
 import lib.config
@@ -106,13 +105,31 @@ def obtain_btc_balance(exchange):
     Returns:
         dict: The account's balance of BTC.
     """
-    bal = exchange.fetch_balance()
-    tree = objectpath.Tree(bal)
-    btc_data = tree.execute("$.info.balances[@.asset is 'BTC'][0]")
+   
+    btc_data = obtain_coin_balances('BTC', exchange)
     LOG.debug("FETCHBAL={}".format(btc_data))
 
     free_btc = btc_data['free']
     return float(free_btc)
+
+
+def obtain_coin_balances(coin, exchange):
+    """Get coin balance.
+
+    Returns:
+        dict: The account's balance of BTC.
+    """
+    
+    LOG.debug("Obtaining balances for coin={} using exchange instance={}".format(coin, exchange))
+
+    
+    bal = exchange.fetchBalance()
+
+    tree = objectpath.Tree(bal)
+    coin_data = tree.execute("$.info.balances[@.asset is '{}'][0]".format(coin))
+    LOG.debug("{} Data={}".format(coin, coin_data))
+
+    return coin_data
 
 
 def available_btc(exchange):
@@ -241,29 +258,35 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
 
 # createLimitBuyOrder (symbol, amount, price[, params])
 
-    result = exchange.createLimitBuyOrder(mkt, amount_of_coin, rate)
-    LOG.debug("Result of limitbuy={}".format(result))
+    buy_order = exchange.createLimitBuyOrder(mkt, amount_of_coin, rate)
+    LOG.debug("Result of limitbuy={}".format(buy_order))
     """
     Result of limitbuy=
-    {'info': 
+    {'info':
         {
-        'symbol': 'TNBBTC', 'orderId': 7465651, 'clientOrderId': 'seX1LO0aOJBTc57j2ff1rh', 
-        'transactTime': 1524553655569, 'price': '0.00000597', 'origQty': '835.00000000', 
-        'executedQty': '835.00000000', 'status': 'FILLED', 'timeInForce': 'GTC', 
+        'symbol': 'TNBBTC', 'orderId': 7465651, 'clientOrderId': 'seX1LO0aOJBTc57j2ff1rh',
+        'transactTime': 1524553655569, 'price': '0.00000597', 'origQty': '835.00000000',
+        'executedQty': '835.00000000', 'status': 'FILLED', 'timeInForce': 'GTC',
         'type': 'LIMIT', 'side': 'BUY'
-        }, 
-        'id': '7465651', 'timestamp': 1524553655569, 
-        'datetime': '2018-04-24T07:07:36.569Z', 'symbol': 'TNB/BTC', 
-        'type': 'limit', 'side': 'buy', 'price': 5.97e-06, 'amount': 835.0, 
-        'cost': 0.004984949999999999, 'filled': 835.0, 'remaining': 0.0, 
+        },
+        'id': '7465651', 'timestamp': 1524553655569,
+        'datetime': '2018-04-24T07:07:36.569Z', 'symbol': 'TNB/BTC',
+        'type': 'limit', 'side': 'buy', 'price': 5.97e-06, 'amount': 835.0,
+        'cost': 0.004984949999999999, 'filled': 835.0, 'remaining': 0.0,
         'status': 'closed', 'fee': None
     }
     """
-    if result['success']:
-        LOG.debug("\tBuy was a success = {}".format(result))
-        record_buy(config_file, result['result']['uuid'], mkt, rate, amount_of_coin)
+    if buy_order['info']['status'] == 'FILLED':
+        LOG.debug("\tBuy was a success = {}".format(buy_order))
+
+        fills = exchange.fetchMyTrades(symbol=mkt, since=buy_order['timestamp'])
+        for fill in fills:
+            LOG.debug("\t\tFILL={}".format(fill))
+            record_buy(config_file, buy_order['id'], mkt,
+                       fill['info']['price'], fill['info']['qty']
+                      )
     else:
-        LOG.debug("\tBuy FAILED: {}".format(result))
+        LOG.debug("\tBuy FAILED: {}".format(buy_order))
 
 
 def buycoin(config_file, user_config, exchange, top_coins):
@@ -420,7 +443,7 @@ def topcoins(exchange, user_config):
 
 def process(config_file, coins=None):
     """Buy coins for every configured user of the bot."""
-    user_config = lib.config.User(config_file)
+    user_config = lib.config.User(config_file, None, None)
 
     exchange = mybittrex.make_bittrex(user_config.config)
 
@@ -432,12 +455,12 @@ def process(config_file, coins=None):
     LOG.debug("------------------------------------------------------------")
     LOG.debug("Buying {} for: {}".format(top_coins, config_file))
     buycoin(config_file, user_config, exchange, top_coins)
-    
-    
+
+
 def process2(configo, exchange_label, coins=None):
     """Buy coins for every configured user of the bot."""
 
-    exchange = lib.exchange.abstract.Abstract.factory(configo, exchange_label)
+    exchange = lib.exchange.abstract.Abstract.factory(configo)
 
     if coins:
         top_coins = coins

@@ -14,7 +14,7 @@ import lib.takeprofit
 
 LOG = lib.logconfig.app_log
 
-
+# https://t.me/PyrogramChat
 
 def ccxt_symbol(base,quote):
     return "{}/{}".format(base, quote)
@@ -24,7 +24,7 @@ class TelegramClient(object):
     def __init__(self, exchange_label):
         self.exchange_label = exchange_label
         
-    def make_update_handler(self, inis):
+    def make_update_handler(self, user_configos):
 
         def update_handler(client, update, users, chats):
             LOG.debug("<UPDATE_HANDLER update={}>".format(update))
@@ -56,14 +56,14 @@ class TelegramClient(object):
                 if not coin:
                     LOG.debug("\tNot a trade message")
                 else:
-                    for ini in inis:
+                    for user_configo in user_configos:
                         market = "BTC-{}".format(coin)
                         market = ccxt_symbol(coin, 'BTC')
-                        LOG.debug("\tTrade {} on {} with ini={}.".format(market, exchange, ini))
+                        LOG.debug("\tTrade {} with ini={}.".format(market, user_configo))
 
-                        lib.buy.process2(ini, self.exchange_label, [market])
-                    for ini in inis:
-                        lib.takeprofit.take_profit(ini)
+                        lib.buy.process2(user_configo, self.exchange_label, [market])
+                    for user_configo in user_configos:
+                        lib.takeprofit.take_profit(user_configo)
             else:
                 LOG.debug("Message is not from desired channel:")
                 # LOG.debug(message)
@@ -120,7 +120,7 @@ class TradingCryptoCoach(TelegramClient):
 class QualitySignals(TelegramClient):
 
     CHANNELS = {
-            'easycoinpicks' : 1312304347,      # My Test Channel,
+            'easycoinpicks'  : 1312304347, # My Test Channel,
             'QualitySignals' : 1226119909  # https://t.me/Tradingcryptocoach
             }
 
@@ -141,15 +141,16 @@ def make_chat_parser(telegram_class, exchange_label):
     _ = eval("{}('{}')".format(telegram_class, exchange_label))
     return _
 
-def main(telegram_class, exchange_label, inis):
+
+def main(telegram_class, user_configos):
     
-    LOG.debug("C={} E={} I={}".format(telegram_class, exchange_label, inis))
+    LOG.debug("C={} I={}".format(telegram_class, user_configos))
 
     client = Client(session_name="example")
 
-    chat_parser = make_chat_parser(telegram_class, exchange_label)
+    chat_parser = make_chat_parser(telegram_class, user_configos[0].exchange)
 
-    update_handler = chat_parser.make_update_handler(inis)
+    update_handler = chat_parser.make_update_handler(user_configos)
 
     client.set_update_handler(update_handler)
     client.start()
