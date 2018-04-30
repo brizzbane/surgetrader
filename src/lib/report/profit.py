@@ -4,6 +4,7 @@
 # core
 import io
 import json
+import pprint
 import traceback
 
 # 3rd party
@@ -21,10 +22,15 @@ from .. import emailer
 #LOG = logging.getLogger('app')
 LOG = lib.logconfig.app_log
 
-def open_order(result):
+
+def satoshify(f):
+    return '{:.8f}'.format(f)
+
+
+def open_order(order):
 
     # pLOG.debug(result['IsOpen'])
-    is_open = result['IsOpen']
+    is_open = order['status'] != 'closed'
     # LOG.debug("\tOrder is open={}".format(is_open))
     return is_open
 
@@ -99,13 +105,10 @@ def obtain_ticker(exchange, order):
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=3, delay=5)
-def obtain_order(exchange, uuid):
-    order = exchange.get_order(uuid)
+def obtain_order(exchange, uuid, market):
+    order = exchange.fetchOrder(uuid, market)
     LOG.debug("Order = {}".format(order))
-    _ = order['result']
-    if _ is None:
-        raise Exception("Could not obtain order")
-    return _
+    return order
 
 
 def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delete_unsold=False):
@@ -114,14 +117,16 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
     def profit_from(buy_order, sell_order):
         "Calculate profit given the related buy and sell order."
 
-        sell_proceeds = sell_order['price'] - sell_order['cost']
-        buy_proceeds = buy_order['price'] + buy_order['cost']
-        # LOG.debug("sell_proceeds={}. buy Order={}. buy proceeds = {}".format(sell_proceeds, bo, buy_proceeds))
+        LOG.debug("Calculating profit using buy={} and sell={}".format(buy_order, sell_order))
+        sell_proceeds = sell_order['cost']
+        buy_proceeds = buy_order['cost']
         profit = sell_proceeds - buy_proceeds
+        LOG.debug("sell_proceeds={}. buy proceeds = {} -> profit={}".format(sell_proceeds, buy_proceeds, profit))
+
         return profit
 
     def best_bid(sell_order):
-        ticker = exchange.fetchTicker(exchange, sell_order['symbol'])
+        ticker = exchange.fetchTicker(sell_order['symbol'])
         LOG.debug("ticker = {}".format(ticker))
         _ = ticker['bid']
 
@@ -144,12 +149,12 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
 #            LOG.debug("\tconfig file != {}... skipping".format(user_config.basename))
 #            return True
 
-        if (not buy_row.sell_id) or (len(buy_row.sell_id) < 12):
+        if (not buy_row.sell_id) or (len(buy_row.sell_id) < 4):
             LOG.debug("\tNo sell id ... skipping")
             return True
 
         if in_skip_markets(buy_row.market, skip_markets):
-            LOG.debug("\tin {}".format(skip_markets))
+            LOG.debug("\tin skip markets of {} ... skipping".format(skip_markets))
             return True
 
         return False
@@ -171,17 +176,14 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
         orderby=~db.buy.timestamp
     ):
 
+        LOG.debug("<BUYROW>{}</BUYROW>".format(pprint.pformat(buy)))
+
         if should_skip(buy):
-            LOG.debug("\tSkipping buy order {}".format(buy))
             continue
 
+        so = obtain_order(exchange, buy.sell_id, buy.market)
 
-        LOG.debug("--------------------- {} {}".format(buy.market, buy.order_id))
-
-        so = obtain_order(exchange, buy.sell_id)
-
-        LOG.debug("\t{}".format(so))
-
+        LOG.debug("\tRelated sell order{}".format(so))
         LOG.debug("\tDate checking {} against {}".format(on_date, so['datetime']))
 
         if on_date:
@@ -190,12 +192,6 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
                 so['Closed'] = 'n/a'
             else:
                 _close_date = close_date(so['datetime'])
-                # LOG.debug("Ondate={}. CloseDate={}".format(pformat(on_date), pformat(_close_date)))
-
-
-#                if _close_date.day == 15 and _close_date.month == 1:
-#                    LOG.debug("\t\t\tSkipping Jan 15 order")
-#                    continue
 
                 if type(on_date) is list:
                     if _close_date < on_date[0]:
@@ -208,8 +204,7 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
                     LOG.debug("\t\tclose date of trade {} != {}".format(_close_date, on_date))
                     continue
 
-
-        bo = exchange.fetchOrder(buy.order_id)
+        bo = exchange.fetchOrder(buy.order_id, buy.market)
 
         LOG.debug("For buy order {}, the related Sell order is {}".format(bo, so))
 
@@ -219,16 +214,17 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
             ))
 
         calculations = {
+            'profit': profit_from(bo, so),
+
             'sell_closed': so['datetime'],
             'buy_opened': bo['datetime'],
             'market': so['symbol'],
             'units_sold': so['amount'],
             'sell_price': so['price'],
-            'sell_commission': so['cost'],
+            'sell_commission': '',
             'units_bought': bo['amount'],
             'buy_price': numeric(bo['price']),
-            'buy_commission': bo['cost'],
-            'profit': profit_from(bo, so)
+            'buy_commission': ''
         }
 
         LOG.debug("\tCalculations: {}".format(calculations))
@@ -263,16 +259,15 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
     html_template.findmeld('date').content("Transaction Log for Previous Day")
 
 
-    def satoshify(f):
-        return '{:.8f}'.format(f)
-
 
     def render_row(element, data, append=None):
         for field_name, field_value in data.items():
             if field_name == 'units_bought':
                 continue
-            if field_name in 'units_sold best_bid sell_price sell_commission buy_price buy_commission':
+            if field_name in 'units_sold ':
                 field_value = str(field_value)
+            if field_name in 'best_bid sell_price buy_price':
+                field_value = satoshify(field_value)
             if field_name == 'profit':
                 profit = field_value
                 field_value = satoshify(field_value)
@@ -290,6 +285,7 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
     data = dict()
     iterator = html_template.findmeld('closed_orders').repeat(closed_orders)
     for element, data in iterator:
+        LOG.debug("Calling render_row with data={}".format(pprint.pformat(data)))
         total_profit += render_row(element, data)
 
     deposit = float(user_configo.trade_deposit)

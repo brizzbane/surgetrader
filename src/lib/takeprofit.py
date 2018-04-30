@@ -69,8 +69,12 @@ def takeprofit(user_configo, exchange, take_profit, stop_loss):
 
         order = exchange.fetchOrder(row['order_id'], row['market'])
         LOG.debug("""
-This row is unsold <row>{}</row>.
-Here is it's order <order>{}</order>.
+This row is unsold <row>
+{}
+</row>.
+Here is it's order <order>
+{}
+</order>.
 """.format(row, order))
         # order = order['result']
         if order['status'] == 'closed':
@@ -126,7 +130,7 @@ def prep(user_configo):
 #            filename = {}
 #            configo  = {}
 #            """.format(user_configo.__class__, user_configo.filename, pprint.pformat(user_configo)))
-    LOG.debug("Prepping using <configo>{}</configo>".format(user_configo))
+    # LOG.debug("Prepping using <configo>{}</configo>".format(user_configo))
     exchangeo = lib.exchange.abstract.Abstract.factory(user_configo)
 
     return user_configo, exchangeo
@@ -138,7 +142,7 @@ def take_profit(user_configo):
     take_profit = configo.takeprofit
     stop_loss   = None
 
-    LOG.debug("Setting profit targets for {}".format(user_configo))
+    LOG.debug("Setting profit targets for {}".format(user_configo.config_name))
 
     takeprofit(configo, exchange, take_profit, stop_loss)
 

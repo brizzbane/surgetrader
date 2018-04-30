@@ -35,7 +35,7 @@ class Abstract:
         else:
             raise Exception("Unknown exchange label.")
 
-        LOG.debug("BINDKEY e={} configo={}".format(e, configo))
+        # LOG.debug("BINDKEY e={} configo={}".format(e, configo))
         cls.bind_keys(e, configo)
         return e
 

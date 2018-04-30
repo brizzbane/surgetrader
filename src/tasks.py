@@ -171,7 +171,8 @@ def telegrambot(_ctx, telegram_client, iniset):
     LOG.debug("C = {} USER_CONFIGOS = {}. EXCHANGE={}".format(telegram_client, user_configos, user_configos[0].exchange))
 
     # Parse a telegram chat room for signals and trade all the user ini files with the signal
-    _telegram.main(telegram_client, user_configos)
+    session_label = "{}-{}".format(telegram_client, iniset)
+    _telegram.main(telegram_client, user_configos, session_label)
 
     LOG.debug(close_task())
 
@@ -198,7 +199,7 @@ def stoploss(_ctx, ini=None):
 
 
 @task
-def takeprofit(_ctx, ini=None):
+def takeprofit(_ctx, iniset):
     """Issue SELL LIMIT orders on the coin(s) that have been bought.
 
     Every 5 minutes this task runs to see if any new coins have been bought.
@@ -208,9 +209,9 @@ def takeprofit(_ctx, ini=None):
     LOG.debug(open_task())
 
 
-    inis = listify_ini(ini)
+    user_configos = load_iniset(iniset)
 
-    for _ in inis:
+    for _ in user_configos:
         LOG.debug("Processing {}".format(_))
         lib.takeprofit.take_profit(_)
 
@@ -261,7 +262,7 @@ def profitreport(_ctx, iniset, date_string=None, skip_markets=None):
         skip_markets = skip_markets.split()
 
     for user_configo in user_configos:
-        LOG.debug("Processing {}".format(user_configo))
+        # LOG.debug("Processing {}".format(user_configo))
         lib.report.profit.main(user_configo, date_string, _date=_date, skip_markets=skip_markets)
 
     LOG.debug(close_task())

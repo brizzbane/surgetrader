@@ -142,11 +142,11 @@ def make_chat_parser(telegram_class, exchange_label):
     return _
 
 
-def main(telegram_class, user_configos):
+def main(telegram_class, user_configos, session_label):
     
     LOG.debug("C={} I={}".format(telegram_class, user_configos))
 
-    client = Client(session_name="example")
+    client = Client(session_name=session_label)
 
     chat_parser = make_chat_parser(telegram_class, user_configos[0].exchange)
 
