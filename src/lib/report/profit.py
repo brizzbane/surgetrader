@@ -8,15 +8,18 @@ import pprint
 import traceback
 
 # 3rd party
+from ccxt.base.errors import OrderNotFound
+
 from retry import retry
 import meld3
 
 # local
 import lib.buy
 import lib.config
+import lib.emailer
 import lib.logconfig
 from ..db import db
-from .. import emailer
+
 
 
 #LOG = logging.getLogger('app')
@@ -204,7 +207,13 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
                     LOG.debug("\t\tclose date of trade {} != {}".format(_close_date, on_date))
                     continue
 
-        bo = exchange.fetchOrder(buy.order_id, buy.market)
+        try:
+            bo = exchange.fetchOrder(buy.order_id, buy.market)
+        except OrderNotFound:
+            raise Exception("""No order found with id={}.
+                            Here are the orders for that symbol: {}
+                            """.format(buy.order_id, pprint.pformat(exchange.fetchOrders(buy.market))))
+
 
         LOG.debug("For buy order {}, the related Sell order is {}".format(bo, so))
 
@@ -347,19 +356,6 @@ def system_config():
     return config
 
 
-def notify_admin(msg, sys_config):
-
-    LOG.debug("Notifying admin about {}".format(msg))
-
-    subject = "SurgeTraderBOT aborted execution on exception"
-    sender = sys_config.email_sender
-    recipient = sys_config.email_bcc
-    emailer.send(subject,
-                 text=msg, html=None,
-                 sender=sender,
-                 recipient=recipient,
-                 bcc=None
-                 )
 
 
 @retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
@@ -373,7 +369,7 @@ def main(user_configo, english_date, _date=None, email=True, skip_markets=None):
 
         if email:
             subject = "{}'s Profit Report for {}".format(english_date, user_configo.config_name)
-            emailer.send(subject,
+            lib.emailer.send(subject,
                          text='hi my name is slim shady', html=html.getvalue(),
                          sender=user_configo.system.email_sender,
                          recipient=user_configo.client_email,
@@ -385,7 +381,7 @@ def main(user_configo, english_date, _date=None, email=True, skip_markets=None):
         LOG.debug('Aborting: {}'.format(error_msg))
         if email:
             LOG.debug("Notifying admin via email")
-            notify_admin(error_msg, user_configo.system)
+            lib.emailer.notify_admin(error_msg, user_configo.system)
 
 
 

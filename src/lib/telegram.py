@@ -20,11 +20,11 @@ def ccxt_symbol(base,quote):
     return "{}/{}".format(base, quote)
 
 class TelegramClient(object):
-    
+
     def __init__(self, exchange_label):
         self.exchange_label = exchange_label
-        
-    def make_update_handler(self, user_configos):
+
+    def make_update_handler(self, user_configo):
 
         def update_handler(client, update, users, chats):
             LOG.debug("<UPDATE_HANDLER update={}>".format(update))
@@ -41,6 +41,12 @@ class TelegramClient(object):
             elif isinstance(update, types.UpdateEditChannelMessage):
                 LOG.debug("Ignoring...")
                 return
+            elif (
+                    isinstance(update, types.UpdateEditChannelMessage) and
+                    update.message._ == "types.MessageService"
+            ):
+                LOG.debug("Ignoring")
+                return
 
             try:
                 message = update.message
@@ -56,14 +62,12 @@ class TelegramClient(object):
                 if not coin:
                     LOG.debug("\tNot a trade message")
                 else:
-                    for user_configo in user_configos:
-                        market = "BTC-{}".format(coin)
-                        market = ccxt_symbol(coin, 'BTC')
-                        LOG.debug("\tTrade {} with ini={}.".format(market, user_configo))
+                    market = "BTC-{}".format(coin)
+                    market = ccxt_symbol(coin, 'BTC')
+                    LOG.debug("\tTrade {} with ini={}.".format(market, user_configo))
 
-                        lib.buy.process2(user_configo, self.exchange_label, [market])
-                    for user_configo in user_configos:
-                        lib.takeprofit.take_profit(user_configo)
+                    lib.buy.process2(user_configo, self.exchange_label, [market])
+                    lib.takeprofit.take_profit(user_configo)
             else:
                 LOG.debug("Message is not from desired channel:")
                 # LOG.debug(message)
@@ -71,28 +75,29 @@ class TelegramClient(object):
             LOG.debug("</UPDATE_HANDLER>")
 
         return update_handler
-    
+
 
 class TradingCryptoCoach(TelegramClient):
 
     CHANNELS = {
-            'easycoinpicks' : 1312304347,      # My Test Channel,
+            'easycoinpicks'      : 1312304347, # My Test Channel,
             'Tradingcryptocoach' : 1147798110  # https://t.me/Tradingcryptocoach
             }
 
     def maybe_trade(self, message):
         # match "Coin #XVG on #Bittrex"
-        re1 = re.compile(r'Coin\s+#(\S+)(\s+\S+)?', re.IGNORECASE)
+        re1 = re.compile(r'^Coin\s+#(\S+)(\s+\S+)?', re.IGNORECASE)
 
         # match #SYS Coin at #Bittrex
-        re1_1 = re.compile(r'#(\S+)\s+Coin(\s+\S+\s+#?(\S+))?', re.IGNORECASE)
+        # match #WAVES dip looks good
+        re1_1 = re.compile(r'^#(\S+)\s+(Coin|Dip)(\s+\S+\s+#?(\S+))?', re.IGNORECASE)
 
         # match "Buy #XVG' or Accumulate #EXCL at #Bittrex
         # note: He sometimes says Accumulate Some #GAME and the `some` throws me off
-        re2 = re.compile(r'(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
+        re2 = re.compile(r'^(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
 
         # match "#XVG Buy'
-        re3 = re.compile(r'#(\S+)\s+Buy', re.IGNORECASE)
+        re3 = re.compile(r'^#(\S+)\s+Buy', re.IGNORECASE)
 
         m = re1.search(message)
         if m:
@@ -120,15 +125,19 @@ class TradingCryptoCoach(TelegramClient):
 class QualitySignals(TelegramClient):
 
     CHANNELS = {
-            'easycoinpicks'  : 1312304347, # My Test Channel,
-            'QualitySignals' : 1226119909  # https://t.me/Tradingcryptocoach
-            }
+        'easycoinpicks'         : 1312304347, # My Test Channel,
+        'QualitySignalsChannel' : 1343688547 # https://t.me/QualitySignalsChannel
+        # 'QualitySignals'        : 1226119909  #
+    }
 
 
     def maybe_trade(self, message):
 
         # match #SYS Coin at #Bittrex
-        re1 = re.compile(r'#(\S+)\s+at\s+(BITTREX|BINANCE)', re.IGNORECASE|re.MULTILINE|re.DOTALL)
+        re1 = re.compile(
+            r'#(\S+)\s+at\s+({})'.format(self.exchange_label),
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
 
         m = re1.search(message)
         if m:
@@ -137,25 +146,49 @@ class QualitySignals(TelegramClient):
 
         return None, None
 
+class CryptoSignalsHub(TelegramClient):
+
+    CHANNELS = {
+        'easycoinpicks'      : 1312304347,   # My Test Channel,
+        'CryptoSignalsHub'   : 1315217912    # https://t.me/joinchat/AAAAAE5kofiekf82MMAcFQ
+    }
+
+
+    def maybe_trade(self, message):
+
+        # match #SYS Coin at #Bittrex
+        re1 = re.compile(
+            r'#(\S+)\s+at\s+({})'.format(self.exchange_label),
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
+
+        m = re1.search(message)
+        if m:
+            coin, exchange = m.groups()
+            return coin, exchange
+
+        return None, None
+
+
 def make_chat_parser(telegram_class, exchange_label):
     _ = eval("{}('{}')".format(telegram_class, exchange_label))
     return _
 
 
-def main(telegram_class, user_configos, session_label):
-    
-    LOG.debug("C={} I={}".format(telegram_class, user_configos))
+def main(telegram_class, user_configo, session_label):
+
+    LOG.debug("C={} I={}".format(telegram_class, user_configo))
 
     client = Client(session_name=session_label)
 
-    chat_parser = make_chat_parser(telegram_class, user_configos[0].exchange)
+    chat_parser = make_chat_parser(telegram_class, user_configo.exchange)
 
-    update_handler = chat_parser.make_update_handler(user_configos)
+    update_handler = chat_parser.make_update_handler(user_configo)
 
     client.set_update_handler(update_handler)
     client.start()
 
-    for channel in chat_parser.CHANNELS.keys():    
+    for channel in chat_parser.CHANNELS.keys():
         client.join_chat(channel)
 
 

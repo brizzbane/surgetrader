@@ -89,8 +89,8 @@ class User(System):
     def __str__(self):
         return """{}:
             filename = {}
-            configo  = {}
-            """.format(self.__class__, self.filename, pprint.pformat(self.configo))
+            exchange  = TODO
+            """.format(self.__class__, self.filename)
 
     @classmethod
     def from_string(cls, ini_string):

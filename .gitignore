@@ -6,6 +6,7 @@ nohup.out
 
 backup/*
 
+*.ini.session
 
 
 *.sqlite3

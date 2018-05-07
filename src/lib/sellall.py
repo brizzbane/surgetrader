@@ -37,58 +37,29 @@ def cancel_sell_order(exchange, sell_id):
 
 
 def cancelall(b):
-    orders = b.get_open_orders()
+    orders = b.fetchOpenOrders()
+    LOG.debug("ORDERS={}".format(orders))
 
-    for order in orders['result']:
-        LOG.debug(order)
-        sell_id = order['OrderUuid']
-        cancel_sell_order(sell_id)
-
-
-def sellall(b):
-
-    cancelall(b)
-    balances = b.get_balances()
-    for balance in balances['result']:
-        LOG.debug("-------------------- {}".format(balance['Currency']))
-        LOG.debug(balance)
-
-        if ((balance['Available'] < 4e-8) or (balance['Currency'] == 'BTC')):
-            LOG.debug("\tno balance or this is BTC")
-            continue
-
-        skipcoin = "BTCD BTCP CPC GEO NEM PDC RISE CRYPT TIT GHC GCR INFX UNO DAR DGD MTL SNGLS SWIFT TIME TKN XAUR"
-        if balance['Currency'] in skipcoin:
-            LOG.debug("\tthis is a skipcoin")
-            continue
-
-        market = "BTC-" + balance['Currency']
-
-        LOG.debug(balance)
-
-        ticker = b.get_ticker(market)['result']
-        LOG.debug(ticker)
-
-        my_ask = ticker['Bid'] - 1e-8
-
-        LOG.debug(("My Ask = {}".format(my_ask)))
-
-        r = b.sell_limit(market, balance['Balance'], my_ask)
-        LOG.debug(r)
+    for order in orders:
+        LOG.debug("ORDER={}".format(order))
+        b.cancelOrder(order['id'])
 
 
-def main(ini):
+def sellall(exc):
 
-    config_file = ini
-    config = configparser.RawConfigParser()
-    LOG.debug("Reading config file")
-    config.read(config_file)
+    cancelall(exc)
+
+    exc.cancelall()
+    exc.sellall()
+
+
+def main(user_configo):
 
     LOG.debug("Creating exchange object")
-    b = mybittrex.make_bittrex(config)
+    e = user_configo.make_exchangeo()
 
     LOG.debug("Selling all coins")
-    sellall(b)
+    e.sellall()
 
 if __name__ == '__main__':
     argh.dispatch_command(main)

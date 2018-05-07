@@ -3,11 +3,15 @@
 
 # core
 import pprint
+import traceback
 
-# pypi
+# 3rd party
+from ccxt.base.errors import InsufficientFunds, InvalidOrder
+
 
 # local
 import lib.config
+import lib.emailer
 import lib.exchange.abstract
 import lib.logconfig
 from .db import db
@@ -38,27 +42,33 @@ def __takeprofit(entry, gain):
     return profit_target
 
 
-def _takeprofit(exchange, percent, row, order):
+def _takeprofit(exchange, percent, row):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
 
     #amount_to_sell = order['Quantity'] - 1e-8
-    amount_to_sell = order['filled']
-    #amount_to_sell = row['amount']
+    #amount_to_sell = order['filled']
+    amount_to_sell = row['amount']
 
-    LOG.debug("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
-    result = exchange.createLimitSellOrder(row.market, amount_to_sell, profit_target)
-    LOG.debug("Limit Sell Result = %s" % result)
+    try:
+        LOG.debug("b.sell_limit({}, {}, {})".format(row.market, amount_to_sell, profit_target))
+        result = exchange.createLimitSellOrder(row.market, amount_to_sell, profit_target)
+        LOG.debug("Limit Sell Result = %s" % result)
+        if result['status'] =='open':
+            row.update_record(selling_price=profit_target, sell_id=result['id'])
+            db.commit()
+    except InsufficientFunds:
+        LOG.debug("Insufficient funds for trade... hmmm...")
+    # except InvalidOrder:
+    #     LOG.debug("Invalid order... probably too small?")
 
-    if result['status'] =='open':
-        row.update_record(selling_price=profit_target, sell_id=result['id'])
-        db.commit()
 
 
 #@retry()
 def takeprofit(user_configo, exchange, take_profit, stop_loss):
 
     config_file = user_configo.config_name
+    db._adapter.reconnect()
     rows = db((db.buy.selling_price == None) & (db.buy.config_file == config_file)).select(orderby=~db.buy.id)
     for row in rows:
 
@@ -67,35 +77,30 @@ def takeprofit(user_configo, exchange, take_profit, stop_loss):
         #         config_file, row['config_file'])
         #     continue
 
-        order = exchange.fetchOrder(row['order_id'], row['market'])
+        # order = exchange.fetchOrder(row['order_id'], row['market'])
         LOG.debug("""
 This row is unsold <row>
 {}
 </row>.
-Here is it's order <order>
-{}
-</order>.
-""".format(row, order))
-        # order = order['result']
-        if order['status'] == 'closed':
-            _takeprofit(exchange, take_profit, row, order)
-        else:
-            LOG.debug("""Buy has not been filled. Cannot sell for profit until it does.
-                  You may want to manually cancel this buy order.""")
+""".format(row))
+
+        _takeprofit(exchange, take_profit, row)
+        # else:
+        #     LOG.debug("""Buy has not been filled. Cannot sell for profit until it does.
+        #           You may want to manually cancel this buy order.""")
 
 
 def _clearprofit(exchange, row):
 
     LOG.debug("Clearing Profit for {}".format(row))
 
-    result = exchange.cancel(row['sell_id'])
+    result = exchange.cancelOrder(row['sell_id'])
 
-    if result['success']:
-        LOG.debug("\t\tSuccess: {}".format(result))
-        row.update_record(selling_price=None, sell_id=None)
-        db.commit()
-    else:
-        raise Exception("Order cancel failed: {}".format(result))
+    LOG.debug("\tResult of cancel: {}".format(result))
+    row.update_record(selling_price=None, sell_id=None)
+    db.commit()
+#    else:
+#        raise Exception("Order cancel failed: {}".format(result))
 
 def clearorder(exchange, sell_id):
     row = db((db.buy.sell_id == sell_id)).select().first()
@@ -111,13 +116,12 @@ def clear_order_id(exchange, sell_order_id):
 
 def clearprofit(exchange):
     "Used in conjunction with `invoke cancelsells`"
-    openorders = exchange.get_open_orders()['result']
-    count = 0
+    openorders = exchange.fetchOpenOrders()
+
     for openorder in openorders:
-        if openorder['OrderType'] == 'LIMIT_SELL':
-            count += 1
-            LOG.debug("{}: {} --->{}".format(count, openorder, openorder['OrderUuid']))
-            clearorder(exchange, openorder['OrderUuid'])
+        LOG.debug("Open Order={}".format(openorder))
+        if openorder['side'] == 'sell':
+            clearorder(exchange, openorder['id'])
 
 #    rows = db((db.buy.sell_id != None) & (db.buy.config_file == config_file)).select()
 #    for i, row in enumerate(rows):
@@ -138,14 +142,34 @@ def prep(user_configo):
 
 def take_profit(user_configo):
 
-    configo, exchange = prep(user_configo)
-    take_profit = configo.takeprofit
-    stop_loss   = None
+    try:
 
-    LOG.debug("Setting profit targets for {}".format(user_configo.config_name))
+        configo, exchange = prep(user_configo)
+        take_profit = configo.takeprofit
+        stop_loss   = None
 
-    takeprofit(configo, exchange, take_profit, stop_loss)
+        LOG.debug("Setting profit targets for {}".format(user_configo.config_name))
 
-def clear_profit(config_file):
-    config, exchange = prep(config_file)
-    clearprofit(exchange)
+        takeprofit(configo, exchange, take_profit, stop_loss)
+
+    except Exception:
+        error_msg = traceback.format_exc()
+        LOG.debug('Aborting: {}'.format(error_msg))
+        LOG.debug("Notifying admin via email")
+        lib.emailer.notify_admin(error_msg, user_configo.system)
+
+
+
+def clear_profit(user_configo):
+    try:
+        configo, exchange = prep(user_configo)
+        clearprofit(exchange)
+    except Exception:
+        error_msg = traceback.format_exc()
+        LOG.debug('Aborting: {}'.format(error_msg))
+        LOG.debug("Notifying admin via email")
+        lib.emailer.notify_admin(error_msg, user_configo.system)
+
+"""
+2018-05-01 13:42:28,677 buy.py:284 		FILL={'info': {'id': 3147232, 'orderId': 11003427, 'price': '0.00003464', 'qty': '141.00000000', 'commission': '0.00160756', 'commissionAsset': 'BNB', 'time': 1525196547276, 'isBuyer': True, 'isMaker': False, 'isBestMatch': True}, 'timestamp': 1525196547276, 'datetime': '2018-05-01T17:42:27.276Z', 'symbol': 'VIBE/BTC', 'id': '3147232', 'order': '11003427', 'type': None, 'side': 'buy', 'price': 3.464e-05, 'cost': 0.00488424, 'amount': 141.0, 'fee': {'cost': 0.00160756, 'currency': 'BNB'}}
+"""

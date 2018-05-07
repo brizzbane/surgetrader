@@ -138,24 +138,24 @@ def buy(_ctx, ini=None):
 def load_iniset(iniset):
     inis = SYS_INI.configo['users'][iniset].split()
     LOG.debug("INISET = {}".format(inis))
-    
-    # Create lib.config.User instances 
-    user_configos = [lib.config.User(ini) for ini in inis]   
-    
+
+    # Create lib.config.User instances
+    user_configos = [lib.config.User(ini) for ini in inis]
+
     return user_configos
 
 
 @task
-def telegrambot(_ctx, telegram_client, iniset):
+def telegramclient(_ctx, telegram_client, ini):
     """Invoke the telegram bot and have it scan the group for posted signals.
     When a signal is posted, trade each ini file using the specified exchange section within that ini-file
 
     Example invocation:
         invoke telegrambot QualitySignals inis
-        
+
         "bill/binance.1 bill/bittrex.2"
         # This will scan the quality_signals telegram group and when a buy signal is detected,
-        # it will trade the signal and set profit targets using the configuration data in the 
+        # it will trade the signal and set profit targets using the configuration data in the
         # bill.ini file and exchange-specific config settings listed in [binance.1] and [binance.2]
         # QualitySignals is the class name of a TelegramClient subclass in src/lib/telegram.py
 
@@ -165,14 +165,13 @@ def telegrambot(_ctx, telegram_client, iniset):
     from lib import telegram as _telegram
 
     LOG.debug(open_task())
-    
-    # Create lib.config.User instances 
-    user_configos = load_iniset(iniset)
-    LOG.debug("C = {} USER_CONFIGOS = {}. EXCHANGE={}".format(telegram_client, user_configos, user_configos[0].exchange))
+
+    # Create lib.config.User instances
+    user_configo = lib.config.User(ini)
 
     # Parse a telegram chat room for signals and trade all the user ini files with the signal
-    session_label = "{}-{}".format(telegram_client, iniset)
-    _telegram.main(telegram_client, user_configos, session_label)
+    session_label = "{}-{}".format(telegram_client, ini)
+    _telegram.main(telegram_client, user_configo, session_label)
 
     LOG.debug(close_task())
 
@@ -243,6 +242,9 @@ def profitreport(_ctx, iniset, date_string=None, skip_markets=None):
         if date_string == 'yesterday':
             date_string = "Yesterday"
             _date = date.fromordinal(date.today().toordinal()-1)
+        elif date_string == 'today':
+            date_string = "Today"
+            _date = date.fromordinal(date.today().toordinal())
         elif date_string == 'lastmonth':
             date_string = "Last month"
             from dateutil.relativedelta import relativedelta
@@ -262,7 +264,7 @@ def profitreport(_ctx, iniset, date_string=None, skip_markets=None):
         skip_markets = skip_markets.split()
 
     for user_configo in user_configos:
-        # LOG.debug("Processing {}".format(user_configo))
+        LOG.debug(" ------------------------------ Processing {}".format(user_configo.config_name))
         lib.report.profit.main(user_configo, date_string, _date=_date, skip_markets=skip_markets)
 
     LOG.debug(close_task())
@@ -286,7 +288,7 @@ def deletebuyorder(_ctx, order_id):
     LOG.debug(close_task())
 
 @task
-def cancelsells(_ctx, ini=None):
+def cancelsells(_ctx, ini):
     """Cancel sell orders so that `invoke takeprofit` can re-issue them.
 
     Bittrex implemented a policy where a SELL LIMIT order can only be active
@@ -298,11 +300,10 @@ def cancelsells(_ctx, ini=None):
     LOG.debug(open_task())
 
 
-    inis = listify_ini(ini)
+    _ = lib.config.User(ini)
 
-    for _ in inis:
-        LOG.debug("Processing {}".format(_))
-        lib.takeprofit.clear_profit(_)
+    LOG.debug("Processing {}".format(_))
+    lib.takeprofit.clear_profit(_)
 
     LOG.debug(close_task())
 
@@ -353,7 +354,8 @@ def sellall(_ctx, ini):
     from lib import sellall as _sellall
     LOG.debug(open_task())
 
-    _sellall.main(ini)
+    user_configo = lib.config.User(ini)
+    _sellall.main(user_configo)
 
     LOG.debug(close_task())
 

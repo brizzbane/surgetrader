@@ -105,7 +105,7 @@ def obtain_btc_balance(exchange):
     Returns:
         dict: The account's balance of BTC.
     """
-   
+
     btc_data = obtain_coin_balances('BTC', exchange)
     LOG.debug("FETCHBAL={}".format(btc_data))
 
@@ -119,14 +119,17 @@ def obtain_coin_balances(coin, exchange):
     Returns:
         dict: The account's balance of BTC.
     """
-    
+
     LOG.debug("Obtaining balances for coin={} using exchange instance={}".format(coin, exchange))
 
-    
+
     bal = exchange.fetchBalance()
 
-    tree = objectpath.Tree(bal)
-    coin_data = tree.execute("$.info.balances[@.asset is '{}'][0]".format(coin))
+    # LOG.debug("bal={}".format(bal))
+
+    coin_data = bal[coin]
+    # 'BTC': {'free': 0.26420178, 'used': 0.0, 'total': 0.26420178},
+
     LOG.debug("{} Data={}".format(coin, coin_data))
 
     return coin_data
@@ -170,7 +173,7 @@ def rate_for(exchange, mkt, btc):
     best_ask = orders['asks'][0][0]
     acceptable_rate = best_ask + best_ask * 0.02
 
-    coin_amount = btc / acceptable_rate
+    coin_amount = int(btc / acceptable_rate)
     return acceptable_rate, coin_amount
 
 
@@ -276,15 +279,23 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
         'status': 'closed', 'fee': None
     }
     """
-    if buy_order['info']['status'] == 'FILLED':
-        LOG.debug("\tBuy was a success = {}".format(buy_order))
+    # BINANCE
+    # Result of limitbuy={'info': {'symbol': 'OSTBTC', 'orderId': 10255819, 'clientOrderId': 'SYgzDaxT2AMO8i9JPdjZNE', 'transactTime': 1525363828398, 'price': '0.00003061', 'origQty': '162.00000000', 'executedQty': '162.00000000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'LIMIT', 'side': 'BUY'}, 'id': '10255819', 'timestamp': 1525363828398, 'datetime': '2018-05-03T16:10:28.398Z', 'symbol': 'OST/BTC', 'type': 'limit', 'side': 'buy', 'price': 3.061e-05, 'amount': 162.0, 'cost': 0.00495882, 'filled': 162.0, 'remaining': 0.0, 'status': 'closed', 'fee': None}
 
-        fills = exchange.fetchMyTrades(symbol=mkt, since=buy_order['timestamp'])
-        for fill in fills:
-            LOG.debug("\t\tFILL={}".format(fill))
-            record_buy(config_file, buy_order['id'], mkt,
-                       fill['info']['price'], fill['info']['qty']
-                      )
+    # BITTRESS
+    # Result of limitbuy={'info': {'success': True, 'message': '', 'result': {'uuid': '29b353cd-50e8-46f6-8cc2-c23b51186a7a'}}, 'id': '29b353cd-50e8-46f6-8cc2-c23b51186a7a', 'symbol': 'ION/BTC', 'type': 'limit', 'side': 'buy', 'status': 'open'}
+
+
+    if exchange.filled(buy_order):
+        LOG.debug("\tBuy was a success = {}".format(buy_order))
+        record_buy(config_file, buy_order['id'], mkt, rate, amount_of_coin)
+
+#        fills = exchange.fetchMyTrades(symbol=mkt, since=buy_order['timestamp'])
+#        for fill in fills:
+#            LOG.debug("\t\tFILL={}".format(fill))
+#            record_buy(config_file, fill['id'], mkt,
+#                       fill['info']['price'], fill['info']['qty']
+#                      )
     else:
         LOG.debug("\tBuy FAILED: {}".format(buy_order))
 

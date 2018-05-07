@@ -2,29 +2,13 @@
 A Python **3** cryptocurrency trading bot that has gone through 2 incarnations:
 
 * Incarnation 1 involved simple technical analysis. Further discussion of it can be found
-in the `README-legacy.md` file. It is no longer making trades for me. Though it
+in the `README-SurgeTraderOld.md` file. It is no longer making trades for me. Though it
 is for others.
-* Incarnation 2 scans Telegram channels devoted to cryptocurrency signals and automatically buys his posted signals and sets profit targets that are much more modest than he typically achieves.
+* Incarnation 2 scans [the Telegram channel of a very astute technical and fundamental trader](https://t.me/Tradingcryptocoach) and automatically buys his posted signals and sets profit targets that are much more modest than he typically achieves.
 
 ## How well has it worked?
 
-* [the Telegram channel of Trading Crypto Coach](https://t.me/Tradingcryptocoach) had very good performance. The only issues with trading him are (1) he doesnt always write the signal in the same way (2) his signals are for Bittrex coins and Binance is preferable for many. The results for him are posted [here](http://telegram-tradingcryptocoach.blogspot.com/). Like many non-objective signal providers, he glorifies his wins and speaks of them in terms of maximum profit but does not mention his losers. For instance his Bitcrystals call never went anywhere and we never hear a thing about it in his channel. But he is an excellent technical and fundamental analyst with a lot of good energy and has more than 120,000 people in his channel.
-
-* [Jose's Quality Signals Channel](https://t.me/QualitySignalsChannel) provides free and premium content. He amalgamates trades from a number of sources. The format is 100% parseable everytime. The problem is the signals are mainly sideways and down. When Trading Crypto Coach provides signals, they jump and provide nice profits in a few days.
-
-* [Crypto Signals Hub](https://t.me/joinchat/AAAAAE5kofiekf82MMAcFQ) provides free signals.
-
-## How to find Telegram channels to trade with?
-
-* Coindetect locates some of them
-* Googling and reading through Bitcointalk and Quora threads yielded some good ones
-
-The bot can be extended with parsers for any number of Telegram channels.
-
-
-## How to contact you
-
-
+I record performance automatically in [this blog](https://surgetradertelegram.blogspot.com/) on a daily basis.
 You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/)
 or [our Discord channel](https://discord.gg/dB2YVg2).
 
