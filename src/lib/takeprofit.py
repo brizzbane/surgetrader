@@ -6,7 +6,7 @@ import pprint
 import traceback
 
 # 3rd party
-from ccxt.base.errors import InsufficientFunds, InvalidOrder
+from ccxt.base.errors import InsufficientFunds, InvalidOrder, ExchangeNotAvailable
 
 
 # local
@@ -59,9 +59,8 @@ def _takeprofit(exchange, percent, row):
             db.commit()
     except InsufficientFunds:
         LOG.debug("Insufficient funds for trade... hmmm...")
-    # except InvalidOrder:
-    #     LOG.debug("Invalid order... probably too small?")
-
+    except ExchangeNotAvailable:
+        LOG.debug("Exchange not available")
 
 
 #@retry()
@@ -105,9 +104,10 @@ def _clearprofit(exchange, row):
 def clearorder(exchange, sell_id):
     row = db((db.buy.sell_id == sell_id)).select().first()
     if not row:
-        raise Exception("Could not find row with sell_id {}".format(sell_id))
+        LOG.debug("Could not find row with sell_id {}".format(sell_id))
+    else:
+        _clearprofit(exchange, row)
 
-    _clearprofit(exchange, row)
 
 def clear_order_id(exchange, sell_order_id):
     "Used in conjunction with `invoke clearorderid`"

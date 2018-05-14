@@ -1,3 +1,8 @@
+"""
+shell> cd surgetrader/src ; python -m 'lib.telegram_test'
+
+"""
+
 # core
 import re
 
@@ -85,39 +90,62 @@ class TradingCryptoCoach(TelegramClient):
             }
 
     def maybe_trade(self, message):
-        # match "Coin #XVG on #Bittrex"
-        re1 = re.compile(r'^Coin\s+#(\S+)(\s+\S+)?', re.IGNORECASE)
+        # match "Coin #XVG"
+        re0 = re.compile(r'^Coin\s+#(\S+)', re.IGNORECASE)
 
         # match #SYS Coin at #Bittrex
         # match #WAVES dip looks good
-        re1_1 = re.compile(r'^#(\S+)\s+(Coin|Dip)(\s+\S+\s+#?(\S+))?', re.IGNORECASE)
+        re1 = re.compile(r'^#(\S+)\s+(at|Coin|Dip)(\s+\S+\s+#?(\S+))?', re.IGNORECASE)
 
         # match "Buy #XVG' or Accumulate #EXCL at #Bittrex
         # note: He sometimes says Accumulate Some #GAME and the `some` throws me off
         re2 = re.compile(r'^(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
 
+        # match Buy and Hold #CRW
+        re2a = re.compile(r'^Buy\s+and\s+Hold\s+#(\S+)', re.IGNORECASE)
+
         # match "#XVG Buy'
         re3 = re.compile(r'^#(\S+)\s+Buy', re.IGNORECASE)
+        m = re3.match(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
+
+        # match "#XVG at Bittrex'
+        re4 = re.compile(r'^#(\S+)\s+at\s+Bittrex', re.IGNORECASE)
+
+        m = re0.search(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
 
         m = re1.search(message)
         if m:
-            coin, exchange = m.groups()
-            return coin, exchange
-
-        m = re1_1.search(message)
-        if m:
-            coin, exchange = m.groups()
-            return coin, exchange
+            coin = m.group(1)
+            return coin, None
 
         m = re2.search(message)
         if m:
             coin = m.group(2)
             return coin, None
 
-        m = re3.search(message)
+        m = re2a.search(message)
         if m:
             coin = m.group(1)
             return coin, None
+
+
+        m = re3.match(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
+        m = re4.match(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
 
         return None, None
 

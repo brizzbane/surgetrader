@@ -18,6 +18,7 @@ import pprint
 
 # 3rd party
 import argh
+from ccxt.base.errors import RequestTimeout
 import objectpath
 from retry import retry
 from supycache import supycache
@@ -113,6 +114,7 @@ def obtain_btc_balance(exchange):
     return float(free_btc)
 
 
+@retry(exceptions=RequestTimeout, tries=600, delay=5)
 def obtain_coin_balances(coin, exchange):
     """Get coin balance.
 
