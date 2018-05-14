@@ -224,9 +224,8 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
 
         calculations = {
             'profit': profit_from(bo, so),
-
-            'sell_closed': so['info']['Closed'],
-            'buy_opened': bo['info']['Opened'],
+            'sell_closed': exchange.datetime_closed(so),
+            'buy_opened': exchange.datetime_opened(bo),
             'market': so['symbol'],
             'units_sold': so['amount'],
             'sell_price': so['price'],
