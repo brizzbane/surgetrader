@@ -10,8 +10,16 @@ exchange = bittrex
 apikey = 872ababa3f48473881b2cdcdcd7bd26f
 secret = f236fa24a393421780fecc721f28ac8d
 
-# (+ 0.03 0.02539748)
+# trade means "trade 5% of the seed capital on each trade".
+# if deposit = 1 and trade = 5 then 0.05 BTC worth of coin will be bought on each trade.
+
+
 deposit    = 2
 trade      = 5
-preserve   = 0.055
 takeprofit = 5
+
+# preserve means "do not use this much of the seed capital to trade with"
+# most likely, you do not want to withdraw your profits each day
+# but instead you can tell SurgeTrader to not use this much of your BTC
+# that way you can wait and withdraw another day.
+preserve   = 0.055

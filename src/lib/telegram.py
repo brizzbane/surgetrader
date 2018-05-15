@@ -213,6 +213,7 @@ def main(telegram_class, user_configo, session_label):
 
     update_handler = chat_parser.make_update_handler(user_configo)
 
+    LOG.debug("client={}. chat_parser={}. update_handler={}".format(client, chat_parser, update_handler))
     client.set_update_handler(update_handler)
     client.start()
 
