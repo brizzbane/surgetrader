@@ -1,0 +1,17 @@
+[DEFAULT]
+
+[client]
+name = supreme
+email = revshareworks.whitesweater@blogger.com
+
+[account]
+exchange = binance
+apikey = 21XAlqxP451uTWBk0J7K6o6aGSU7QdL49uGj4bOjD5DgmzhuNLZ9Ypnv6zKUFGsm
+secret = BXIa42waNgR2jptC6oD5w0GcGBswpmg6uaOriMRzgBO9bNJ2Z4gTmoRuw1Ovhvnl
+
+deposit     = 0.1
+trade       = 5
+takeprofit  = 5
+
+# (+
+preserve    = 0.0

@@ -1,0 +1,17 @@
+[DEFAULT]
+
+
+[client]
+name = supreme
+email = revshareworks.jcl4ever@blogger.com
+
+[account]
+exchange = bittrex
+apikey = 872ababa3f48473881b2cdcdcd7bd26f
+secret = f236fa24a393421780fecc721f28ac8d
+
+# (+ 0.03 0.02539748)
+deposit    = 2
+trade      = 5
+preserve   = 0.055
+takeprofit = 5
