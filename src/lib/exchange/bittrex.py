@@ -18,10 +18,10 @@ class Bittrex(ccxt.bittrex):
             LOG.debug("ORDER={}".format(order))
             self.cancelOrder(order['id'])
 
-    def datetime_closed(order):
+    def datetime_closed(self, order):
         return order['info']['Closed']
 
-    def datetime_opened(order):
+    def datetime_opened(self, order):
         return order['info']['Opened']
 
     def sellall(self):

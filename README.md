@@ -16,7 +16,7 @@ is for others.
 
 ## How to find Telegram channels to trade with?
 
-* Coindetect locates some of them
+* [Coindetect](http://coindetect.org/top100) locates some of them.
 * Googling and reading through Bitcointalk and Quora threads yielded some good ones
 
 The bot can be extended with parsers for any number of Telegram channels.
@@ -26,18 +26,15 @@ The bot can be extended with parsers for any number of Telegram channels.
 
 
 You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/)
-or [our Discord channel](https://discord.gg/dB2YVg2).
+or [our Discord channel](https://discord.gg/dB2YVg2). My userid is `princepawn`.
 
 Here are some other ways to learn about it:
 
 * [AMA Chat on reddit cryptomarkets]()
 
-
 # How do I install this bad boy?
 
 1. You need Python **3**. I recommend the [Miniconda](https://conda.io/miniconda.html) or [Anaconda](https://www.anaconda.com) Python 3 distribution.
-1. Install python-bittrex from [this
-github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 1. `git clone https://gitlab.com/metaperl/surgetrader/`
 1. `cd surgetrader`
 1. `pip3 install -r requirements.txt`
@@ -50,14 +47,14 @@ and not a Python 2 one by typing `which pip` and looking at the path of the exec
 1. At the shell, copy `src/system.ini.sample` to `src/system.ini` and configure the file as documented.
 1. Change to the `src/users` directory. Copy `src/users/useraccount.ini.sample` to a new name of your choosing, e.g. myaccount.ini.
 Edit your account ini file as documented.
-1. In the file `src/system.ini`, update the variable `inis` in the `[users]` section with the name of this new ini file.
+1. In the file `src/system.ini`, crate a a variable in the `[users]` section with the space-separated names of the ini files you have in `src/users`.
 
 ### Optimal Settings
 
 Over a period of experimentation, I have found that
 these settings work well:
 
-    Each trade should use 3% of the seed capital. Aim for a 5% profit margin.
+    Each trade should use 5% of the seed capital. Aim for a 5% profit margin.
 
 You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
 profits, you should only aim for 5% profit.
@@ -65,12 +62,14 @@ profits, you should only aim for 5% profit.
 ## Cron
 
     INVOKE=/home/schemelab/install/miniconda3/bin/invoke
+    INISET=iniset
+    BITTREX_ACCT=sally.ini
     # SURGE TRADER
     # mn hr dom mon dow command
-    *    *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
-    07   07 *   *   07  cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
-    15   00 *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
-    15   01 01  *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
+    *    *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit $INISET
+    07   07 *   *   07  cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells $BITTREX_ACCT
+    15   00 *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport $INISET -d yesterday
+    15   01 01  *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport $INISET -d lastmonth
     59   08 *   *   *   cd ~/prg/surgetrader/src/ ; cp storage.sqlite3 backup/storage.sqlite3-$(date -Is)
 
 
@@ -98,18 +97,18 @@ providing the registration credentials in a config file so the computer program 
 
 1. Visit https://my.telegram.org/apps and log in with your Telegram Account.
 1. Fill out the form to register a new Telegram application.
-1. Done. The Telegram API key consists of two parts: the App api_id and the App api_hash
+1. The Telegram API key consists of two parts: the App api_id and the App api_hash
 
-In the `src` directory `cp telegram.ini.sample to telegram.ini` and then
+In the `src` directory `cp config.ini.sample to config.ini` and then
 enter the `api_id` and `api_hash` you got above
 
 Then one time, you need to run this command:
 
-    shell> invoke telegraminit
+    shell> invoke telegramclient
 
 Here is what you will see:
 
-    schemelab@metta:~/prg/surgetrader/src$ invoke telegrambot
+    schemelab@metta:~/prg/surgetrader/src$ invoke telegramclient
     2018-04-11 19:46:42,933 tasks.py:148 <BEGIN process=telegrambot>
     Pyrogram v0.6.5, Copyright (C) 2017-2018 Dan Tes <https://github.com/delivrance>
     Licensed under the terms of the GNU Lesser General Public License v3 or later (LGPLv3+)
@@ -127,8 +126,22 @@ the bot run even if you disconnect.
 Now, you simply need to have the telegram client poll the channel forever. Whenever it identifies a trade signal, it
 will trade it and set a profit point.
 
-    shell> nohup invoke telegramtrader &
+    shell> nohup invoke telegramclilent &
 
+
+HOWEVER: I do recommend that you use the file `gohup.sample` to invoke your nohup jobs.
+
+   shell> cd surgetrader/src/sh
+   shell> cp gohup.sample gohup
+
+Then whenever you want to invoke the telegram client on one or more telegram channels you
+can simply type
+
+   shell> cd surgetrader/src
+   shell> ./sh/gohup
+
+A be **certain** that you do all execute from the `surgetrader/src` directory. Invoke
+everything using relative pathnames from there.
 
 ## System Hygiene
 

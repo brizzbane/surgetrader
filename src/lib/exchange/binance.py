@@ -24,10 +24,10 @@ class Binance(ccxt.binance):
             LOG.debug("ORDER={}".format(order))
             self.cancelOrder(order['id'], order['symbol'])
 
-    def datetime_closed(order):
+    def datetime_closed(self, order):
         return order['datetime']
 
-    def datetime_opened(order):
+    def datetime_opened(self, order):
         return order['datetime']
 
     def sellall(self):

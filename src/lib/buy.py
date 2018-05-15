@@ -114,7 +114,7 @@ def obtain_btc_balance(exchange):
     return float(free_btc)
 
 
-@retry(exceptions=RequestTimeout, tries=600, delay=5)
+@retry(exceptions=RequestTimeout, tries=12, delay=5)
 def obtain_coin_balances(coin, exchange):
     """Get coin balance.
 
@@ -473,7 +473,7 @@ def process(config_file, coins=None):
 def process2(configo, exchange_label, coins=None):
     """Buy coins for every configured user of the bot."""
 
-    exchange = lib.exchange.abstract.Abstract.factory(configo)
+    exchange = configo.make_exchangeo()
 
     if coins:
         top_coins = coins

@@ -34,6 +34,7 @@ import random
 from invoke import task
 
 #local
+import lib.buy
 import lib.config
 import lib.db
 import lib.logconfig
@@ -151,7 +152,7 @@ def telegramclient(_ctx, telegram_client, ini):
     When a signal is posted, trade each ini file using the specified exchange section within that ini-file
 
     Example invocation:
-        invoke telegrambot QualitySignals inis
+        invoke telegramclient QualitySignals inis
 
         "bill/binance.1 bill/bittrex.2"
         # This will scan the quality_signals telegram group and when a buy signal is detected,
@@ -367,11 +368,48 @@ def openorders(_ctx, ini):
 
     """
 
-    _, exchange = lib.takeprofit.prep(ini)
+    user_configo = lib.config.User(ini)
+    exchange = user_configo.exchangeo
 
-    open_orders = exchange.get_open_orders()
-    for order in open_orders['result']:
+    open_orders = exchange.fetchOpenOrders()
+    LOG.debug("Orders = {}".format(open_orders))
+    for order in open_orders:
         print(order)
+
+@task
+def closedorders(_ctx, ini, symbol):
+    """List the closed orders for a particular user for a symbol.
+    """
+
+    user_configo = lib.config.User(ini)
+    exchange = user_configo.exchangeo
+
+    orders = exchange.fetchClosedOrders(symbol)
+    LOG.debug("Orders = {}".format(orders))
+    for order in orders:
+        print(order)
+
+@task
+def recordbuy(_ctx, ini, order_id, symbol, rate, amount):
+    """Manually record a buy.
+    Whenever the exchange times out and does not provide a status for a buy, the buy
+    may still be successful. In this case, we need to record it, so that `takeprofit`
+    can come along and set a profit target.
+
+    ini - ini file name
+    order_id - id of order, probably obtained via `invoke closedorders`
+    symbol - the ccxt format for markets BTC-KMD on bittrex becomes KMD/BTC here
+    rate - price you bought it at
+    amount - amount you bought
+    """
+
+    #user_configo = lib.config.User(ini)
+    #exchange = user_configo.exchangeo
+
+    # import uuid
+    # order_id = 'manual-buy-{}'.format(uuid.uuid1())
+    lib.buy.record_buy(ini, order_id, symbol, float(rate), float(amount))
+
 
 
 @task

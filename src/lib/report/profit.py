@@ -8,7 +8,7 @@ import pprint
 import traceback
 
 # 3rd party
-from ccxt.base.errors import OrderNotFound
+from ccxt.base.errors import OrderNotFound, RequestTimeout
 
 from retry import retry
 import meld3
@@ -128,6 +128,7 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
 
         return profit
 
+    @retry(exceptions=RequestTimeout, tries=10, delay=5)
     def best_bid(sell_order):
         ticker = exchange.fetchTicker(sell_order['symbol'])
         LOG.debug("ticker = {}".format(ticker))

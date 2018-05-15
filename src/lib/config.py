@@ -103,6 +103,10 @@ class User(System):
         return exchange
 
 
+    @property
+    def exchangeo(self):
+        return self.make_exchangeo()
+
     def account(self, param):
         _ = self.configo['account'][param]
         return _
@@ -134,7 +138,7 @@ class User(System):
 
         _ = self.account('preserve')
         return float(_)
-    
+
     @property
     def apikey(self):
         _ = self.account('apikey')

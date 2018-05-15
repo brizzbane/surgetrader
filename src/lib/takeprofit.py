@@ -7,6 +7,7 @@ import traceback
 
 # 3rd party
 from ccxt.base.errors import InsufficientFunds, InvalidOrder, ExchangeNotAvailable
+from ccxt.base.errors import RequestTimeout
 
 
 # local
@@ -42,6 +43,7 @@ def __takeprofit(entry, gain):
     return profit_target
 
 
+@retry(exceptions=RequestTimeout, tries=12, delay=5)
 def _takeprofit(exchange, percent, row):
 
     profit_target = __takeprofit(entry=row.purchase_price, gain=percent)
@@ -135,7 +137,7 @@ def prep(user_configo):
 #            configo  = {}
 #            """.format(user_configo.__class__, user_configo.filename, pprint.pformat(user_configo)))
     # LOG.debug("Prepping using <configo>{}</configo>".format(user_configo))
-    exchangeo = lib.exchange.abstract.Abstract.factory(user_configo)
+    exchangeo = user_configo.make_exchangeo()
 
     return user_configo, exchangeo
 
