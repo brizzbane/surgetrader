@@ -152,7 +152,7 @@ def telegramclient(_ctx, telegram_client, ini):
     When a signal is posted, trade each ini file using the specified exchange section within that ini-file
 
     Example invocation:
-        invoke telegramclient QualitySignals inis
+        invoke telegramclient QualitySignals ini-file-name
 
         "bill/binance.1 bill/bittrex.2"
         # This will scan the quality_signals telegram group and when a buy signal is detected,

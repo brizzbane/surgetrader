@@ -6,7 +6,7 @@ marrow.mailer
 meld3
 objectpath
 pyDAL
-pyrogram
+pyrogram>=0.7.4
 python-dateutil
 retry
 supycache
