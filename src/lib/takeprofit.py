@@ -8,7 +8,7 @@ import traceback
 # 3rd party
 from ccxt.base.errors import InsufficientFunds, InvalidOrder, ExchangeNotAvailable
 from ccxt.base.errors import RequestTimeout
-
+from retry import retry
 
 # local
 import lib.config
