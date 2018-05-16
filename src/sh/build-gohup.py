@@ -1,3 +1,8 @@
+"""
+EDIT the list `invokes` below.
+Provide the parser class in src/lib/telegram.py that you want to use
+Provide the ini-file in src/users that will connect to the exchange and trade.
+"""
 
 class Invoke:
 
@@ -14,15 +19,20 @@ invokes = [
 def shell_call(i, nohup=True):
     if nohup:
         _nohup = 'nohup'
+        amp = '&'
     else:
         _nohup = ''
+        amp = ''
 
-    return """
-{} invoke telegramclient -t {} {} > tmp/{}-`date "+%F-%T"`.out &
-    """.format(_nohup, i.parser_class, i.ini_file, i.parser_class)
+    s = """invoke telegramclient -t {} {}""".format(i.parser_class, i.ini_file)
+
+    if nohup:
+        s = """nohup {} > tmp/{}-`date "+%F-%T"`.out &""".format(s, i.parser_class)
+
+    return s + '\n'
 
 with open('gohup', 'w') as gohup:
-    with open('gohup-init', 'w') as gohup_init:
         for invoke in invokes:
-            gohup.write(shell_call(invoke))
-            gohup_init.write(shell_call(invoke, nohup=False))
+            with open('gohup-init-{}'.format(invoke.parser_class), 'w') as gohup_init:
+                gohup.write(shell_call(invoke))
+                gohup_init.write(shell_call(invoke, nohup=False))

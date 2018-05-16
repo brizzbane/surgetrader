@@ -59,6 +59,7 @@ class TelegramClient(object):
                 LOG.debug("Attribute error on {}".format(update))
                 return
 
+            # TODO
             # if message.to_id == "pyrogram.api.types.PeerUser":
             #     LOG.debug("Ignoring...")
             #     return
