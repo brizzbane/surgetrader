@@ -2,4 +2,5 @@
 
 
 nohup invoke telegrambot -t QualitySignals     terrence-binance-tb.ini         > tmp/qs-`date "+%F-%T"`.out &
+nohup invoke telegrambot -t QualitySignals     terrence-binance-tb.ini         > tmp/qs-`date "+%F-%T"`.out &
 nohup invoke telegrambot -t TradingCryptoCoach terrence-bittrex-steadyvest.ini > tmp/tcc-`date "+%F-%T"`.out &

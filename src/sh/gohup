@@ -1,4 +1,7 @@
-#!/bin/bash -x
 
-
-nohup invoke telegramclient -t TradingCryptoCoach terrence-bittrex-steadyvest.ini >> tmp/tcc-steady-`date "+%F"`.out &
+nohup invoke telegramclient -t WallStreetCrypto terrence-binance-tb.ini > tmp/WallStreetCrypto-`date "+%F-%T"`.out &
+    
+nohup invoke telegramclient -t WallStreetTraderSchool terrence-binance-tb.ini > tmp/WallStreetTraderSchool-`date "+%F-%T"`.out &
+    
+nohup invoke telegramclient -t TradingCryptoCoach terrence-bittrex-steadyvest.ini > tmp/TradingCryptoCoach-`date "+%F-%T"`.out &
+    

@@ -59,6 +59,10 @@ class TelegramClient(object):
                 LOG.debug("Attribute error on {}".format(update))
                 return
 
+            if message.to_id == "pyrogram.api.types.PeerUser":
+                LOG.debug("Ignoring...")
+                return
+
             i = message.to_id.channel_id
             if i in self.CHANNELS.values():
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
@@ -84,8 +88,9 @@ class TelegramClient(object):
 
 class TradingCryptoCoach(TelegramClient):
 
+    # 'easycoinpicks'      : 1312304347, # My Test Channel,
     CHANNELS = {
-            'easycoinpicks'      : 1312304347, # My Test Channel,
+
             'Tradingcryptocoach' : 1147798110  # https://t.me/Tradingcryptocoach
             }
 
@@ -152,8 +157,9 @@ class TradingCryptoCoach(TelegramClient):
 
 class QualitySignals(TelegramClient):
 
+    # 'easycoinpicks'         : 1312304347, # My Test Channel,
     CHANNELS = {
-        'easycoinpicks'         : 1312304347, # My Test Channel,
+
         'QualitySignalsChannel' : 1343688547 # https://t.me/QualitySignalsChannel
         # 'QualitySignals'        : 1226119909  #
     }
@@ -174,28 +180,67 @@ class QualitySignals(TelegramClient):
 
         return None, None
 
-class CryptoSignalsHub(TelegramClient):
+class WallStreetTraderSchool(TelegramClient):
 
+    # 'easycoinpicks'      : 1312304347,   # My Test Channel,
     CHANNELS = {
-        'easycoinpicks'      : 1312304347,   # My Test Channel,
-        'CryptoSignalsHub'   : 1315217912    # https://t.me/joinchat/AAAAAE5kofiekf82MMAcFQ
+
+        'WallStreetTraderSchool'   : 1136730358
     }
 
 
     def maybe_trade(self, message):
 
-        # match #SYS Coin at #Bittrex
+        # match "#BCPT\n\nBuy @5200\n\nSell @ 5650, 6100, 6600"
         re1 = re.compile(
-            r'#(\S+)\s+at\s+({})'.format(self.exchange_label),
+            r'#(\S+).+Buy'.format(self.exchange_label),
             re.IGNORECASE|re.MULTILINE|re.DOTALL
         )
 
         m = re1.search(message)
         if m:
-            coin, exchange = m.groups()
-            return coin, exchange
+            coin = m.group(1)
+            return coin, None
+
+        # match Buy INS
+        re1 = re.compile(
+            r'Buy (\S+)',
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
+
+        m = re1.search(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
 
         return None, None
+
+
+class WallStreetCrypto(TelegramClient):
+
+    # 'easycoinpicks'      : 1312304347,   # My Test Channel,
+    CHANNELS = {
+
+        'WallStreetCrypto'   : 1275581291
+    }
+
+
+    def maybe_trade(self, message):
+
+        # match "TRX looking good. Huge buy wall looks like whale accumulating before another bull run."
+        re1 = re.compile(
+            r'(\S+)\s+looking\s+good',
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
+
+        m = re1.search(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
+        return None, None
+
 
 
 def make_chat_parser(telegram_class, exchange_label):

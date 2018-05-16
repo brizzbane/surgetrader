@@ -2,6 +2,9 @@ import unittest
 
 import lib.telegram
 
+# shell> cd surgetrader/src
+# shell> python -m lib.telegram_test
+
 class TestQualitySignals(unittest.TestCase):
 
     def setUp(self):
@@ -30,6 +33,42 @@ LOW: 0.00121500 HIGH:0.00128720
 
         self.assertEqual(coin.upper(), 'NEBL')
         self.assertEqual(exchange.upper(), 'BINANCE')
+
+class TestWallStreetTraderSchool(unittest.TestCase):
+
+    def setUp(self):
+        self.text1 = "#BCPT\n\nBuy @5200\n\nSell @ 5650, 6100, 6600"
+        self.text2 = "Buy INS"
+
+        telegram_class = 'WallStreetTraderSchool'
+        exchange_label = 'binance'
+        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
+
+    def test_re1(self):
+        coin, exchange = self.chat_parser.maybe_trade(self.text1)
+
+        self.assertEqual(coin.upper(), 'BCPT')
+
+    def test_re2(self):
+        coin, exchange = self.chat_parser.maybe_trade(self.text2)
+
+        self.assertEqual(coin.upper(), 'INS')
+
+class TestWallStreetCrypto(unittest.TestCase):
+
+    def setUp(self):
+        self.text1 = "EOS looking good for mid term and long term holder's."
+
+        telegram_class = 'WallStreetCrypto'
+        exchange_label = 'binance'
+        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
+
+    def test_re1(self):
+        coin, exchange = self.chat_parser.maybe_trade(self.text1)
+
+        self.assertEqual(coin.upper(), 'EOS')
+
+
 
 class TestCryptoCoach(unittest.TestCase):
 
