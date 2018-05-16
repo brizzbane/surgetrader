@@ -59,9 +59,9 @@ class TelegramClient(object):
                 LOG.debug("Attribute error on {}".format(update))
                 return
 
-            if message.to_id == "pyrogram.api.types.PeerUser":
-                LOG.debug("Ignoring...")
-                return
+            # if message.to_id == "pyrogram.api.types.PeerUser":
+            #     LOG.debug("Ignoring...")
+            #     return
 
             i = message.to_id.channel_id
             if i in self.CHANNELS.values():
