@@ -1,29 +1,21 @@
 # surgetrader
-A python **3** bot designed to profit on price surges detected at BitTrex.
+A Python **3** cryptocurrency trading bot that has gone through 2 incarnations:
 
-## How does it work?
-
-SurgeTrader finds what coin has had the greatest percent growth in price over a period
-of time (typically an hour). It then buys that coin at market value and sets a profit target.
-
-**READ THIS CAREFULLY** SurgeTraderBot is designed to generate BTC profits and then go back into more trades immediately.
-It opens a large number of "losing" transactions in the _hopes_ of closing a few profit targets on a daily basis. Be prepared for
-the estimated value of your account to drop to 20 to 50% of your initial deposit and remain that way. If you are not comfortable
-with the large number of open transactions that you see in [my live account](https://surgetraderbot.blogspot.com/), where each open
-transaction is losing 20 to 60% of the initial value of the trade before it (hopefully) closes, then you have a few options:
-* fork the code and implement an artificial stop loss (crypto is too volatile for this IMHO)
-* Do not use the bot
+* Incarnation 1 involved simple technical analysis. Further discussion of it can be found
+in the `README-SurgeTraderOld.md` file. It is no longer making trades for me. Though it
+is for others.
+* Incarnation 2 scans [the Telegram channel of a very astute technical and fundamental trader](https://t.me/Tradingcryptocoach) and automatically buys his posted signals and sets profit targets that are much more modest than he typically achieves.
 
 ## How well has it worked?
 
-I record performance in [this blog](https://surgetraderbot.blogspot.com/) on a daily basis.
+I record performance automatically in [this blog](https://surgetradertelegram.blogspot.com/) on a daily basis.
 You may ask questions in [the reddit group for SurgeTrader](https://www.reddit.com/r/surgetraderbot/)
-or [our Discord channel](https://discord.gg/5WPHMwu).
+or [our Discord channel](https://discord.gg/dB2YVg2).
 
 Here are some other ways to learn about it:
 
-* [AMA Chat on reddit cryptomarkets](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/)
-* [A comment I made](https://www.reddit.com/r/CryptoMarkets/comments/7dxyb4/bitcoin_cash_traders_lose_millions_as_exchange/dq1jeuk/) in response to a panic buy where people list millions - SurgeTraderBot can rightly be seen as a bot that sometimes buys into panic.
+* [AMA Chat on reddit cryptomarkets]()
+
 
 # How do I install this bad boy?
 
@@ -35,7 +27,6 @@ github](https://github.com/metaperl/python-bittrex) instead of PyPi.
 1. `pip3 install -r requirements.txt`
 1. If `pip3` is not available, then you may try calling `pip` instead. But make sure that `pip` is indeed a Python **3** `pip`
 and not a Python 2 one by typing `which pip` and looking at the path of the executable.
-1. `git clone https://github.com/Crypto-toolbox/bitex ; cd bitex ; git checkout -b dev ; python3 setup.py install`
 1. in the `src/log` directory follow the directions in `0-README.md` to enable log rotation.
 
 ## Configuration
@@ -50,22 +41,17 @@ Edit your account ini file as documented.
 Over a period of experimentation, I have found that
 these settings work well:
 
-    Each trade should use 3% of the account. Aim for a 5% profit margin.
+    Each trade should use 3% of the seed capital. Aim for a 5% profit margin.
 
 You can aim for higher profit margins if you are more interested in weekly or monthly profits. But for daily
 profits, you should only aim for 5% profit.
 
 ## Cron
 
-Create 1 cron entry that downloads the market data every hour (or whatever
-sample period you like) and then scans for the coin with the strongest
-surge and buys it:
-
     INVOKE=/home/schemelab/install/miniconda3/bin/invoke
     # SURGE TRADER
     # mn hr dom mon dow command
-    00   *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE download buy takeprofit
-    */5  *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
+    *    *  *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE takeprofit
     07   07 *   *   07  cd ~/prg/surgetrader/src/ ; $INVOKE cancelsells
     15   00 *   *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d yesterday
     15   01 01  *   *   cd ~/prg/surgetrader/src/ ; $INVOKE profitreport -d lastmonth
@@ -88,10 +74,45 @@ You can see the modifications that one individual made
 [here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
 
 
-### Test it Out!
+### Prime the pump (one time)
 
-Do **NOT** test this out by typing `invoke download`. If you do, you run the risk of prematurely buying a coin - not a big deal.
-But it's better to test it by typing `invoke takeprofit`
+You must [get the Python telegram client library setup](https://docs.pyrogram.ml/start/ProjectSetup).
+This requires registering an app with your Telegram account and then
+providing the registration credentials in a config file so the computer program can read them. So here's what you do:
+
+1. Visit https://my.telegram.org/apps and log in with your Telegram Account.
+1. Fill out the form to register a new Telegram application.
+1. Done. The Telegram API key consists of two parts: the App api_id and the App api_hash
+
+In the `src` directory `cp telegram.ini.sample to telegram.ini` and then
+enter the `api_id` and `api_hash` you got above
+
+Then one time, you need to run this command:
+
+    shell> invoke telegraminit
+
+Here is what you will see:
+
+    schemelab@metta:~/prg/surgetrader/src$ invoke telegrambot
+    2018-04-11 19:46:42,933 tasks.py:148 <BEGIN process=telegrambot>
+    Pyrogram v0.6.5, Copyright (C) 2017-2018 Dan Tes <https://github.com/delivrance>
+    Licensed under the terms of the GNU Lesser General Public License v3 or later (LGPLv3+)
+
+    Enter phone number: 18005551212
+    Is "18005551212" correct? (y/n): y
+    Enter phone code: 19879
+    2018-04-11 19:47:09,738 tasks.py:153 <END process=telegrambot>
+
+So this is fine, and if a signal comes in it will trade it. But you are better off having
+the bot run even if you disconnect.
+
+### So Let's have the bot run even if we logout of our linux box
+
+Now, you simply need to have the telegram client poll the channel forever. Whenever it identifies a trade signal, it
+will trade it and set a profit point.
+
+    shell> nohup invoke telegramtrader &
+
 
 ## System Hygiene
 
@@ -324,3 +345,6 @@ by those who chose to download and use it.
 * [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading)
 * [Gekko (freaking amazing)](https://gekko.wizb.it/)
 *
+# Other cool bots
+
+* [Moon Bot](https://moon-bot.com/en/) - closed source but very well engineered.
