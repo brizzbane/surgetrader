@@ -5,8 +5,8 @@ A python 3 library for general algorithmic trading and profit reporting.
 
 SurgeTrader has two working bots:
 
-* HOURLY SURGE: The first one was designed to detect coins with the strongest gain in price over 1 hour. It would then buy them and set profit targets. You can read about it in README-hourly.md  ... I'm no longer running it.
-* TELEGRAM CLIENT: The newer bot, scans Telegram channels for buy signals and automatically executes them. Then it sets profit targets. You can read about it in READMe-telegram.md ... I'm currently running it.
+* HOURLY SURGE: The first one was designed to detect coins with the strongest gain in price over 1 hour. It would then buy them and set profit targets. You can read about it in [README-hourly.md](README-hourly.md)  ... I'm no longer running it.
+* TELEGRAM CLIENT: The newer bot, scans Telegram channels for buy signals and automatically executes them. Then it sets profit targets. You can read about it in [README-telegram.md](README-telegram.md) ... I'm currently running it.
 
 Both bot versions provide daily and monthly profit reports.
 
