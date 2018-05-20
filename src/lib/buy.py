@@ -62,31 +62,6 @@ MIN_GAIN = SYS_INI.min_gain
 "1-hour gain must be 5% or more"
 
 
-@retry(exceptions=json.decoder.JSONDecodeError, tries=600, delay=5)
-def number_of_open_orders_in(openorders, market):
-    """Maximum number of unclosed SELL LIMIT orders for a coin.
-
-    SurgeTrader detects hourly surges. On occasion the hourly surge is part
-    of a longer downtrend, leading SurgeTrader to buy on surges that do not
-    close. We do not want to keep buying false surges so we limit ourselves to
-    3 open orders on any one coin.
-
-    Args:
-        exchange (int): The exchange object.
-        market (str): The coin.
-
-    Returns:
-        int: The number of open orders for a particular coin.
-
-    """
-    orders = list()
-    open_orders_list = openorders['result']
-    if open_orders_list:
-        for order in open_orders_list:
-            if order['Exchange'] == market:
-                orders.append(order)
-
-    return len(orders)
 
 
 def percent_gain(new, old):
@@ -308,6 +283,11 @@ def buycoin(config_file, user_config, exchange, top_coins):
     avail = available_btc(exchange)
 
     for market in top_coins:
+
+        if len(exchange.open_orders_in(name)) >= MAX_ORDERS_PER_MARKET:
+            LOG.debug('\tToo many open orders: ' + name)
+            continue
+
         _buycoin(config_file, user_config, exchange, market, avail)
 
 

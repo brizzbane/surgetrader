@@ -1,11 +1,15 @@
+
+# 3rd party
 import ccxt.bittrex
 
+# local
+import lib.exchange.concrete
 import lib.logconfig
 
 LOG = lib.logconfig.app_log
 
 
-class Bittrex(ccxt.bittrex):
+class Bittrex(ccxt.bittrex, lib.exchange.concrete.Concrete):
 
     def filled(self, order):
         return order['info']['success']

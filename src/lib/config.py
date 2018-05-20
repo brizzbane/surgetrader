@@ -102,7 +102,6 @@ class User(System):
         exchange = lib.exchange.abstract.Abstract.factory(self)
         return exchange
 
-
     @property
     def exchangeo(self):
         return self.make_exchangeo()

@@ -1,6 +1,9 @@
 [DEFAULT]
 
 [client]
+# You can put the name of the person this account belongs to here
+# I like to also put the parser class associated with this account here
+# e.g. TradingCryptoCoach for Jane Smith
 name = supreme
 email = revshareworks.whitesweater@blogger.com
 

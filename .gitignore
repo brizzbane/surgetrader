@@ -8,6 +8,7 @@ backup/*
 
 *.ini.session
 
+parsers.ini
 
 *.sqlite3
 *.sqlite3*

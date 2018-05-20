@@ -2,6 +2,7 @@
 from ccxt.base.errors import InvalidOrder
 
 #local
+import lib.exchange.concrete
 import lib.logconfig
 
 
@@ -11,7 +12,7 @@ LOG = lib.logconfig.app_log
 import ccxt.binance
 
 
-class Binance(ccxt.binance):
+class Binance(ccxt.binance, lib.exchange.concrete.Concrete):
 
     def filled(self, order):
         return order['info']['status'] == 'FILLED'

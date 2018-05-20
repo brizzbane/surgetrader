@@ -183,9 +183,14 @@ class QualitySignals(TelegramClient):
 
 class WallStreetTraderSchool(TelegramClient):
 
-    # 'easycoinpicks'      : 1312304347,   # My Test Channel,
-    CHANNELS = {
+    """
+    https://t.me/binanceofficial1       - signals
+    https://t.me/wallstreetTraderSchool - commentary
+    """
 
+    # 'easycoinpicks'      : 1312304347,   # My Test Channel,
+
+    CHANNELS = {
         'WallStreetTraderSchool'   : 1136730358
     }
 
@@ -220,6 +225,10 @@ class WallStreetTraderSchool(TelegramClient):
 
 class WallStreetCrypto(TelegramClient):
 
+    """
+    https://t.me/wallstreetcryptotrader
+    """
+
     # 'easycoinpicks'      : 1312304347,   # My Test Channel,
     CHANNELS = {
 
@@ -230,8 +239,9 @@ class WallStreetCrypto(TelegramClient):
     def maybe_trade(self, message):
 
         # match "TRX looking good. Huge buy wall looks like whale accumulating before another bull run."
+        # match MOD AND MDA looking good for short term holder's.
         re1 = re.compile(
-            r'(\S+)\s+looking\s+good',
+            r'(\S+)\s+.*looking\s+good',
             re.IGNORECASE|re.MULTILINE|re.DOTALL
         )
 
@@ -241,7 +251,6 @@ class WallStreetCrypto(TelegramClient):
             return coin, None
 
         return None, None
-
 
 
 def make_chat_parser(telegram_class, exchange_label):

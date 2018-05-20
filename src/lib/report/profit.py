@@ -107,7 +107,7 @@ def obtain_ticker(exchange, order):
         raise GetTickerError(market)
 
 
-@retry(exceptions=json.decoder.JSONDecodeError, tries=3, delay=5)
+@retry(exceptions=RequestTimeout, tries=12, delay=5)
 def obtain_order(exchange, uuid, market):
     order = exchange.fetchOrder(uuid, market)
     LOG.debug("Order = {}".format(order))

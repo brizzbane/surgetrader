@@ -437,3 +437,18 @@ def getorder(_ctx, ini, uuid):
 
     _ = exchange.get_order(uuid)
     print(_)
+
+@task
+def openordersin(_ctx, ini, symbol):
+    """
+    """
+
+    LOG.debug(open_task())
+
+    user_configo = lib.config.User(ini)
+    exchange = user_configo.exchangeo
+
+    open_orders = exchange.open_orders_in(symbol)
+    LOG.debug("OPEN ORDERS = {}".format(open_orders))
+
+    LOG.debug(close_task())
