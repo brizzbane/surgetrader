@@ -283,9 +283,8 @@ def buycoin(config_file, user_config, exchange, top_coins):
     avail = available_btc(exchange)
 
     for market in top_coins:
-
-        if len(exchange.open_orders_in(name)) >= MAX_ORDERS_PER_MARKET:
-            LOG.debug('\tToo many open orders: ' + name)
+        if len(exchange.open_orders_in(market)) >= MAX_ORDERS_PER_MARKET:
+            LOG.debug('\tToo many open orders: ' + market)
             continue
 
         _buycoin(config_file, user_config, exchange, market, avail)
