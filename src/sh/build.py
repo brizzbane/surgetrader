@@ -27,7 +27,7 @@ def shell_call(i, nohup=True):
     s = """invoke telegramclient -t {} {}""".format(i.parser_class, i.ini_file)
 
     if nohup:
-        s = """nohup {} > tmp/{}-`date "+%F"`.out &""".format(s, i.parser_class)
+        s = """nohup {} >> tmp/{}-`date "+%F"`.out &""".format(s, i.parser_class)
 
     return s + '\n'
 

@@ -32,7 +32,7 @@ class TelegramClient(object):
     def __init__(self, exchange_label):
         self.exchange_label = exchange_label
 
-    def make_update_handler(self, user_configo):
+    def make_message_handler(self, user_configo):
 
         def message_handler(client, message):
             LOG.debug("<MESSAGE_HANDLER message={}>".format(message))
@@ -55,9 +55,11 @@ class TelegramClient(object):
                 LOG.debug("Message is not from desired channel:")
                 # LOG.debug(message)
 
-            LOG.debug("</UPDATE_HANDLER>")
+            LOG.debug("</MESSAGE_HANDLER>")
+
 
         return message_handler
+
 
 
 class TradingCryptoCoach(TelegramClient):
@@ -128,6 +130,15 @@ class TradingCryptoCoach(TelegramClient):
 
 
         return None, None
+
+
+class EasyCoinPicks(TradingCryptoCoach):
+
+    # 'easycoinpicks'      : 1312304347, # My Test Channel,
+    CHANNELS = {
+
+            'easycoinpicks' : 1312304347, # My Test Channel which parses
+            }
 
 
 class QualitySignals(TelegramClient):
@@ -207,7 +218,7 @@ class WallStreetCrypto(TelegramClient):
     # 'easycoinpicks'      : 1312304347,   # My Test Channel,
     CHANNELS = {
 
-        'WallStreetCrypto'   : 1275581291
+        'wallstreetcryptotrader'   : 1275581291
     }
 
 
@@ -249,7 +260,7 @@ def main(telegram_class, user_configo, session_label):
 
 
 
-    client.add_handler(MessageHandler(update_handler, Filters.text))
+    client.add_handler(RawUpdateHandler(update_handler))
     client.start()
 
     for channel in chat_parser.CHANNELS.keys():

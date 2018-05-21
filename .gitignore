@@ -24,7 +24,7 @@ src/tmp
 
 src/log/app.log*
 
-src/gohup
+src/sh/gohup-init-*
 
 src/backup/storage*
 
