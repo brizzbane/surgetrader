@@ -96,11 +96,18 @@ class TestCryptoCoach(unittest.TestCase):
 
         self.assertEqual(coin.upper(), 'XVG')
 
+
     def test_re2_a(self):
         text = 'Accumulate #LTC'
         coin, exchange = self.chat_parser.maybe_trade(text)
 
         self.assertEqual(coin.upper(), 'LTC')
+
+    def test_re2_b(self):
+        text = 'Accumulate some #XVG'
+        coin, exchange = self.chat_parser.maybe_trade(text)
+
+        self.assertEqual(coin.upper(), 'XVG')
 
     def test_re2a(self):
         text = 'Buy and Hold #CRW guys till 16th of May 🚀🚀🚀'

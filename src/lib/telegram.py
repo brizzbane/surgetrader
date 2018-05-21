@@ -1,7 +1,10 @@
 """
 shell> cd surgetrader/src ; python -m 'lib.telegram_test'
 
+Channels: you can't post unless admin
+Supergroups: well, that's a group which can alllow lots of members to join
 """
+
 
 # core
 import re
@@ -31,44 +34,14 @@ class TelegramClient(object):
 
     def make_update_handler(self, user_configo):
 
-        def update_handler(client, update, users, chats):
-            LOG.debug("<UPDATE_HANDLER update={}>".format(update))
+        def message_handler(client, message):
+            LOG.debug("<MESSAGE_HANDLER message={}>".format(message))
 
-            if isinstance(update, types.UpdateUserStatus):
-                LOG.debug("Ignoring...")
-                return
-            elif isinstance(update, types.UpdateChatUserTyping):
-                LOG.debug("Ignoring...")
-                return
-            elif isinstance(update, types.UpdateReadHistoryInbox):
-                LOG.debug("Ignoring...")
-                return
-            elif isinstance(update, types.UpdateEditChannelMessage):
-                LOG.debug("Ignoring...")
-                return
-            elif (
-                    isinstance(update, types.UpdateEditChannelMessage) and
-                    update.message._ == "types.MessageService"
-            ):
-                LOG.debug("Ignoring")
-                return
-
-            try:
-                message = update.message
-            except AttributeError:
-                LOG.debug("Attribute error on {}".format(update))
-                return
-
-            # TODO
-            # if message.to_id == "pyrogram.api.types.PeerUser":
-            #     LOG.debug("Ignoring...")
-            #     return
-
-            i = message.to_id.channel_id
-            if i in self.CHANNELS.values():
+            i = message.chat.username
+            if i in self.CHANNELS.keys():
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
-                LOG.debug(message.message)
-                (coin, exchange) = self.maybe_trade(message.message)
+                LOG.debug(message.text)
+                (coin, exchange) = self.maybe_trade(message.text)
                 if not coin:
                     LOG.debug("\tNot a trade message")
                 else:
@@ -84,7 +57,7 @@ class TelegramClient(object):
 
             LOG.debug("</UPDATE_HANDLER>")
 
-        return update_handler
+        return message_handler
 
 
 class TradingCryptoCoach(TelegramClient):
@@ -105,7 +78,7 @@ class TradingCryptoCoach(TelegramClient):
 
         # match "Buy #XVG' or Accumulate #EXCL at #Bittrex
         # note: He sometimes says Accumulate Some #GAME and the `some` throws me off
-        re2 = re.compile(r'^(Buy|Accumulate)\s+#(\S+)', re.IGNORECASE)
+        re2 = re.compile(r'^(Buy|Accumulate)(\s+some)?\s+#(\S+)', re.IGNORECASE)
 
         # match Buy and Hold #CRW
         re2a = re.compile(r'^Buy\s+and\s+Hold\s+#(\S+)', re.IGNORECASE)
@@ -133,7 +106,8 @@ class TradingCryptoCoach(TelegramClient):
 
         m = re2.search(message)
         if m:
-            coin = m.group(2)
+            matches = m.groups()
+            coin = matches[-1]
             return coin, None
 
         m = re2a.search(message)
@@ -184,6 +158,8 @@ class QualitySignals(TelegramClient):
 class WallStreetTraderSchool(TelegramClient):
 
     """
+    Very bizarre channel. The username link changes often and the format of signals is a zoo.
+
     https://t.me/binanceofficial1       - signals
     https://t.me/wallstreetTraderSchool - commentary
     """
@@ -191,9 +167,8 @@ class WallStreetTraderSchool(TelegramClient):
     # 'easycoinpicks'      : 1312304347,   # My Test Channel,
 
     CHANNELS = {
-        'WallStreetTraderSchool'   : 1136730358
+        'Wall_Street_Trader_School'   : 1136730358
     }
-
 
     def maybe_trade(self, message):
 
@@ -270,9 +245,11 @@ def main(telegram_class, user_configo, session_label):
 
     LOG.debug("client={}. chat_parser={}. update_handler={}".format(client, chat_parser, update_handler))
 
-    from pyrogram import RawUpdateHandler
+    from pyrogram import RawUpdateHandler, Filters, MessageHandler
 
-    client.add_handler(RawUpdateHandler(update_handler))
+
+
+    client.add_handler(MessageHandler(update_handler, Filters.text))
     client.start()
 
     for channel in chat_parser.CHANNELS.keys():
