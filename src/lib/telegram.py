@@ -252,15 +252,15 @@ def main(telegram_class, user_configo, session_label):
 
     chat_parser = make_chat_parser(telegram_class, user_configo.exchange)
 
-    update_handler = chat_parser.make_update_handler(user_configo)
+    handler = chat_parser.make_message_handler(user_configo)
 
-    LOG.debug("client={}. chat_parser={}. update_handler={}".format(client, chat_parser, update_handler))
+    LOG.debug("client={}. chat_parser={}. handler={}".format(client, chat_parser, handler))
 
     from pyrogram import RawUpdateHandler, Filters, MessageHandler
 
 
 
-    client.add_handler(RawUpdateHandler(update_handler))
+    client.add_handler(MessageHandler(handler))
     client.start()
 
     for channel in chat_parser.CHANNELS.keys():
