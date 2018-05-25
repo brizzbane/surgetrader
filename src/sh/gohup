@@ -1,2 +1,2 @@
-nohup invoke telegramclient -t WallStreetCrypto terrence-binance-steadyvest.ini >> tmp/WallStreetCrypto-`date "+%F"`.out &
+nohup invoke telegramclient -t CryptoAddicts terrence-binance-steadyvest.ini >> tmp/CryptoAddicts-`date "+%F"`.out &
 nohup invoke telegramclient -t TradingCryptoCoach terrence-bittrex-steadyvest.ini >> tmp/TradingCryptoCoach-`date "+%F"`.out &

@@ -239,6 +239,36 @@ class WallStreetCrypto(TelegramClient):
         return None, None
 
 
+class CryptoAddicts(TelegramClient):
+
+    """
+    https://t.me/crypto_addicts_free
+    """
+
+    # 'easycoinpicks'      : 1312304347,   # My Test Channel,
+    CHANNELS = {
+
+        'crypto_addicts_free'   : 1275581291
+    }
+
+
+    def maybe_trade(self, message):
+
+        # match 🚀NCASH/BTC
+
+        re1 = re.compile(
+            r'(\w+)\/BTC',
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
+
+        m = re1.search(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
+        return None, None
+
+
 def make_chat_parser(telegram_class, exchange_label):
     _ = eval("{}('{}')".format(telegram_class, exchange_label))
     return _

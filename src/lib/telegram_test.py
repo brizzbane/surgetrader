@@ -68,6 +68,21 @@ class TestWallStreetCrypto(unittest.TestCase):
 
         self.assertEqual(coin.upper(), 'EOS')
 
+class TestWallStreetCrypto(unittest.TestCase):
+
+    def setUp(self):
+        self.text1 = "🚀NCASH/BTC"
+        self.text1 = "NCASH/BTC"
+
+        telegram_class = 'CryptoAddicts'
+        exchange_label = 'binance'
+        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
+
+    def test_re1(self):
+        coin, exchange = self.chat_parser.maybe_trade(self.text1)
+
+        self.assertEqual(coin.upper(), 'NCASH')
+
 
 
 class TestCryptoCoach(unittest.TestCase):
