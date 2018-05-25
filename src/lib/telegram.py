@@ -248,7 +248,7 @@ class CryptoAddicts(TelegramClient):
     # 'easycoinpicks'      : 1312304347,   # My Test Channel,
     CHANNELS = {
 
-        'crypto_addicts_free'   : 1275581291
+        'crypto_addicts_free'   : '?'
     }
 
 
