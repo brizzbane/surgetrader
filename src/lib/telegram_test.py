@@ -5,83 +5,75 @@ import lib.telegram
 # shell> cd surgetrader/src
 # shell> python -m lib.telegram_test
 
-class TestQualitySignals(unittest.TestCase):
+
+class TestCryptoAddicts(unittest.TestCase):
 
     def setUp(self):
-        self.channel_text = """Signal 2455 (42º today) at 18-Apr 17:46 UTC
-
-#NEBL at BINANCE - Chart (https://www.binance.com/trade.html?symbol=NEBL_BTC)
-
-Buy:   0.00127433 - 0.00130007
-Current ask: 0.00128730
-Target 1:  0.00149000 (15.75%)
-Target 2:  0.00166000 (28.95%)
-Target 3:  0.00181000 (40.60%)
-Type:   SHORT/MID TERM
-
-LAST:0.00128720 2.89%
-ASK: 0.00128730 BID: 0.00128720
-LOW: 0.00121500 HIGH:0.00128720
-"""
-
-        telegram_class = 'QualitySignals'
-        exchange_label = 'binance'
-        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
-
-    def test_re1(self):
-        coin, exchange = self.chat_parser.maybe_trade(self.channel_text)
-
-        self.assertEqual(coin.upper(), 'NEBL')
-        self.assertEqual(exchange.upper(), 'BINANCE')
-
-class TestWallStreetTraderSchool(unittest.TestCase):
-
-    def setUp(self):
-        self.text1 = "#BCPT\n\nBuy @5200\n\nSell @ 5650, 6100, 6600"
-        self.text2 = "Buy INS"
-
-        telegram_class = 'WallStreetTraderSchool'
-        exchange_label = 'binance'
-        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
-
-    def test_re1(self):
-        coin, exchange = self.chat_parser.maybe_trade(self.text1)
-
-        self.assertEqual(coin.upper(), 'BCPT')
-
-    def test_re2(self):
-        coin, exchange = self.chat_parser.maybe_trade(self.text2)
-
-        self.assertEqual(coin.upper(), 'INS')
-
-class TestWallStreetCrypto(unittest.TestCase):
-
-    def setUp(self):
-        self.text1 = "EOS looking good for mid term and long term holder's."
-
-        telegram_class = 'WallStreetCrypto'
-        exchange_label = 'binance'
-        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
-
-    def test_re1(self):
-        coin, exchange = self.chat_parser.maybe_trade(self.text1)
-
-        self.assertEqual(coin.upper(), 'EOS')
-
-class TestWallStreetCrypto(unittest.TestCase):
-
-    def setUp(self):
-        self.text1 = "🚀NCASH/BTC"
-        self.text1 = "NCASH/BTC"
 
         telegram_class = 'CryptoAddicts'
         exchange_label = 'binance'
         self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
+        self.photo_message = {
+            "_": "Message",
+            "message_id": 4109,
+            "date": 1527344286,
+            "chat": {
+                "_": "Chat",
+                "id": -1001139894217,
+                "type": "channel",
+                "title": "CRYPTO-ADDICTS Alerts & Analys",
+                "username": "crypto_addicts_free",
+                "photo": {
+                    "_": "ChatPhoto",
+                    "small_file_id": "AQADBAATQPmNGgAEDz49j3KrtSwAATEFAAEC",
+                    "big_file_id": "AQADBAATQPmNGgAEVwb8xX1fmXQCMQUAAQI"
+                }
+            },
+            "edit_date": 1527344301,
+            "photo": [
+                {
+                    "_": "PhotoSize",
+                    "file_id": "AgADBAADKa0xG0WoSVDRe_f7mwO8W5TonhoABEGGCO8uUcGDhzEAAgI",
+                    "width": 90,
+                    "height": 57,
+                    "file_size": 1116,
+                    "date": 1527344213
+                },
+                {
+                    "_": "PhotoSize",
+                    "file_id": "AgADBAADKa0xG0WoSVDRe_f7mwO8W5TonhoABEli-6yh5NKPiDEAAgI",
+                    "width": 320,
+                    "height": 202,
+                    "file_size": 18680,
+                    "date": 1527344213
+                },
+                {
+                    "_": "PhotoSize",
+                    "file_id": "AgADBAADKa0xG0WoSVDRe_f7mwO8W5TonhoABLGzn8roZezpiTEAAgI",
+                    "width": 800,
+                    "height": 504,
+                    "file_size": 86075,
+                    "date": 1527344213
+                },
+                {
+                    "_": "PhotoSize",
+                    "file_id": "AgADBAADKa0xG0WoSVDRe_f7mwO8W5TonhoABIINhAFLlrQ5hjEAAgI",
+                    "width": 912,
+                    "height": 574,
+                    "file_size": 107038,
+                    "date": 1527344213
+                }
+            ],
+            "caption": "\ud83d\ude80 ANT/BTC\n\nExchange:Bittrex \nBuy Below 42250\nStop 40600\nT1# 42700 - T2# 43306 - T3# 44600\n\n\ud83d\udd38 Period: 19h - Risk: 3.8/5",
+            "views": 21,
+            "outgoing": False
+        }
+
 
     def test_re1(self):
-        coin, exchange = self.chat_parser.maybe_trade(self.text1)
+        coin, exchange = self.chat_parser.maybe_trade(self.photo_message['caption'])
 
-        self.assertEqual(coin.upper(), 'NCASH')
+        self.assertEqual(coin.upper(), 'ANT')
 
 
 
@@ -96,7 +88,6 @@ class TestCryptoCoach(unittest.TestCase):
     def test_re0(self):
         text = 'Coin #STEEM'
         coin, exchange = self.chat_parser.maybe_trade(text)
-
         self.assertEqual(coin.upper(), 'STEEM')
 
     def test_re1(self):

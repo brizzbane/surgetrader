@@ -40,8 +40,12 @@ class TelegramClient(object):
             i = message.chat.username
             if i in self.CHANNELS.keys():
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
-                LOG.debug(message.text)
-                (coin, exchange) = self.maybe_trade(message.text)
+                parser_text = message.get('caption')
+                if not parser_text:
+                    parser_text = message['text']
+
+                LOG.debug(parser_text)
+                (coin, exchange) = self.maybe_trade(parser_text)
                 if not coin:
                     LOG.debug("\tNot a trade message")
                 else:
@@ -71,6 +75,7 @@ class TradingCryptoCoach(TelegramClient):
             }
 
     def maybe_trade(self, message):
+
         # match "Coin #XVG"
         re0 = re.compile(r'^Coin\s+#(\S+)', re.IGNORECASE)
 
