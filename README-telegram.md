@@ -9,8 +9,13 @@ A Python **3** cryptocurrency trading bot that has gone through 2 incarnations:
 in the `README-legacy.md` file. It is no longer making trades for me. Though it
 is for others.
 * Incarnation 2 scans Telegram channels devoted to cryptocurrency signals and automatically buys his posted signals and sets profit targets that are much more modest than he typically achieves.
+The bot can be extended with parsers for any number of Telegram channels.
 
 ## How well has it worked?
+
+[This post summarizes 30 days of testing](https://www.reddit.com/r/CryptoMarkets/comments/8nqwfq/telegram_autotrading_30_day_reflection_and_steps/)
+
+### What channels to use?
 
 * [the Telegram channel of Trading Crypto Coach](https://t.me/Tradingcryptocoach) had very good performance. The only issues with trading him are (1) he doesnt always write the signal in the same way (2) his signals are for Bittrex coins and Binance is preferable for many. The results for him are posted [here](http://telegram-tradingcryptocoach.blogspot.com/). Like many non-objective signal providers, he glorifies his wins and speaks of them in terms of maximum profit but does not mention his losers. For instance his Bitcrystals call never went anywhere and we never hear a thing about it in his channel. But he is an excellent technical and fundamental analyst with a lot of good energy and has more than 120,000 people in his channel.
 
@@ -18,12 +23,11 @@ is for others.
 
 * [Crypto Signals Hub](https://t.me/joinchat/AAAAAE5kofiekf82MMAcFQ) provides free signals.
 
-## How to find Telegram channels to trade with?
-
 * [Coindetect](http://coindetect.org/top100) locates some of them.
-* Googling and reading through Bitcointalk and Quora threads yielded some good ones
+* 
+* Googling and reading through Bitcointalk and Quora threads yielded some good ones.
+*  [SmartOptions](http://smartoptions.io) lists some good ones that are mainly paid.
 
-The bot can be extended with parsers for any number of Telegram channels.
 
 
 ## How to contact you
@@ -44,7 +48,6 @@ Here are some other ways to learn about it:
 1. `pip3 install -r requirements.txt`
 1. If `pip3` is not available, then you may try calling `pip` instead. But make sure that `pip` is indeed a Python **3** `pip`
 and not a Python 2 one by typing `which pip` and looking at the path of the executable.
-1. in the `src/log` directory follow the directions in `0-README.md` to enable log rotation.
 
 ## Configuration
 
@@ -93,7 +96,7 @@ You can see the modifications that one individual made
 [here](https://www.reddit.com/r/CryptoMarkets/comments/7a20lc/im_the_author_the_foss_crypto_trading_bot/dpbuwzw/).
 
 
-### Prime the pump (one time)
+### Get an API key
 
 You must [get the Python telegram client library setup](https://docs.pyrogram.ml/start/ProjectSetup).
 This requires registering an app with your Telegram account and then
@@ -106,36 +109,23 @@ providing the registration credentials in a config file so the computer program 
 In the `src` directory `cp config.ini.sample to config.ini` and then
 enter the `api_id` and `api_hash` you got above
 
-Then one time, you need to run this command:
+### Build and init the Telegram initialization and invocation scripts.
 
-    shell> invoke telegramclient
+Follow the instructions in `surgetrader/src/sh/README`
 
-Here is what you will see:
-
-    schemelab@metta:~/prg/surgetrader/src$ invoke telegramclient
-    2018-04-11 19:46:42,933 tasks.py:148 <BEGIN process=telegrambot>
-    Pyrogram v0.6.5, Copyright (C) 2017-2018 Dan Tes <https://github.com/delivrance>
-    Licensed under the terms of the GNU Lesser General Public License v3 or later (LGPLv3+)
-
-    Enter phone number: 18005551212
-    Is "18005551212" correct? (y/n): y
-    Enter phone code: 19879
-    2018-04-11 19:47:09,738 tasks.py:153 <END process=telegrambot>
-
-So this is fine, and if a signal comes in it will trade it. But you are better off having
-the bot run even if you disconnect.
-
-### So Let's have the bot run even if we logout of our linux box
+### Have the bot run even if we logout of our linux box
 
 Now, you simply need to have the telegram client poll the channel forever. Whenever it identifies a trade signal, it
 will trade it and set a profit point.
 
-    shell> nohup invoke telegramclilent &
+    shell> cd surgetrader/src
+    shell> ./sh/gohup-SessionName
 
 
 HOWEVER: I do recommend that you use the file `gohup.sample` to invoke your nohup jobs.
 
    shell> cd surgetrader/src/sh
+   shell> python build.py
    shell> cp gohup.sample gohup
 
 Then whenever you want to invoke the telegram client on one or more telegram channels you
