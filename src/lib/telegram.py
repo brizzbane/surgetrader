@@ -37,12 +37,17 @@ class TelegramClient(object):
         def message_handler(client, message):
             LOG.debug("<MESSAGE_HANDLER message={}>".format(message))
 
-            i = message.chat.username
-            if i in self.CHANNELS.keys():
+            u = message.chat.username
+            i = message.chat.id
+            t = message.chat.title
+            k = self.CHANNELS.keys()
+            v = self.CHANNELS.values()
+            LOG.debug("Testing username {} and title {} against {}".format(u, t, k))
+            if (u in k) or (t in k):
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
-                parser_text = message.get('caption')
+                parser_text = getattr(message, 'caption', None)
                 if not parser_text:
-                    parser_text = message['text']
+                    parser_text = getattr(message, 'text')
 
                 LOG.debug(parser_text)
                 (coin, exchange) = self.maybe_trade(parser_text)
@@ -253,7 +258,7 @@ class CryptoAddicts(TelegramClient):
     # 'easycoinpicks'      : 1312304347,   # My Test Channel,
     CHANNELS = {
 
-        'crypto_addicts_free'   : '?'
+        'crypto_addicts_free'   : 1139894217
     }
 
 
@@ -263,6 +268,36 @@ class CryptoAddicts(TelegramClient):
 
         re1 = re.compile(
             r'(\w+)\/BTC',
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
+
+        m = re1.search(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
+        return None, None
+
+
+class CryptoAddictsVIP(TelegramClient):
+
+    """
+    https://t.me/?
+    """
+
+    # 'easycoinpicks'      : 1312304347,   # My Test Channel,
+    CHANNELS = {
+
+        'VIP CRYPTO-ADDICTS'   : 1133918305
+    }
+
+
+    def maybe_trade(self, message):
+
+        # match 🚀NCASH/BTC
+
+        re1 = re.compile(
+            r'([A-Z]+)\/BTC',
             re.IGNORECASE|re.MULTILINE|re.DOTALL
         )
 
@@ -292,11 +327,12 @@ def main(telegram_class, user_configo, session_label):
     LOG.debug("client={}. chat_parser={}. handler={}".format(client, chat_parser, handler))
 
     from pyrogram import RawUpdateHandler, Filters, MessageHandler
-
-
-
     client.add_handler(MessageHandler(handler))
     client.start()
+
+    from pyrogram.api.functions.messages import GetAllChats
+    all_chats = client.send(GetAllChats([]))
+    LOG.debug("All chats = {}".format(all_chats))
 
     for channel in chat_parser.CHANNELS.keys():
         client.join_chat(channel)
