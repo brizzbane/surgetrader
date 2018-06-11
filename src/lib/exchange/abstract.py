@@ -33,6 +33,10 @@ class Abstract:
             import lib.exchange.bittrex
             e = lib.exchange.bittrex.Bittrex()
 
+        elif exchange_label == 'kucoin':
+            import lib.exchange.kucoin
+            e = lib.exchange.kucoin.Kucoin()
+
         else:
             raise Exception("Unknown exchange label.")
 

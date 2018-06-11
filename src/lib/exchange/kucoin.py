@@ -1,17 +1,21 @@
-
 # 3rd party
-import ccxt.bittrex
+from ccxt.base.errors import InvalidOrder
 
-# local
+#local
 import lib.exchange.concrete
 import lib.logconfig
+
 
 LOG = lib.logconfig.app_log
 
 
-class Bittrex(ccxt.bittrex, lib.exchange.concrete.Concrete):
+import ccxt.binance
+
+
+class Kucoin(ccxt.kucoin, lib.exchange.concrete.Concrete):
 
     def filled(self, order):
+        LOG.debug("checking if filled using order={}".format(order))
         return order['info']['success']
 
     def cancelall(self):
@@ -20,13 +24,13 @@ class Bittrex(ccxt.bittrex, lib.exchange.concrete.Concrete):
 
         for order in orders:
             LOG.debug("ORDER={}".format(order))
-            self.cancelOrder(order['id'])
+            self.cancelOrder(order['id'], order['symbol'])
 
     def datetime_closed(self, order):
-        return order['info']['Closed']
+        return order['datetime']
 
     def datetime_opened(self, order):
-        return order['info']['Opened']
+        return order['datetime']
 
     def sellall(self):
 
@@ -38,18 +42,18 @@ class Bittrex(ccxt.bittrex, lib.exchange.concrete.Concrete):
         {'info': {'makerCommission': 10, 'takerCommission': 10, 'buyerCommission': 0, 'sellerCommission': 0, 'canTrade': True, 'canWithdraw': True, 'canDeposit': True, 'updateTime': 1525348371503, 'balances': [{'asset': 'BTC', 'free': '0.02430571', 'locked': '0.00000000'}, {'asset': 'LTC', 'free': '0.00872000', 'locked': '1.00000000'}, {'asset': 'ETH', 'free': '0.14788804', 'locked': '0.00000000'}, {'asset': 'BNC', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'ICO', 'free': '0.00000000', 'locked': '0.00000000'}, {'asset': 'NEO', 'free': '0.54940000', 'locked': '2.00000000'}, {'asset': 'BNB', 'free': '50.59812785', 'locked': '0.00000000'}, {'asset
         """
 
-        for balance in balances['info']:
+        for balance in balances['info']['balances']:
             LOG.debug("-- balance ------------------ {}".format(balance))
 
 
-            balance['free'] = float(balance['Available'])
-            balance['asset'] = balance['Currency']
+            #balance['free'] = float(balance['Available'])
+            #balance['asset'] = balance['Currency']
 
-            if ((balance['free'] < 4e-8) or (balance['asset'] == 'BTC')):
+            if ((float(balance['free']) < 4e-8) or (balance['asset'] == 'BTC')):
                 LOG.debug("\tno balance or this is BTC")
                 continue
 
-            skipcoin = "RDD BCC BTCP GCR MYST INFX PDC RISE CTR SBTC"
+            skipcoin = "BCX SBTC CTR ETH XRP BCC EOS LTC XLM IOTA TRX"
             if balance['asset'] in skipcoin:
                 LOG.debug("\tthis is a skipcoin")
                 continue
@@ -65,8 +69,9 @@ class Bittrex(ccxt.bittrex, lib.exchange.concrete.Concrete):
 
             LOG.debug(("My Ask = {}".format(my_ask)))
 
+
             try:
-                r = self.createLimitSellOrder(market, balance['free'], my_ask)
-                LOG.debug(r)
-            except:
-                pass
+                r = self.createLimitSellOrder(market, float(balance['free']), my_ask)
+                LOG.debug("result of limit sell={}".format(r))
+            except InvalidOrder:
+                print("invalid order: ")

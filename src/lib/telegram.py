@@ -32,6 +32,12 @@ class TelegramClient(object):
     def __init__(self, exchange_label):
         self.exchange_label = exchange_label
 
+    def chat_belongs_to(self, chat, channel_substrings):
+        for channel_substring in channel_substrings:
+            if channel_substring in chat:
+                return True
+        return False
+
     def make_message_handler(self, user_configo):
 
         def message_handler(client, message):
@@ -43,7 +49,7 @@ class TelegramClient(object):
             k = self.CHANNELS.keys()
             v = self.CHANNELS.values()
             LOG.debug("Testing username {} and title {} against {}".format(u, t, k))
-            if (u in k) or (t in k):
+            if (u in k) or self.chat_belongs_to(t, k):
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
                 parser_text = getattr(message, 'caption', None)
                 if not parser_text:
@@ -298,6 +304,37 @@ class CryptoAddictsVIP(TelegramClient):
 
         re1 = re.compile(
             r'([A-Z]+)\/BTC',
+            re.IGNORECASE|re.MULTILINE|re.DOTALL
+        )
+
+        m = re1.search(message)
+        if m:
+            coin = m.group(1)
+            return coin, None
+
+        return None, None
+
+
+class MiningHamster(TelegramClient):
+
+    """
+    https://t.me/?
+    """
+
+    #
+    CHANNELS = {
+
+        'Easy Picks'         : 1312304347,
+        'MH Signals'         : 1226232514
+
+    }
+
+    def maybe_trade(self, message):
+
+        # BTC-CXO
+
+        re1 = re.compile(
+            r'BTC-([A-Z]+)',
             re.IGNORECASE|re.MULTILINE|re.DOTALL
         )
 

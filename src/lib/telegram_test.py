@@ -6,6 +6,84 @@ import lib.telegram
 # shell> python -m lib.telegram_test
 
 
+class TestMiningHamster(unittest.TestCase):
+
+    def setUp(self):
+
+
+        telegram_class = 'MiningHamster'
+        exchange_label = 'kucoin'
+        self.chat_parser = lib.telegram.make_chat_parser(telegram_class, exchange_label)
+        self.message = {
+            "_": "Message",
+            "message_id": 344,
+            "date": 1528678642,
+            "chat": {
+                "_": "Chat",
+                "id": -1001226232514,
+                "type": "channel",
+                "title": "MH Signals Kucoin",
+                "photo": {
+                    "_": "ChatPhoto",
+                    "small_file_id": "AQADBAATAuaNGgAEpLKhT34ZAuI0HgUAAQI",
+                    "big_file_id": "AQADBAATAuaNGgAEAU92ByErOFg2HgUAAQI"
+                }
+            },
+            "text": "\ud83d\ude80 BTC-LYM\nUp signal on Kucoin\nSignalprice: 0.0001427\n-2.07 % price incr. (5min ago)\n-1.50 % price incr. (2min ago)\n-0.43 % price incr. (1min ago)\n\nBaseVol: 146.9916",
+            "entities": [
+                {
+                    "_": "MessageEntity",
+                    "type": "bold",
+                    "offset": 0,
+                    "length": 10
+                },
+                {
+                    "_": "MessageEntity",
+                    "type": "text_link",
+                    "offset": 24,
+                    "length": 6,
+                    "url": "https://www.kucoin.com/#/trade.pro/LYM-ETH"
+                },
+                {
+                    "_": "MessageEntity",
+                    "type": "bold",
+                    "offset": 54,
+                    "length": 7
+                },
+                {
+                    "_": "MessageEntity",
+                    "type": "bold",
+                    "offset": 85,
+                    "length": 7
+                },
+                {
+                    "_": "MessageEntity",
+                    "type": "bold",
+                    "offset": 116,
+                    "length": 7
+                },
+                {
+                    "_": "MessageEntity",
+                    "type": "bold",
+                    "offset": 157,
+                    "length": 8
+                }
+            ],
+            "views": 1,
+            "outgoing": False
+        }
+
+    def test_channel_substrings(self):
+        chat_title = 'MH Signals Kucoin'
+        chat_substrings = ['Easy Picks', 'MH Signals']
+        self.assertTrue(self.chat_parser.chat_belongs_to(chat_title, chat_substrings))
+
+    def test_chat_message(self):
+        coin, exchange = self.chat_parser.maybe_trade(self.message['text'])
+        self.assertEqual(coin.upper(), 'LYM')
+
+
+
 class TestCryptoAddicts(unittest.TestCase):
 
     def setUp(self):

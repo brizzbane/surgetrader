@@ -40,11 +40,12 @@ for key in config['parsers']:
 print("Building:")
 
 with open('gohup', 'w') as gohup:
-        for invoke in invokes:
-            print(" {}".format(invoke))
-            with open('gohup-init-{}'.format(invoke.parser_class), 'w') as gohup_init:
-                gohup.write(shell_call(invoke))
-                gohup_init.write(shell_call(invoke, nohup=False))
+    for invoke in invokes:
+        print(" {}".format(invoke))
+        with open('gohup-init-{}'.format(invoke.parser_class), 'w') as gohup_init:
+            gohup.write(shell_call(invoke))
+            gohup_init.write(shell_call(invoke, nohup=False))
 
+    gohup.write("ps -eaf | grep telegram")
 
 print("Built.")

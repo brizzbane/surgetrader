@@ -259,7 +259,7 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
     # BINANCE
     # Result of limitbuy={'info': {'symbol': 'OSTBTC', 'orderId': 10255819, 'clientOrderId': 'SYgzDaxT2AMO8i9JPdjZNE', 'transactTime': 1525363828398, 'price': '0.00003061', 'origQty': '162.00000000', 'executedQty': '162.00000000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'LIMIT', 'side': 'BUY'}, 'id': '10255819', 'timestamp': 1525363828398, 'datetime': '2018-05-03T16:10:28.398Z', 'symbol': 'OST/BTC', 'type': 'limit', 'side': 'buy', 'price': 3.061e-05, 'amount': 162.0, 'cost': 0.00495882, 'filled': 162.0, 'remaining': 0.0, 'status': 'closed', 'fee': None}
 
-    # BITTRESS
+    # Bittrex
     # Result of limitbuy={'info': {'success': True, 'message': '', 'result': {'uuid': '29b353cd-50e8-46f6-8cc2-c23b51186a7a'}}, 'id': '29b353cd-50e8-46f6-8cc2-c23b51186a7a', 'symbol': 'ION/BTC', 'type': 'limit', 'side': 'buy', 'status': 'open'}
 
 
