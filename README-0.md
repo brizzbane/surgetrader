@@ -21,8 +21,12 @@ by those who chose to download and use it.
 
 GNU GPL.
 
-# Other free bots
+# Other free open source bots
 
 * [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
 * [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading) - Carlos is releasing Code18 soon.
 * [Gekko (freaking amazing)](https://gekko.wizb.it/)
+
+## Closed Source
+
+* [Nefertiti](https://nefertiti-tradebot.com/)
