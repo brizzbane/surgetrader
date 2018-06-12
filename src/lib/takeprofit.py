@@ -131,6 +131,11 @@ def clearprofit(exchange):
 #        clearorder(exchange, row)
 
 
+def _prep(ini):
+    import lib.config
+    user_configo = lib.config.User(ini)
+    return prep(user_configo)
+
 def prep(user_configo):
 #    LOG.debug("""USER CONFIGO         {}:
 #            filename = {}

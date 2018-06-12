@@ -1,0 +1,4 @@
+#!/bin/bash -x
+
+
+ps -eaf | grep telegram

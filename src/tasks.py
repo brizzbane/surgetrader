@@ -427,15 +427,15 @@ def orderhistory(_ctx, ini, mkt):
 
 
 @task
-def getorder(_ctx, ini, uuid):
+def getorder(_ctx, ini, order_id, symbol):
     """Get  order details
 
 
     """
 
-    _, exchange = lib.takeprofit.prep(ini)
+    _, exchange = lib.takeprofit._prep(ini)
 
-    _ = exchange.get_order(uuid)
+    _ = exchange.fetchOrder(order_id)
     print(_)
 
 @task

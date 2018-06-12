@@ -108,8 +108,9 @@ def obtain_ticker(exchange, order):
 
 
 @retry(exceptions=RequestTimeout, tries=12, delay=5)
-def obtain_order(exchange, uuid, market):
-    order = exchange.fetchOrder(uuid, market)
+def obtain_order(exchange, uuid, market, side):
+    params = {'type' : side}
+    order = exchange.fetchOrder(uuid, market, params)
     LOG.debug("Order = {}".format(order))
     return order
 
@@ -185,7 +186,7 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
         if should_skip(buy):
             continue
 
-        so = obtain_order(exchange, buy.sell_id, buy.market)
+        so = obtain_order(exchange, buy.sell_id, buy.market, 'SELL')
 
         LOG.debug("\tRelated sell order{}".format(so))
         LOG.debug("\tDate checking {} against {}".format(on_date, so['datetime']))
@@ -209,11 +210,9 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
                     continue
 
         try:
-            bo = exchange.fetchOrder(buy.order_id, buy.market)
+            bo = obtain_order(exchange, buy.order_id, buy.market, 'BUY')
         except OrderNotFound:
-            raise Exception("""No order found with id={}.
-                            Here are the orders for that symbol: {}
-                            """.format(buy.order_id, pprint.pformat(exchange.fetchOrders(buy.market))))
+            raise Exception("""No order found with id={}.""".format(buy.order_id))
 
 
         LOG.debug("For buy order {}, the related Sell order is {}".format(bo, so))

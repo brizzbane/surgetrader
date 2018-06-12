@@ -10,7 +10,7 @@ import pprint
 
 # local
 import lib.logconfig
-from . import mybittrex
+#from . import mybittrex
 from .db import db
 
 

@@ -5,6 +5,9 @@ LOG = lib.logconfig.app_log
 
 class Concrete:
 
+    def fee_adjust(self, amount_of_coin):
+        return amount_of_coin
+
     def open_orders_in(self, symbol, side='sell'):
         """Maximum number of unclosed SELL LIMIT orders for a coin.
 

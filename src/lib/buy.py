@@ -28,7 +28,7 @@ import lib.config
 import lib.exchange.abstract
 import lib.logconfig
 from .db import db
-from . import mybittrex
+#from . import mybittrex
 
 #LOGGER = logging.getLogger(__name__)
 LOG = lib.logconfig.app_log
@@ -236,25 +236,8 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
     LOG.debug("I get {0} units of {1} at the rate of {2:.8f} BTC per coin.".format(
         amount_of_coin, mkt, rate))
 
-# createLimitBuyOrder (symbol, amount, price[, params])
-
     buy_order = exchange.createLimitBuyOrder(mkt, amount_of_coin, rate)
     LOG.debug("Result of limitbuy={}".format(buy_order))
-    """
-    Result of limitbuy=
-    {'info':
-        {
-        'symbol': 'TNBBTC', 'orderId': 7465651, 'clientOrderId': 'seX1LO0aOJBTc57j2ff1rh',
-        'transactTime': 1524553655569, 'price': '0.00000597', 'origQty': '835.00000000',
-        'executedQty': '835.00000000', 'status': 'FILLED', 'timeInForce': 'GTC',
-        'type': 'LIMIT', 'side': 'BUY'
-        },
-        'id': '7465651', 'timestamp': 1524553655569,
-        'datetime': '2018-04-24T07:07:36.569Z', 'symbol': 'TNB/BTC',
-        'type': 'limit', 'side': 'buy', 'price': 5.97e-06, 'amount': 835.0,
-        'cost': 0.004984949999999999, 'filled': 835.0, 'remaining': 0.0,
-        'status': 'closed', 'fee': None
-    }
     """
     # BINANCE
     # Result of limitbuy={'info': {'symbol': 'OSTBTC', 'orderId': 10255819, 'clientOrderId': 'SYgzDaxT2AMO8i9JPdjZNE', 'transactTime': 1525363828398, 'price': '0.00003061', 'origQty': '162.00000000', 'executedQty': '162.00000000', 'status': 'FILLED', 'timeInForce': 'GTC', 'type': 'LIMIT', 'side': 'BUY'}, 'id': '10255819', 'timestamp': 1525363828398, 'datetime': '2018-05-03T16:10:28.398Z', 'symbol': 'OST/BTC', 'type': 'limit', 'side': 'buy', 'price': 3.061e-05, 'amount': 162.0, 'cost': 0.00495882, 'filled': 162.0, 'remaining': 0.0, 'status': 'closed', 'fee': None}
@@ -262,9 +245,14 @@ def _buycoin(config_file, user_config, exchange, mkt, btc):
     # Bittrex
     # Result of limitbuy={'info': {'success': True, 'message': '', 'result': {'uuid': '29b353cd-50e8-46f6-8cc2-c23b51186a7a'}}, 'id': '29b353cd-50e8-46f6-8cc2-c23b51186a7a', 'symbol': 'ION/BTC', 'type': 'limit', 'side': 'buy', 'status': 'open'}
 
+    # Kucoin
+    # Result of limitbuy={'info': {'success': True, 'code': 'OK', 'msg': 'OK', 'timestamp': 1528700851126, 'data': {'orderOid': '5b1e1fb35f0fde3bc4026c53'}}, 'id': '5b1e1fb35f0fde3bc4026c53', 'timestamp': 1528700851126, 'datetime': '2018-06-11T07:07:31.126Z', 'symbol': 'IOTX/BTC', 'type': 'limit', 'side': 'buy', 'amount': 435.0, 'filled': None, 'remaining': None, 'price': 5.7222e-06, 'cost': 0.002489157, 'status': 'open', 'fee': None, 'trades': None}
+    """
+
 
     if exchange.filled(buy_order):
         LOG.debug("\tBuy was a success = {}".format(buy_order))
+        amount_of_coin = exchange.fee_adjust(amount_of_coin)
         record_buy(config_file, buy_order['id'], mkt, rate, amount_of_coin)
 
 #        fills = exchange.fetchMyTrades(symbol=mkt, since=buy_order['timestamp'])

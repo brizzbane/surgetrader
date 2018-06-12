@@ -14,6 +14,11 @@ import ccxt.binance
 
 class Kucoin(ccxt.kucoin, lib.exchange.concrete.Concrete):
 
+    def fee_adjust(self, amount_of_coin):
+        _ = amount_of_coin - amount_of_coin * (0.1/100)
+        LOG.debug("{} Fee adjusted = {}".format(amount_of_coin, _))
+        return _
+
     def filled(self, order):
         LOG.debug("checking if filled using order={}".format(order))
         return order['info']['success']
