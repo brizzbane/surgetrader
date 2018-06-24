@@ -26,6 +26,9 @@ GNU GPL.
 * [Krypto trading bot](https://github.com/ctubio/Krypto-trading-bot)
 * [Zenbot](https://jaynagpaul.com/algorithmic-crypto-trading) - Carlos is releasing Code18 soon.
 * [Gekko (freaking amazing)](https://gekko.wizb.it/)
+* [Stakemachine](https://github.com/xeroc/stakemachine)
+* [BTS Liquidity](https://github.com/linouxis9/bitshares2-liquiditybots)
+
 
 ## Closed Source
 

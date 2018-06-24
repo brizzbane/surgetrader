@@ -13,8 +13,6 @@ from retry import retry
 
 # local
 import lib.logconfig
-from . import mybittrex
-from bittrex.bittrex import SELL_ORDERBOOK
 from .db import db
 
 
@@ -38,7 +36,7 @@ def cancel_sell_order(exchange, sell_id):
 
 def cancelall(b):
     orders = b.fetchOpenOrders()
-    LOG.debug("ORDERS={}".format(orders))
+    LOG.debug("ORDERS={}".format(orders))XC
 
     for order in orders:
         LOG.debug("ORDER={}".format(order))

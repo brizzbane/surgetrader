@@ -324,8 +324,7 @@ class MiningHamster(TelegramClient):
     #
     CHANNELS = {
 
-        'Easy Picks'         : 1312304347,
-        'MH Signals'         : 1226232514
+        'MiningHamster Signals'         : 1226232514
 
     }
 

@@ -11,6 +11,8 @@ import traceback
 from ccxt.base.errors import OrderNotFound, RequestTimeout
 
 from retry import retry
+import sys
+sys.path.insert(0, "/home/schemelab/prg/meld3")
 import meld3
 
 # local
@@ -27,6 +29,7 @@ LOG = lib.logconfig.app_log
 
 
 def satoshify(f):
+    #f = (f)
     return '{:.8f}'.format(f)
 
 
@@ -327,17 +330,21 @@ def report_profit(user_configo, exchange, on_date=None, skip_markets=None, delet
                 setting, elem, val))
         elem.content(val)
 
+    trade_amt = satoshify(lib.buy.calculate_trade_size(user_configo))
+    elem = html_template.findmeld('trade_amt')
+    elem.content(trade_amt)
+
     elem = html_template.findmeld('available')
     btc = lib.buy.obtain_coin_balances('BTC', exchange)
     val = "{} BTC".format(btc['free'])
     elem.content(val)
 
     elem = html_template.findmeld('locked')
-    val = "{} BTC".format(locked_capital)
+    val = "{} BTC".format(satoshify(locked_capital))
     elem.content(val)
 
     elem = html_template.findmeld('operating')
-    val = "{} BTC".format(locked_capital + float(btc['free']))
+    val = "{} BTC".format(satoshify(locked_capital + float(btc['free'])))
     elem.content(val)
 
     LOG.debug("HTML OUTFILE: {}".format(html_outfile))
