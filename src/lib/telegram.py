@@ -48,8 +48,9 @@ class TelegramClient(object):
             t = message.chat.title
             k = self.CHANNELS.keys()
             v = self.CHANNELS.values()
-            LOG.debug("Testing username {} and title {} against {}".format(u, t, k))
-            if (u in k) or self.chat_belongs_to(t, k):
+            LOG.debug("Testing username {} and title {} against {} in chat with ID={}".format(u, t, k, i))
+            # or self.chat_belongs_to(t, k):
+            if (u in k) or (i in v):
                 LOG.debug("** MESSAGE FROM RELEVANT CHANNEL:")
                 parser_text = getattr(message, 'caption', None)
                 if not parser_text:
@@ -324,7 +325,8 @@ class MiningHamster(TelegramClient):
     #
     CHANNELS = {
 
-        'MiningHamster Signals'         : 1226232514
+        'easycoinpicks' : 1312304347, # My Test Channel
+        'MiningHamster Signals'         : 547995781
 
     }
 

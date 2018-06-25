@@ -3,19 +3,20 @@ A python 3 library for general algorithmic trading and profit reporting.
 
 ## What working bots exist?
 
-SurgeTrader has two working bots:
+SurgeTrader has the following working bots:
 
-* HOURLY SURGE: The first one was designed to detect coins with the strongest gain in price over 1 hour. It would then buy them and set profit targets. You can read about it in [README-hourly.md](README-hourly.md)  ... I'm no longer running it.
+* HOURLY SURGE: The first one was designed to detect coins with the strongest gain in price over 1 hour. It would then buy them and set profit targets. You can read about it in [README-periodic.md](README-periodic.md)  ... I'm no longer running it.
 * TELEGRAM CLIENT: The newer bot, scans Telegram channels for buy signals and automatically executes them. Then it sets profit targets. You can read about it in [README-telegram.md](README-telegram.md) ... I'm currently running it.
+* PRICE DIP: buys coins on a price dip
 
-Both bot versions provide daily and monthly profit reports.
+All bot versions provide daily and monthly profit reports.
 
-**Neither** implements any form of stop loss.
+**No stop loss has been implemented**.
 
 # DISCLAIMER
 
 The author of this software is in no way responsible for any type of loss incurred
-by those who chose to download and use it.
+by those who choose to download and use it.
 
 # LICENSE
 
@@ -30,6 +31,6 @@ GNU GPL.
 * [BTS Liquidity](https://github.com/linouxis9/bitshares2-liquiditybots)
 
 
-## Closed Source
+## Closed Source, but free
 
 * [Nefertiti](https://nefertiti-tradebot.com/)

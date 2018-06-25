@@ -46,6 +46,6 @@ with open('gohup', 'w') as gohup:
             gohup.write(shell_call(invoke))
             gohup_init.write(shell_call(invoke, nohup=False))
 
-    gohup.write("ps -eaf | grep telegram")
+    gohup.write("pgrep -f telegram")
 
 print("Built.")

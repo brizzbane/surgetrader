@@ -136,6 +136,30 @@ def buy(_ctx, ini=None):
     LOG.debug(close_task())
 
 
+@task
+def buydip(_ctx, ini=None):
+    """Analyze market data and buy ini-specified coins on dip.
+
+    The INI file must have a dip section with the following parameters:
+    * coins:
+    * percentage:
+    * timeframe
+
+    Returns:
+        Nothing.
+    """
+    from lib import buy as _buy
+
+    LOG.debug(open_task())
+
+
+    inis = listify_ini(ini, randomize=False)
+    _buy.main(inis)
+
+    LOG.debug(close_task())
+
+
+
 def load_iniset(iniset):
     inis = SYS_INI.configo['users'][iniset].split()
     LOG.debug("INISET = {}".format(inis))
